@@ -6,6 +6,31 @@ const path = require('path');
 const { Team, Student, Programme, Notification, Appeal, Gallery, Contact, Settings } = require('./models');
 
 const app = express();
+// Ensure admin password in Settings matches environment variable
+const syncAdminPassword = async () => {
+  try {
+    const settings = await Settings.findOne();
+    const envPass = process.env.ADMIN_PASSWORD || "admin";
+    if (!settings) {
+      // Create settings if missing
+      await Settings.create({ adminPassword: envPass });
+      console.log('Created Settings with admin password from .env');
+    } else if (settings.adminPassword !== envPass) {
+      settings.adminPassword = envPass;
+      await settings.save();
+      console.log('Updated admin password in Settings to match .env');
+    }
+  } catch (err) {
+    console.error('Error syncing admin password:', err);
+  }
+};
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log('Connected to MongoDB');
+    syncAdminPassword();
+  })
+  .catch((err) => console.error('MongoDB connection error:', err));
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
