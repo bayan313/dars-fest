@@ -82,18 +82,13 @@ class Database {
         throw new Error('Failed to load data from API');
       }
     } catch (e) {
-      console.error("Database loading from API failed, trying localStorage or defaults", e);
-      const data = localStorage.getItem("thanapus_db");
-      if (data) {
-        this.db = JSON.parse(data);
-      } else {
-        this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
-      }
+      // No local fallback: data lives only on the server (MongoDB).
+      console.error("Database loading from API failed", e);
+      this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
     }
   }
 
   save() {
-    localStorage.setItem("thanapus_db", JSON.stringify(this.db));
     fetch('/api/all', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
