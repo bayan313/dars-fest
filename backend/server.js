@@ -43,11 +43,17 @@ app.use(express.static(path.join(__dirname, '../')));
 
 // Get all data
 app.get('/api/all', async (req, res) => {
+  const data = await getAllData();
+  res.json(data);
+});
+
+// Helper to fetch all collections
+async function getAllData() {
   const [teams, students, programmes, notifications, appeals, gallery, contact, settings] = await Promise.all([
     Team.find(), Student.find(), Programme.find(), Notification.find(), Appeal.find(), Gallery.find(), Contact.findOne(), Settings.findOne()
   ]);
-  res.json({ teams, students, programmes, notifications, appeals, gallery, contact, settings });
-});
+  return { teams, students, programmes, notifications, appeals, gallery, contact, settings };
+}
 
 // Update all data
 app.post('/api/all', async (req, res) => {
@@ -59,8 +65,9 @@ app.post('/api/all', async (req, res) => {
   if (db.appeals) { await Appeal.deleteMany({}); await Appeal.insertMany(db.appeals); }
   if (db.gallery) { await Gallery.deleteMany({}); await Gallery.insertMany(db.gallery); }
   if (db.contact) { await Contact.deleteMany({}); await Contact.create(db.contact); }
-  if (db.settings) { await Settings.deleteMany({}); await Settings.create(db.settings); }
-  res.json({ message: 'All data updated' });
+  if (db.settings) { await Settings.deleteMany({}); await Settings.create(db.settings); await syncAdminPassword(); }
+  const updatedData = await getAllData();
+  res.json(updatedData);
 });
 
 // Other API Routes

@@ -98,7 +98,13 @@ class Database {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(this.db)
-    }).catch(e => console.error("Failed to save to API", e));
+    })
+      .then(res => res.json())
+      .then(data => {
+        this.db = data;
+        console.log('Database synchronized with server');
+      })
+      .catch(e => console.error('Failed to save to API', e));
   }
 
   reset() {
