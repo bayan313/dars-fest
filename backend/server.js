@@ -39,9 +39,7 @@ app.use(express.json());
 // Serve static frontend files from the parent directory
 app.use(express.static(path.join(__dirname, '../')));
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+// Duplicate mongoose connection removed; primary connection is established earlier with admin password sync
 
 // Get all data
 app.get('/api/all', async (req, res) => {
