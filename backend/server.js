@@ -15,10 +15,6 @@ const syncAdminPassword = async () => {
       // Create settings if missing
       await Settings.create({ adminPassword: envPass });
       console.log('Created Settings with admin password from .env');
-    } else if (settings.adminPassword !== envPass) {
-      settings.adminPassword = envPass;
-      await settings.save();
-      console.log('Updated admin password in Settings to match .env');
     }
   } catch (err) {
     console.error('Error syncing admin password:', err);
@@ -35,6 +31,12 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+
+// Prevent caching so every browser fetches the latest data
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  next();
+});
 
 // Serve static frontend files from the parent directory
 app.use(express.static(path.join(__dirname, '../')));

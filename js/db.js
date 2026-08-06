@@ -192,8 +192,6 @@ class Database {
       const team = this.db.teams.find(orig => orig.id === t.id);
       team.rank = idx + 1;
     });
-
-    this.save();
   }
 
   // Calculate Kalaprathibha (Arts Champion)
