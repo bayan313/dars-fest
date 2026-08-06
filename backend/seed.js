@@ -56,15 +56,8 @@ const DEFAULT_DB = {
     email: "info@thanafusfest.com",
     address: "THANAFUS Dars Fest Committee Office, Markaz Campus, Calicut, Kerala, 673573"
   },
-  // Ensure admin password from .env overrides default
-  const envAdminPass = process.env.ADMIN_PASSWORD || "admin";
-  const settingsData = {
+  settings: {
     prospectusUrl: "",
-    adminPassword: envAdminPass,
-  };
-  // settings placeholder will be replaced below
-
-    prospectusUrl: "", // Base64 or standard URL
     adminPassword: "admin"
   }
 };
@@ -90,7 +83,7 @@ async function seed() {
     await Appeal.insertMany(DEFAULT_DB.appeals);
     await Gallery.insertMany(DEFAULT_DB.gallery);
     await Contact.create(DEFAULT_DB.contact);
-    await Settings.create(settingsData);
+    await Settings.create(DEFAULT_DB.settings);
 
     console.log('Database seeded successfully');
     process.exit(0);
