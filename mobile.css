@@ -1,0 +1,40 @@
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  /* Header & navbar */
+  .navbar {
+    padding: 10px 5%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .nav-links {
+    flex-direction: column;
+    width: 100%;
+    display: none;
+  }
+  .nav-links.open { display: flex; }
+  .hamburger { display: flex; }
+
+  /* Hero */
+  .hero {
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+  .hero-title { font-size: 2.2rem; }
+  .hero-motto { font-size: 1rem; }
+
+  /* Grids */
+  .grid-4, .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Cards */
+  .card { padding: 1rem; }
+
+  /* Buttons */
+  .btn { width: 100%; justify-content: center; }
+
+  /* Sections */
+  .section { padding: 2rem 1rem; }
+}
