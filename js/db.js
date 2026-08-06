@@ -72,23 +72,33 @@ class Database {
   }
 
   load() {
-    const data = localStorage.getItem("thanapus_db");
-    if (data) {
-      try {
-        this.db = JSON.parse(data);
-      } catch (e) {
-        console.error("Database parsing failed, resetting to defaults", e);
-        this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
-        this.save();
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', '/api/all', false); // Synchronous request to ensure data is loaded before rendering
+      xhr.send(null);
+      if (xhr.status === 200) {
+        this.db = JSON.parse(xhr.responseText);
+      } else {
+        throw new Error('Failed to load data from API');
       }
-    } else {
-      this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
-      this.save();
+    } catch (e) {
+      console.error("Database loading from API failed, trying localStorage or defaults", e);
+      const data = localStorage.getItem("thanapus_db");
+      if (data) {
+        this.db = JSON.parse(data);
+      } else {
+        this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
+      }
     }
   }
 
   save() {
     localStorage.setItem("thanapus_db", JSON.stringify(this.db));
+    fetch('/api/all', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(this.db)
+    }).catch(e => console.error("Failed to save to API", e));
   }
 
   reset() {
