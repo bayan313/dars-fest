@@ -1,0 +1,9 @@
+{
+  "name": "dars-fest",
+  "version": "1.0.0",
+  "description": "THANAFUS Dars Fest 2026 website",
+  "dependencies": {
+    "mongoose": "^9.9.1",
+    "dotenv": "^17.4.2"
+  }
+}
