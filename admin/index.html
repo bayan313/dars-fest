@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THANAFUS Dars Fest 2026 | Administration Panel</title>
+  
+  <!-- Poppins Font & Stylesheets -->
+  <link rel="stylesheet" href="../style.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- ADMIN LOGIN OVERLAY -->
+  <div class="admin-login-overlay" id="login-overlay">
+    <div class="admin-login-card">
+      <div class="logo-icon" style="margin: 0 auto 15px auto; width: 60px; height: 60px; font-size: 1.8rem;">T</div>
+      <h2 style="color: var(--primary-emerald); margin-bottom: 5px;">Admin Portal</h2>
+      <p style="color: var(--text-gray); font-size: 0.85rem; margin-bottom: 25px;">Enter the access key to manage THANAFUS 2026</p>
+      
+      <form onsubmit="handleAdminLogin(event)">
+        <div class="form-group" style="text-align: left;">
+          <label for="admin-pass">Access Key</label>
+          <input type="password" class="form-control" id="admin-pass" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
+          <i class="fa-solid fa-right-to-bracket"></i> Authenticate
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Header & Navigation (Standard layout but has Logout) -->
+  <header>
+    <nav class="navbar">
+      <a href="../index.html" class="logo-container">
+        <div class="logo-icon">T</div>
+        <div class="logo">
+          <h2>THANAFUS<span>2026</span></h2>
+        </div>
+      </a>
+      <div style="display: flex; gap: 15px; align-items: center;">
+        <span style="color: white; font-weight: 500; font-size: 0.9rem;" id="admin-welcome-msg">Logged in as Administrator</span>
+        <button class="btn btn-gold btn-sm" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div class="admin-dashboard-layout" id="admin-layout" style="display: none;">
+      
+      <!-- Left Sidebar Nav -->
+      <aside class="admin-sidebar-nav">
+        <ul>
+          <li class="active" id="nav-dash"><a href="#" onclick="switchAdminTab('dash')"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+          <li id="nav-students"><a href="#" onclick="switchAdminTab('students')"><i class="fa-solid fa-user-graduate"></i> Manage Students</a></li>
+          <li id="nav-teams"><a href="#" onclick="switchAdminTab('teams')"><i class="fa-solid fa-people-group"></i> Manage Teams</a></li>
+          <li id="nav-progs"><a href="#" onclick="switchAdminTab('progs')"><i class="fa-solid fa-circle-nodes"></i> Programmes & Results</a></li>
+          <li id="nav-media"><a href="#" onclick="switchAdminTab('media')"><i class="fa-solid fa-photo-film"></i> Upload Media</a></li>
+          <li id="nav-notifs"><a href="#" onclick="switchAdminTab('notifs')"><i class="fa-solid fa-bullhorn"></i> Notifications</a></li>
+          <li id="nav-appeals"><a href="#" onclick="switchAdminTab('appeals')"><i class="fa-solid fa-list-check"></i> Appeals Board</a></li>
+          <li id="nav-settings"><a href="#" onclick="switchAdminTab('settings')"><i class="fa-solid fa-sliders"></i> Portal Settings</a></li>
+        </ul>
+      </aside>
+
+      <!-- Right Main Panel Content -->
+      <section class="admin-main-content">
+        
+        <!-- SECTION 1: DASHBOARD WIDGETS -->
+        <div id="sec-dash" class="admin-section-container">
+          <h2 style="color: var(--primary-emerald); margin-bottom: 25px;"><i class="fa-solid fa-gauge"></i> Live Statistics Dashboard</h2>
+          
+          <div class="admin-stats-grid">
+            <div class="admin-stat-card">
+              <div>
+                <span class="admin-stat-label">Total Registered Students</span>
+                <div class="admin-stat-number" id="stat-students">0</div>
+              </div>
+              <i class="fa-solid fa-user-graduate" style="font-size: 2.5rem; color: #3b82f6; opacity: 0.3;"></i>
+            </div>
+            
+            <div class="admin-stat-card">
+              <div>
+                <span class="admin-stat-label">Active Teams</span>
+                <div class="admin-stat-number" id="stat-teams">0</div>
+              </div>
+              <i class="fa-solid fa-people-group" style="font-size: 2.5rem; color: #10b981; opacity: 0.3;"></i>
+            </div>
+
+            <div class="admin-stat-card">
+              <div>
+                <span class="admin-stat-label">Total Programmes</span>
+                <div class="admin-stat-number" id="stat-progs">0</div>
+              </div>
+              <i class="fa-solid fa-circle-nodes" style="font-size: 2.5rem; color: #f59e0b; opacity: 0.3;"></i>
+            </div>
+
+            <div class="admin-stat-card">
+              <div>
+                <span class="admin-stat-label">Pending Appeal Forms</span>
+                <div class="admin-stat-number" id="stat-appeals" style="color: #ef4444;">0</div>
+              </div>
+              <i class="fa-solid fa-circle-exclamation" style="font-size: 2.5rem; color: #ef4444; opacity: 0.3;"></i>
+            </div>
+          </div>
+
+          <div class="admin-section-content" style="margin-top: 30px;">
+            <h3>Quick Actions</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+              <button class="btn btn-primary" onclick="switchAdminTab('progs')"><i class="fa-solid fa-square-plus"></i> Publish a New Result</button>
+              <button class="btn btn-gold" onclick="openStudentModal()"><i class="fa-solid fa-user-plus"></i> Register Student</button>
+              <button class="btn btn-outline" onclick="switchAdminTab('appeals')"><i class="fa-solid fa-envelope-open-text"></i> Review Pending Appeals</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: STUDENT MANAGEMENT -->
+        <div id="sec-students" class="admin-section-container" style="display: none;">
+          <div class="flex-between">
+            <h2><i class="fa-solid fa-user-graduate"></i> Student Database</h2>
+            <button class="btn btn-gold btn-sm" onclick="openStudentModal()"><i class="fa-solid fa-user-plus"></i> Add New Student</button>
+          </div>
+          
+          <div class="admin-section-content">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Category</th>
+                    <th>Team</th>
+                    <th>Photo Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-students-table">
+                  <!-- Dynamic rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: TEAM MANAGEMENT -->
+        <div id="sec-teams" class="admin-section-container" style="display: none;">
+          <div class="flex-between">
+            <h2><i class="fa-solid fa-people-group"></i> Team Roster</h2>
+            <button class="btn btn-gold btn-sm" onclick="openTeamModal()"><i class="fa-solid fa-plus"></i> Add New Team</button>
+          </div>
+
+          <div class="admin-section-content">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Team Name</th>
+                    <th>Captain</th>
+                    <th>Members Count</th>
+                    <th>Score</th>
+                    <th>Rank</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-teams-table">
+                  <!-- Dynamic rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 4: PROGRAMMES & RESULTS -->
+        <div id="sec-progs" class="admin-section-container" style="display: none;">
+          <div class="flex-between">
+            <h2><i class="fa-solid fa-circle-nodes"></i> Program Evaluations</h2>
+            <button class="btn btn-gold btn-sm" onclick="openProgModal()"><i class="fa-solid fa-plus"></i> Add New Programme</button>
+          </div>
+
+          <div class="admin-section-content">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Programme Name</th>
+                    <th>Category</th>
+                    <th>Venue</th>
+                    <th>Judge</th>
+                    <th>Results Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-progs-table">
+                  <!-- Dynamic rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 5: MEDIA GALLERY UPLOADS -->
+        <div id="sec-media" class="admin-section-container" style="display: none;">
+          <h2><i class="fa-solid fa-photo-film"></i> Gallery Manager</h2>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px; margin-top: 20px;">
+            <!-- Upload form -->
+            <div class="card" style="padding: 25px;">
+              <h3 style="color: var(--primary-emerald); margin-bottom: 20px;">Upload Media Item</h3>
+              <form id="mediaUploadForm" onsubmit="handleMediaUpload(event)">
+                <div class="form-group">
+                  <label for="media-type">Media Format</label>
+                  <select class="form-control" id="media-type" onchange="toggleMediaFileInput(this.value)" required>
+                    <option value="image">Photo / Image</option>
+                    <option value="video">Video URL / File</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="media-title">Title / Name</label>
+                  <input type="text" class="form-control" id="media-title" placeholder="E.g., Quran Recitation Ceremony" required>
+                </div>
+
+                <!-- Image upload file input -->
+                <div class="form-group" id="media-file-group">
+                  <label for="media-file">Choose Local File</label>
+                  <input type="file" class="form-control" id="media-file" accept="image/*" required>
+                  <span style="font-size:0.75rem; color:var(--text-gray);">Maximum file size: 1MB. Files are saved in localStorage.</span>
+                </div>
+
+                <!-- Video URL input (hidden initially) -->
+                <div class="form-group" id="media-url-group" style="display: none;">
+                  <label for="media-url">Video MP4 File Link / Embed</label>
+                  <input type="url" class="form-control" id="media-url" placeholder="https://example.com/video.mp4">
+                  <span style="font-size:0.75rem; color:var(--text-gray);">Provide a direct link to an MP4 video or use our pre-seeded video URLs.</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                  <div class="form-group">
+                    <label for="media-day">Festival Day</label>
+                    <select class="form-control" id="media-day" required>
+                      <option value="Day 1">Day 1</option>
+                      <option value="Day 2">Day 2</option>
+                      <option value="Day 3">Day 3</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="media-cat">Category</label>
+                    <select class="form-control" id="media-cat" required>
+                      <option value="General">General</option>
+                      <option value="Sub Junior">Sub Junior</option>
+                      <option value="Junior">Junior</option>
+                      <option value="Senior">Senior</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="media-event">Event Name</label>
+                  <input type="text" class="form-control" id="media-event" placeholder="E.g. Quran Recitation" required>
+                </div>
+
+                <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Upload Media Item
+                </button>
+              </form>
+            </div>
+
+            <!-- List of existing media -->
+            <div class="admin-section-content">
+              <h3>Uploaded Media Items</h3>
+              <div style="max-height: 500px; overflow-y: auto; margin-top: 15px;">
+                <table style="width: 100%;">
+                  <thead>
+                    <tr>
+                      <th>Preview</th>
+                      <th>Title</th>
+                      <th>Format</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-media-table">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 6: NOTIFICATIONS MANAGEMENT -->
+        <div id="sec-notifs" class="admin-section-container" style="display: none;">
+          <h2><i class="fa-solid fa-bullhorn"></i> Broadcast Announcements</h2>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px; margin-top: 20px;">
+            <div class="card" style="padding: 25px;">
+              <h3 style="color: var(--primary-emerald); margin-bottom: 20px;">Compose Notification</h3>
+              <form id="notifForm" onsubmit="handleNotificationCreate(event)">
+                <div class="form-group">
+                  <label for="notif-title-input">Headline Title</label>
+                  <input type="text" class="form-control" id="notif-title-input" placeholder="Title" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="notif-type">Label Category</label>
+                  <select class="form-control" id="notif-type" required>
+                    <option value="info">Info (Blue)</option>
+                    <option value="success">Success / Result Published (Green)</option>
+                    <option value="warning">Important Notice (Yellow)</option>
+                    <option value="danger">Warning / Danger (Red)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="notif-content">Message Content</label>
+                  <textarea class="form-control" id="notif-content" placeholder="Type notification detail here..." style="min-height: 100px;" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
+                  <i class="fa-solid fa-bullhorn"></i> Send Broadcast
+                </button>
+              </form>
+            </div>
+
+            <div class="admin-section-content">
+              <h3>Active Notifications List</h3>
+              <div style="max-height: 500px; overflow-y: auto; margin-top: 15px;" id="admin-notifs-list-container">
+                <!-- Loaded dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 7: APPEALS MANAGEMENT -->
+        <div id="sec-appeals" class="admin-section-container" style="display: none;">
+          <h2><i class="fa-solid fa-list-check"></i> Participant Appeals Dashboard</h2>
+          <p style="color:var(--text-gray); margin-bottom: 20px;">View and respond to submitted appeals from students regarding evaluation outcomes.</p>
+
+          <div class="admin-section-content">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Student</th>
+                    <th>Team</th>
+                    <th>Programme</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Response Action</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-appeals-table">
+                  <!-- Dynamic rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 8: PORTAL SETTINGS & RESET -->
+        <div id="sec-settings" class="admin-section-container" style="display: none;">
+          <h2><i class="fa-solid fa-sliders"></i> Portal Settings & Contacts</h2>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
+            <!-- Contacts -->
+            <div class="card" style="padding: 25px;">
+              <h3 style="color:var(--primary-emerald); margin-bottom:20px;">Contact Details Directory</h3>
+              <form onsubmit="handleContactUpdate(event)">
+                <div class="form-group">
+                  <label for="c-coord">Festival Coordinator</label>
+                  <input type="text" class="form-control" id="c-coord" required>
+                </div>
+                <div class="form-group">
+                  <label for="c-coord-phone">Coordinator Phone</label>
+                  <input type="text" class="form-control" id="c-coord-phone" required>
+                </div>
+                <div class="form-group">
+                  <label for="c-tech">Tech Support Desk</label>
+                  <input type="text" class="form-control" id="c-tech" required>
+                </div>
+                <div class="form-group">
+                  <label for="c-tech-phone">Tech Support Phone</label>
+                  <input type="text" class="form-control" id="c-tech-phone" required>
+                </div>
+                <div class="form-group">
+                  <label for="c-email">Correspondence Email</label>
+                  <input type="email" class="form-control" id="c-email" required>
+                </div>
+                <div class="form-group">
+                  <label for="c-address">Festival Office Address</label>
+                  <textarea class="form-control" id="c-address" style="min-height:80px;" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; padding: 12px; margin-top:10px;">
+                  <i class="fa-solid fa-save"></i> Save Directory Details
+                </button>
+              </form>
+            </div>
+
+            <!-- Prospectus upload, password, db reset -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              
+              <!-- Prospectus PDF upload -->
+              <div class="card" style="padding: 25px;">
+                <h3 style="color:var(--primary-emerald); margin-bottom:15px;"><i class="fa-solid fa-file-pdf"></i> Upload Prospectus PDF</h3>
+                <form onsubmit="handleProspectusUpload(event)">
+                  <div class="form-group">
+                    <label for="prospectus-file">Select PDF File</label>
+                    <input type="file" class="form-control" id="prospectus-file" accept="application/pdf" required>
+                    <span style="font-size:0.75rem; color:var(--text-gray);">Converts PDF to Base64 and saves inside local database (Max 2MB).</span>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-upload"></i> Upload PDF Handbook</button>
+                </form>
+              </div>
+
+              <!-- Reset database & password -->
+              <div class="card" style="padding: 25px;">
+                <h3 style="color:var(--primary-emerald); margin-bottom:15px;"><i class="fa-solid fa-shield"></i> Security & Core Settings</h3>
+                
+                <form onsubmit="handlePasswordChange(event)" style="margin-bottom:25px;">
+                  <div class="form-group">
+                    <label for="c-pass">Change Access Key Password</label>
+                    <input type="password" class="form-control" id="c-pass" placeholder="Enter new password" required>
+                  </div>
+                  <button type="submit" class="btn btn-outline btn-sm"><i class="fa-solid fa-key"></i> Update Password</button>
+                </form>
+                
+                <hr style="border: 0; border-top:1px solid #e2e8f0; margin-bottom: 20px;">
+                
+                <h4 style="color:#ef4444; margin-bottom:8px;">Database Reset Command</h4>
+                <p style="font-size:0.8rem; color:var(--text-gray); margin-bottom:15px;">Warning: Resetting the database clears all manual registrations, uploaded media, published scores, and resets back to standard mock datasets.</p>
+                <button class="btn btn-outline btn-sm" onclick="handleDatabaseReset()" style="color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash-can"></i> Restore Factory Seed Data</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- MODAL 1: ADD/EDIT STUDENT -->
+  <div class="modal-overlay" id="student-modal">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="closeStudentModal()">&times;</button>
+      <h3 style="color: var(--primary-emerald); margin-bottom: 20px;" id="stud-modal-title">Register Student</h3>
+      
+      <form id="studentForm" onsubmit="handleStudentSave(event)">
+        <input type="hidden" id="stud-id">
+        <div class="form-group">
+          <label for="stud-name">Student Full Name</label>
+          <input type="text" class="form-control" id="stud-name" placeholder="Name" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div class="form-group">
+            <label for="stud-cat">Age Category</label>
+            <select class="form-control" id="stud-cat" required>
+              <option value="Sub Junior">Sub Junior</option>
+              <option value="Junior">Junior</option>
+              <option value="Senior">Senior</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="stud-team">Team Association</label>
+            <select class="form-control" id="stud-team" required>
+              <!-- Populate -->
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="stud-photo-file">Profile Photo (Optional)</label>
+          <input type="file" class="form-control" id="stud-photo-file" accept="image/*">
+          <span style="font-size:0.75rem; color:var(--text-gray);">Saves local avatar in Database (Keep files small).</span>
+        </div>
+
+        <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; padding: 12px; margin-top: 15px;">
+          <i class="fa-solid fa-save"></i> Save Student Data
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: ADD/EDIT TEAM -->
+  <div class="modal-overlay" id="team-modal">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="closeTeamModal()">&times;</button>
+      <h3 style="color: var(--primary-emerald); margin-bottom: 20px;" id="team-modal-title">Register Team</h3>
+      
+      <form id="teamForm" onsubmit="handleTeamSave(event)">
+        <input type="hidden" id="team-id">
+        <div class="form-group">
+          <label for="team-name">Team Name</label>
+          <input type="text" class="form-control" id="team-name" placeholder="Team Name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="team-captain">Team Captain Name</label>
+          <input type="text" class="form-control" id="team-captain" placeholder="Captain Name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="team-members">Roster Members (Comma separated)</label>
+          <textarea class="form-control" id="team-members" placeholder="Faris Rahman, Yousuf Hasan, Zayd Ali" style="min-height: 80px;" required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; padding: 12px; margin-top: 15px;">
+          <i class="fa-solid fa-save"></i> Save Team Data
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: ADD/EDIT PROGRAMME -->
+  <div class="modal-overlay" id="prog-modal">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="closeProgModal()">&times;</button>
+      <h3 style="color: var(--primary-emerald); margin-bottom: 20px;" id="prog-modal-title">Register Programme</h3>
+      
+      <form id="progForm" onsubmit="handleProgSave(event)">
+        <input type="hidden" id="prog-id">
+        <div class="form-group">
+          <label for="prog-name">Programme Title</label>
+          <input type="text" class="form-control" id="prog-name" placeholder="E.g., Quran Recitation" required>
+        </div>
+
+        <div class="form-group">
+          <label for="prog-cat">Category Division</label>
+          <select class="form-control" id="prog-cat" required>
+            <option value="Sub Junior">Sub Junior</option>
+            <option value="Junior">Junior</option>
+            <option value="Senior">Senior</option>
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div class="form-group">
+            <label for="prog-venue">Venue Name</label>
+            <input type="text" class="form-control" id="prog-venue" placeholder="E.g. Stage A" required>
+          </div>
+
+          <div class="form-group">
+            <label for="prog-judge">Assigned Judge</label>
+            <input type="text" class="form-control" id="prog-judge" placeholder="Usthad Name" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; padding: 12px; margin-top: 15px;">
+          <i class="fa-solid fa-save"></i> Save Programme Details
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: PUBLISH RESULTS ASSIGNER -->
+  <div class="modal-overlay" id="result-publish-modal">
+    <div class="modal-card" style="max-width: 750px; max-height:90vh; display:flex; flex-direction:column;">
+      <button class="modal-close-btn" onclick="closeResultPublishModal()">&times;</button>
+      <h3 style="color: var(--primary-emerald); margin-bottom: 15px;">Publish Results Evaluator</h3>
+      <h4 style="color: var(--accent-gold-dark); margin-bottom: 20px;" id="publish-prog-title">Quran Recitation (Sub Junior)</h4>
+      
+      <div style="overflow-y:auto; flex-grow:1; padding-right:10px; margin-bottom:20px;">
+        <div id="results-rows-container">
+          <!-- Dynamic student rows will be appended here -->
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="addResultRow()"><i class="fa-solid fa-plus"></i> Add Participant Entry</button>
+      </div>
+
+      <div style="display: flex; gap: 15px; justify-content: flex-end;">
+        <button class="btn btn-outline" onclick="closeResultPublishModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveResultsPublish()"><i class="fa-solid fa-bullhorn"></i> Save & Publish Results</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: RESOLVE APPEAL -->
+  <div class="modal-overlay" id="appeal-modal">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="closeAppealModal()">&times;</button>
+      <h3 style="color: var(--primary-emerald); margin-bottom: 20px;">Resolve Appeal Form</h3>
+      
+      <div id="appeal-meta-info" style="font-size:0.9rem; background:#f8fafc; padding:15px; border-radius:8px; margin-bottom:20px;">
+        <!-- Filled by JS -->
+      </div>
+
+      <form id="appealResolveForm" onsubmit="handleAppealResolveSubmit(event)">
+        <input type="hidden" id="appeal-id">
+        <div class="form-group">
+          <label for="appeal-status-select">Verdict Decision</label>
+          <select class="form-control" id="appeal-status-select" required>
+            <option value="Approved">Approved (Success / Rectify)</option>
+            <option value="Rejected">Rejected (Dismiss Appeal)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="appeal-response-text">Jury Evaluation Remarks</label>
+          <textarea class="form-control" id="appeal-response-text" placeholder="Explain the decision of the Grand Jury committee..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px; margin-top: 15px;">
+          <i class="fa-solid fa-check-double"></i> Save Verdict & Broadcast update
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Shared Javascript Files -->
+  <script src="../js/db.js"></script>
+  <script src="../js/main.js"></script>
+
+  <!-- Admin logic -->
+  <script>
+    let activeAdminTab = "dash";
+    let isEditingStudentPhoto = "";
+    let resultPublishProgId = "";
+
+    // AUTHENTICATION
+    function handleAdminLogin(event) {
+      event.preventDefault();
+      const pass = document.getElementById("admin-pass").value;
+      const truePass = ThanafusDB.db.settings.adminPassword || "admin";
+
+      if (pass === truePass) {
+        document.getElementById("login-overlay").style.display = "none";
+        document.getElementById("admin-layout").style.display = "grid";
+        showAlert("Successfully authenticated as Administrator", "success");
+        initDashboard();
+      } else {
+        showAlert("Invalid access key!", "danger");
+      }
+    }
+
+    function handleLogout() {
+      document.getElementById("admin-layout").style.display = "none";
+      document.getElementById("login-overlay").style.display = "flex";
+      document.getElementById("admin-pass").value = "";
+      showAlert("Logged out from session", "info");
+    }
+
+    // TAB MANAGEMENT
+    function switchAdminTab(tab) {
+      activeAdminTab = tab;
+      
+      // Update sidebar active selection
+      document.querySelectorAll(".admin-sidebar-nav li").forEach(li => li.classList.remove("active"));
+      document.getElementById(`nav-${tab}`).classList.add("active");
+
+      // Hide all panels
+      document.querySelectorAll(".admin-section-container").forEach(sec => sec.style.display = "none");
+      document.getElementById(`sec-${tab}`).style.display = "block";
+
+      // Render respective panel data
+      if (tab === "dash") initDashboard();
+      else if (tab === "students") renderStudentsTable();
+      else if (tab === "teams") renderTeamsTable();
+      else if (tab === "progs") renderProgsTable();
+      else if (tab === "media") renderMediaTable();
+      else if (tab === "notifs") renderNotifsTable();
+      else if (tab === "appeals") renderAppealsTable();
+      else if (tab === "settings") loadSettingsForm();
+    }
+
+    // 1. DASHBOARD
+    function initDashboard() {
+      document.getElementById("stat-students").innerText = ThanafusDB.db.students.length;
+      document.getElementById("stat-teams").innerText = ThanafusDB.db.teams.length;
+      document.getElementById("stat-progs").innerText = ThanafusDB.db.programmes.length;
+      document.getElementById("stat-appeals").innerText = ThanafusDB.db.appeals.filter(a => a.status === 'Pending').length;
+    }
+
+    // 2. STUDENTS
+    function renderStudentsTable() {
+      const tbody = document.getElementById("admin-students-table");
+      tbody.innerHTML = "";
+
+      ThanafusDB.db.students.forEach(s => {
+        const teamObj = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+        const photoLabel = s.photo ? '<span style="color:#10b981;"><i class="fa-solid fa-check"></i> Uploaded</span>' : '<span style="color:var(--text-gray);">None</span>';
+        
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${s.name}</strong></td>
+            <td>${s.category}</td>
+            <td>${teamObj ? teamObj.name : '<span style="color:red;">No Team</span>'}</td>
+            <td>${photoLabel}</td>
+            <td>
+              <button class="btn btn-primary btn-sm" onclick="openStudentModal('${s.id}')" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn btn-outline btn-sm" onclick="deleteStudent('${s.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function openStudentModal(id = "") {
+      const modal = document.getElementById("student-modal");
+      const title = document.getElementById("stud-modal-title");
+      const form = document.getElementById("studentForm");
+      
+      // Populate team dropdown options
+      const teamSelect = document.getElementById("stud-team");
+      teamSelect.innerHTML = '<option value="">Choose Team</option>';
+      ThanafusDB.db.teams.forEach(t => {
+        teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+      });
+
+      isEditingStudentPhoto = "";
+      document.getElementById("stud-photo-file").value = "";
+
+      if (id) {
+        title.innerText = "Edit Student Profile";
+        const stud = ThanafusDB.db.students.find(s => s.id === id);
+        if (stud) {
+          document.getElementById("stud-id").value = stud.id;
+          document.getElementById("stud-name").value = stud.name;
+          document.getElementById("stud-cat").value = stud.category;
+          document.getElementById("stud-team").value = stud.teamId;
+        }
+      } else {
+        title.innerText = "Register Student";
+        form.reset();
+        document.getElementById("stud-id").value = "";
+      }
+
+      modal.style.display = "flex";
+    }
+
+    function closeStudentModal() {
+      document.getElementById("student-modal").style.display = "none";
+    }
+
+    // Save Student (handles files base64 async read)
+    function handleStudentSave(event) {
+      event.preventDefault();
+      const id = document.getElementById("stud-id").value;
+      const name = document.getElementById("stud-name").value;
+      const category = document.getElementById("stud-cat").value;
+      const teamId = document.getElementById("stud-team").value;
+      const fileInput = document.getElementById("stud-photo-file");
+
+      const save = (photoBase64 = "") => {
+        if (id) {
+          ThanafusDB.editStudent(id, name, teamId, category, photoBase64);
+          showAlert("Student profile updated successfully.", "success");
+        } else {
+          ThanafusDB.addStudent(name, teamId, category, photoBase64);
+          showAlert("New student registered successfully.", "success");
+        }
+        closeStudentModal();
+        renderStudentsTable();
+      };
+
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.size > 500 * 1024) {
+          showAlert("Profile image must be less than 500KB to fit Database.", "warning");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          save(e.target.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        save();
+      }
+    }
+
+    function deleteStudent(id) {
+      if (confirm("Are you sure you want to delete this student and clear their scores?")) {
+        ThanafusDB.deleteStudent(id);
+        showAlert("Student profile deleted.", "info");
+        renderStudentsTable();
+      }
+    }
+
+    // 3. TEAMS
+    function renderTeamsTable() {
+      const tbody = document.getElementById("admin-teams-table");
+      tbody.innerHTML = "";
+
+      ThanafusDB.db.teams.forEach(team => {
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${team.name}</strong></td>
+            <td>${team.captain}</td>
+            <td>${team.members.length} members</td>
+            <td><strong>${team.totalScore} pts</strong></td>
+            <td>Rank #${team.rank}</td>
+            <td>
+              <button class="btn btn-primary btn-sm" onclick="openTeamModal('${team.id}')" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn btn-outline btn-sm" onclick="deleteTeam('${team.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function openTeamModal(id = "") {
+      const modal = document.getElementById("team-modal");
+      const title = document.getElementById("team-modal-title");
+      const form = document.getElementById("teamForm");
+
+      if (id) {
+        title.innerText = "Edit Team Profile";
+        const team = ThanafusDB.db.teams.find(t => t.id === id);
+        if (team) {
+          document.getElementById("team-id").value = team.id;
+          document.getElementById("team-name").value = team.name;
+          document.getElementById("team-captain").value = team.captain;
+          document.getElementById("team-members").value = team.members.join(", ");
+        }
+      } else {
+        title.innerText = "Register Team";
+        form.reset();
+        document.getElementById("team-id").value = "";
+      }
+
+      modal.style.display = "flex";
+    }
+
+    function closeTeamModal() {
+      document.getElementById("team-modal").style.display = "none";
+    }
+
+    function handleTeamSave(event) {
+      event.preventDefault();
+      const id = document.getElementById("team-id").value;
+      const name = document.getElementById("team-name").value;
+      const captain = document.getElementById("team-captain").value;
+      const membersText = document.getElementById("team-members").value;
+      const members = membersText.split(",").map(m => m.trim()).filter(m => m.length > 0);
+
+      if (id) {
+        ThanafusDB.editTeam(id, name, captain, members);
+        showAlert("Team details updated.", "success");
+      } else {
+        ThanafusDB.addTeam(name, captain, members);
+        showAlert("New team added.", "success");
+      }
+      closeTeamModal();
+      renderTeamsTable();
+    }
+
+    function deleteTeam(id) {
+      if (confirm("Are you sure you want to delete this team? Students in this team will be orphaned.")) {
+        ThanafusDB.deleteTeam(id);
+        showAlert("Team deleted.", "info");
+        renderTeamsTable();
+      }
+    }
+
+    // 4. PROGRAMMES & RESULTS
+    function renderProgsTable() {
+      const tbody = document.getElementById("admin-progs-table");
+      tbody.innerHTML = "";
+
+      ThanafusDB.db.programmes.forEach(p => {
+        const publishButton = p.resultsPublished 
+          ? `<button class="btn btn-outline btn-sm" onclick="unpublishResults('${p.id}')" style="padding:4px 8px; font-size:0.75rem; border-color:#e2a32c; color:#d97706;"><i class="fa-solid fa-rotate-left"></i> Unpublish</button>`
+          : `<button class="btn btn-primary btn-sm" onclick="openResultPublishModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem; background:#10b981; border-color:#10b981;"><i class="fa-solid fa-circle-check"></i> Evaluate & Publish</button>`;
+
+        const statusText = p.resultsPublished 
+          ? `<span style="color:#10b981;font-weight:600;"><i class="fa-solid fa-circle-check"></i> Published (${p.results.length} entries)</span>` 
+          : `<span style="color:var(--text-gray);"><i class="fa-regular fa-clock"></i> Pending</span>`;
+
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${p.name}</strong></td>
+            <td>${p.category}</td>
+            <td>${p.venue}</td>
+            <td>${p.judge}</td>
+            <td>${statusText}</td>
+            <td>
+              <div style="display:flex; gap:6px;">
+                ${publishButton}
+                <button class="btn btn-primary btn-sm" onclick="openProgModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn btn-outline btn-sm" onclick="deleteProg('${p.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function openProgModal(id = "") {
+      const modal = document.getElementById("prog-modal");
+      const title = document.getElementById("prog-modal-title");
+      const form = document.getElementById("progForm");
+
+      if (id) {
+        title.innerText = "Edit Programme Details";
+        const prog = ThanafusDB.db.programmes.find(p => p.id === id);
+        if (prog) {
+          document.getElementById("prog-id").value = prog.id;
+          document.getElementById("prog-name").value = prog.name;
+          document.getElementById("prog-cat").value = prog.category;
+          document.getElementById("prog-venue").value = prog.venue;
+          document.getElementById("prog-judge").value = prog.judge;
+        }
+      } else {
+        title.innerText = "Register Programme";
+        form.reset();
+        document.getElementById("prog-id").value = "";
+      }
+
+      modal.style.display = "flex";
+    }
+
+    function closeProgModal() {
+      document.getElementById("prog-modal").style.display = "none";
+    }
+
+    function handleProgSave(event) {
+      event.preventDefault();
+      const id = document.getElementById("prog-id").value;
+      const name = document.getElementById("prog-name").value;
+      const category = document.getElementById("prog-cat").value;
+      const venue = document.getElementById("prog-venue").value;
+      const judge = document.getElementById("prog-judge").value;
+
+      if (id) {
+        ThanafusDB.editProgramme(id, name, category, venue, judge);
+        showAlert("Programme updated successfully.", "success");
+      } else {
+        ThanafusDB.addProgramme(name, category, venue, judge);
+        showAlert("New programme created.", "success");
+      }
+      closeProgModal();
+      renderProgsTable();
+    }
+
+    function deleteProg(id) {
+      if (confirm("Delete this programme and wipe its scores?")) {
+        ThanafusDB.deleteProgramme(id);
+        showAlert("Programme deleted.", "info");
+        renderProgsTable();
+      }
+    }
+
+    // RESULT PUBLISHER DRAWER
+    function openResultPublishModal(progId) {
+      resultPublishProgId = progId;
+      const prog = ThanafusDB.db.programmes.find(p => p.id === progId);
+      if (!prog) return;
+
+      document.getElementById("publish-prog-title").innerText = `${prog.name} (${prog.category})`;
+      
+      const container = document.getElementById("results-rows-container");
+      container.innerHTML = "";
+
+      // Seed 3 rows by default (for 1st, 2nd, 3rd)
+      for (let i = 1; i <= 3; i++) {
+        addResultRow(i, "", "");
+      }
+
+      document.getElementById("result-publish-modal").style.display = "flex";
+    }
+
+    function closeResultPublishModal() {
+      document.getElementById("result-publish-modal").style.display = "none";
+      resultPublishProgId = "";
+    }
+
+    function addResultRow(rank = "", selectedStudentId = "", selectedGrade = "") {
+      const container = document.getElementById("results-rows-container");
+      const prog = ThanafusDB.db.programmes.find(p => p.id === resultPublishProgId);
+      if (!prog) return;
+
+      // Filter students who are in the matching category
+      const categoryStudents = ThanafusDB.db.students.filter(s => s.category === prog.category);
+
+      let options = `<option value="">Choose Participant</option>`;
+      categoryStudents.forEach(s => {
+        const teamObj = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+        const teamLabel = teamObj ? `(${teamObj.name})` : '';
+        const selectedAttr = s.id === selectedStudentId ? 'selected' : '';
+        options += `<option value="${s.id}" ${selectedAttr}>${s.name} ${teamLabel}</option>`;
+      });
+
+      const rowDiv = document.createElement("div");
+      rowDiv.className = "result-row";
+      rowDiv.innerHTML = `
+        <div>
+          <select class="form-control res-rank">
+            <option value="">None</option>
+            <option value="1" ${rank == 1 ? 'selected' : ''}>1st Place</option>
+            <option value="2" ${rank == 2 ? 'selected' : ''}>2nd Place</option>
+            <option value="3" ${rank == 3 ? 'selected' : ''}>3rd Place</option>
+          </select>
+        </div>
+        <div>
+          <select class="form-control res-student" required>
+            ${options}
+          </select>
+        </div>
+        <div>
+          <select class="form-control res-grade">
+            <option value="">No Grade</option>
+            <option value="A" ${selectedGrade === 'A' ? 'selected' : ''}>Grade A</option>
+            <option value="B" ${selectedGrade === 'B' ? 'selected' : ''}>Grade B</option>
+            <option value="C" ${selectedGrade === 'C' ? 'selected' : ''}>Grade C</option>
+          </select>
+        </div>
+      `;
+      container.appendChild(rowDiv);
+    }
+
+    function saveResultsPublish() {
+      const rows = document.querySelectorAll("#results-rows-container .result-row");
+      const resultsArray = [];
+      let hasDuplicateStudent = false;
+      const selectedStudents = new Set();
+
+      for (let i = 0; i < rows.length; i++) {
+        const studentId = rows[i].querySelector(".res-student").value;
+        const rank = rows[i].querySelector(".res-rank").value;
+        const grade = rows[i].querySelector(".res-grade").value;
+
+        if (!studentId) continue; // Skip empty rows
+
+        if (selectedStudents.has(studentId)) {
+          hasDuplicateStudent = true;
+          break;
+        }
+        selectedStudents.add(studentId);
+
+        resultsArray.push({
+          studentId,
+          rank: rank ? parseInt(rank) : null,
+          grade: grade || null
+        });
+      }
+
+      if (hasDuplicateStudent) {
+        showAlert("Duplicate student found! A student can only have one entry per programme.", "warning");
+        return;
+      }
+
+      if (resultsArray.length === 0) {
+        showAlert("Add at least one participant result to publish.", "warning");
+        return;
+      }
+
+      ThanafusDB.publishResults(resultPublishProgId, resultsArray);
+      showAlert("Results successfully evaluated and published! Live Leaderboard updated.", "success");
+      closeResultPublishModal();
+      renderProgsTable();
+    }
+
+    function unpublishResults(progId) {
+      if (confirm("Reset results for this program? This will deduct points from the standings.")) {
+        ThanafusDB.unpublishResults(progId);
+        showAlert("Results unpublished.", "info");
+        renderProgsTable();
+      }
+    }
+
+    // 5. GALLERY MANAGER
+    function toggleMediaFileInput(type) {
+      const fileGroup = document.getElementById("media-file-group");
+      const urlGroup = document.getElementById("media-url-group");
+      const fileInput = document.getElementById("media-file");
+
+      if (type === 'image') {
+        fileGroup.style.display = "block";
+        urlGroup.style.display = "none";
+        fileInput.required = true;
+      } else {
+        fileGroup.style.display = "none";
+        urlGroup.style.display = "block";
+        fileInput.required = false;
+      }
+    }
+
+    function handleMediaUpload(event) {
+      event.preventDefault();
+      const type = document.getElementById("media-type").value;
+      const title = document.getElementById("media-title").value;
+      const day = document.getElementById("media-day").value;
+      const category = document.getElementById("media-cat").value;
+      const eventVal = document.getElementById("media-event").value;
+
+      const upload = (url) => {
+        ThanafusDB.addMedia(type, title, url, day, category, eventVal);
+        showAlert("Media item added to gallery database.", "success");
+        document.getElementById("mediaUploadForm").reset();
+        toggleMediaFileInput('image');
+        renderMediaTable();
+      };
+
+      if (type === 'image') {
+        const fileInput = document.getElementById("media-file");
+        if (fileInput.files.length > 0) {
+          const file = fileInput.files[0];
+          if (file.size > 1024 * 1024) {
+            showAlert("File is too large! Maximum limit is 1MB.", "warning");
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            upload(e.target.result);
+          };
+          reader.readAsDataURL(file);
+        }
+      } else {
+        let url = document.getElementById("media-url").value;
+        if (!url) url = "https://www.w3schools.com/html/mov_bbb.mp4"; // standard default fallback
+        upload(url);
+      }
+    }
+
+    function renderMediaTable() {
+      const tbody = document.getElementById("admin-media-table");
+      tbody.innerHTML = "";
+
+      ThanafusDB.db.gallery.forEach(item => {
+        const preview = item.type === 'image' 
+          ? `<img src="${item.url}" style="width:40px;height:30px;object-fit:cover;border-radius:4px;">` 
+          : `<div style="width:40px;height:30px;background:#000;display:flex;align-items:center;justify-content:center;color:white;font-size:0.8rem;border-radius:4px;"><i class="fa-solid fa-play"></i></div>`;
+          
+        tbody.innerHTML += `
+          <tr>
+            <td>${preview}</td>
+            <td><strong>${item.title}</strong></td>
+            <td><span class="prog-meta-badge">${item.type.toUpperCase()}</span></td>
+            <td>
+              <button class="btn btn-outline btn-sm" onclick="deleteMedia('${item.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function deleteMedia(id) {
+      if (confirm("Delete this gallery item?")) {
+        ThanafusDB.deleteMedia(id);
+        showAlert("Gallery media item removed.", "info");
+        renderMediaTable();
+      }
+    }
+
+    // 6. NOTIFICATIONS
+    function handleNotificationCreate(event) {
+      event.preventDefault();
+      const title = document.getElementById("notif-title-input").value;
+      const type = document.getElementById("notif-type").value;
+      const content = document.getElementById("notif-content").value;
+
+      ThanafusDB.addNotification(title, content, type);
+      showAlert("Announcement broadcasted successfully.", "success");
+      document.getElementById("notifForm").reset();
+      renderNotifsTable();
+    }
+
+    function renderNotifsTable() {
+      const container = document.getElementById("admin-notifs-list-container");
+      container.innerHTML = "";
+      
+      const notifs = ThanafusDB.db.notifications;
+      if (notifs.length === 0) {
+        container.innerHTML = "<p>No active broadcasts.</p>";
+        return;
+      }
+
+      notifs.forEach(n => {
+        container.innerHTML += `
+          <div class="card" style="padding:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <span class="prog-meta-badge" style="margin-bottom:6px; display:inline-block;">${n.type.toUpperCase()}</span>
+              <h4 style="color:var(--primary-emerald);">${n.title}</h4>
+              <p style="font-size:0.85rem; color:var(--text-gray);">${n.content}</p>
+              <span style="font-size:0.75rem; color:var(--text-gray);">${formatDate(n.date)}</span>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="deleteNotif('${n.id}')" style="color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        `;
+      });
+    }
+
+    function deleteNotif(id) {
+      if (confirm("Delete announcement broadcast?")) {
+        ThanafusDB.deleteNotification(id);
+        showAlert("Broadcast deleted.", "info");
+        renderNotifsTable();
+      }
+    }
+
+    // 7. APPEALS BOARD
+    function renderAppealsTable() {
+      const tbody = document.getElementById("admin-appeals-table");
+      tbody.innerHTML = "";
+
+      ThanafusDB.db.appeals.forEach(a => {
+        let statusBadge = "";
+        let actionBtn = "";
+        
+        if (a.status === 'Pending') {
+          statusBadge = `<span class="prog-meta-badge" style="background:#fffbeb; color:#d97706;"><i class="fa-regular fa-clock"></i> Pending</span>`;
+          actionBtn = `<button class="btn btn-primary btn-sm" onclick="openAppealResolveModal('${a.id}')"><i class="fa-solid fa-gavel"></i> Resolve</button>`;
+        } else if (a.status === 'Approved') {
+          statusBadge = `<span class="prog-meta-badge" style="background:#e2fdf2; color:#10b981;"><i class="fa-solid fa-check"></i> Approved</span>`;
+          actionBtn = `<span style="font-size:0.85rem; color:var(--text-gray);">Resolved</span>`;
+        } else {
+          statusBadge = `<span class="prog-meta-badge" style="background:#fef2f2; color:#ef4444;"><i class="fa-solid fa-xmark"></i> Rejected</span>`;
+          actionBtn = `<span style="font-size:0.85rem; color:var(--text-gray);">Resolved</span>`;
+        }
+
+        tbody.innerHTML += `
+          <tr>
+            <td style="font-size:0.8rem;color:var(--text-gray);">${formatDate(a.date)}</td>
+            <td><strong>${a.studentName}</strong></td>
+            <td>${a.team}</td>
+            <td>${a.programme} <span style="font-size:0.75rem;color:var(--text-gray);">(${a.category})</span></td>
+            <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${a.description}">${a.description}</td>
+            <td>${statusBadge}</td>
+            <td>${actionBtn}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function openAppealResolveModal(id) {
+      const appeal = ThanafusDB.db.appeals.find(a => a.id === id);
+      if (!appeal) return;
+
+      document.getElementById("appeal-id").value = appeal.id;
+      document.getElementById("appeal-meta-info").innerHTML = `
+        <p><strong>Student:</strong> ${appeal.studentName} (${appeal.team})</p>
+        <p><strong>Programme:</strong> ${appeal.programme} (${appeal.category})</p>
+        <p><strong>Appeal Reason:</strong> "${appeal.description}"</p>
+        <p><strong>Phone Number:</strong> ${appeal.phoneNumber}</p>
+      `;
+
+      document.getElementById("appealResolveForm").reset();
+      document.getElementById("appeal-modal").style.display = "flex";
+    }
+
+    function closeAppealModal() {
+      document.getElementById("appeal-modal").style.display = "none";
+    }
+
+    function handleAppealResolveSubmit(event) {
+      event.preventDefault();
+      const id = document.getElementById("appeal-id").value;
+      const status = document.getElementById("appeal-status-select").value;
+      const response = document.getElementById("appeal-response-text").value;
+
+      ThanafusDB.respondToAppeal(id, status, response);
+      showAlert(`Appeal resolved and status updated. Notification published.`, "success");
+      closeAppealModal();
+      renderAppealsTable();
+    }
+
+    // 8. SETTINGS & CONTACTS
+    function loadSettingsForm() {
+      const c = ThanafusDB.db.contact;
+      document.getElementById("c-coord").value = c.coordinatorName;
+      document.getElementById("c-coord-phone").value = c.coordinatorPhone;
+      document.getElementById("c-tech").value = c.techSupportName;
+      document.getElementById("c-tech-phone").value = c.techSupportPhone;
+      document.getElementById("c-email").value = c.email;
+      document.getElementById("c-address").value = c.address;
+    }
+
+    function handleContactUpdate(event) {
+      event.preventDefault();
+      
+      const details = {
+        coordinatorName: document.getElementById("c-coord").value,
+        coordinatorPhone: document.getElementById("c-coord-phone").value,
+        techSupportName: document.getElementById("c-tech").value,
+        techSupportPhone: document.getElementById("c-tech-phone").value,
+        email: document.getElementById("c-email").value,
+        address: document.getElementById("c-address").value
+      };
+
+      ThanafusDB.updateContact(details);
+      showAlert("Contact directory details saved.", "success");
+    }
+
+    function handlePasswordChange(event) {
+      event.preventDefault();
+      const newPass = document.getElementById("c-pass").value;
+      ThanafusDB.updateSettings({ adminPassword: newPass });
+      showAlert("Access Key Password updated successfully.", "success");
+      document.getElementById("c-pass").value = "";
+    }
+
+    function handleDatabaseReset() {
+      if (confirm("DANGER: This action wipes all published evaluations, uploaded gallery media, appeals and registrations. Restore to factories default seed data?")) {
+        ThanafusDB.reset();
+        showAlert("Database successfully restored to original factory defaults.", "info");
+        switchAdminTab('dash');
+      }
+    }
+
+    // Prospectus PDF handling
+    function handleProspectusUpload(event) {
+      event.preventDefault();
+      const fileInput = document.getElementById("prospectus-file");
+      
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (file.size > 2 * 1024 * 1024) {
+          showAlert("PDF file is too large! Maximum limit is 2MB.", "warning");
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          ThanafusDB.updateProspectus(e.target.result);
+          showAlert("Official Prospectus PDF handbook uploaded successfully.", "success");
+          fileInput.value = "";
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  </script>
+</body>
+</html>

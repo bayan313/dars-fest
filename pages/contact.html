@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THANAFUS Dars Fest 2026 | Contact Us</title>
+  
+  <!-- Poppins Font & Stylesheets -->
+  <link rel="stylesheet" href="../style.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Header & Navigation -->
+  <header>
+    <nav class="navbar">
+      <a href="../index.html" class="logo-container">
+        <div class="logo-icon">T</div>
+        <div class="logo">
+          <h2>THANAFUS<span>2026</span></h2>
+        </div>
+      </a>
+      
+      <button class="hamburger" aria-label="Toggle Navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <ul class="nav-links">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="results.html">Results</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="appeal.html">Appeal Panel</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="text-center">
+        <h1 class="section-title">Contact & Helpdesk</h1>
+        <p class="section-subtitle">Get in touch with the THANAFUS organizing committee and tech support</p>
+      </div>
+
+      <div class="contact-wrapper">
+        <!-- Left: Dynamic Contact info cards -->
+        <div class="contact-card-box">
+          <h3 style="color: var(--primary-emerald); margin-bottom: 25px;"><i class="fa-solid fa-address-book"></i> Official Directory</h3>
+          
+          <div id="contact-list-container">
+            <!-- Dynamic populating of contact cards from DB -->
+          </div>
+        </div>
+
+        <!-- Right: Message Form -->
+        <div class="appeal-form-card">
+          <h3 style="color: var(--primary-emerald); margin-bottom: 20px;"><i class="fa-solid fa-envelope-open-text"></i> Send Us a Message</h3>
+          <form onsubmit="handleContactSubmit(event)">
+            <div class="form-group">
+              <label for="c-name">Full Name</label>
+              <input type="text" class="form-control" id="c-name" placeholder="Enter your name" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="c-email">Email Address</label>
+              <input type="email" class="form-control" id="c-email" placeholder="Enter email" required>
+            </div>
+
+            <div class="form-group">
+              <label for="c-msg">Message / Query</label>
+              <textarea class="form-control" id="c-msg" placeholder="Write your message here..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">
+              <i class="fa-solid fa-paper-plane"></i> Submit Message
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Map section -->
+      <div style="margin-top: 50px; border-radius: var(--border-radius); overflow: hidden; box-shadow: var(--card-shadow); border:1px solid rgba(11, 79, 53, 0.1);">
+        <iframe 
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3911.776662705608!2d75.87588371480572!3d11.351052691932822!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba65eb8cd587595%3A0xe104cfbf65ab4774!2sMarkaz%20Knowledge%20City!5e0!3m2!1sen!2sin!4v1680000000000!5m2!1sen!2sin" 
+          width="100%" 
+          height="450" 
+          style="border:0;" 
+          allowfullscreen="" 
+          loading="lazy" 
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-bottom">
+      <p>&copy; 2026 THANAFUS Dars Fest. All Rights Reserved. | Powered by <strong>THANAFUS IT Team</strong></p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../js/db.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      loadContactDetails();
+    });
+
+    function loadContactDetails() {
+      const container = document.getElementById("contact-list-container");
+      const c = ThanafusDB.db.contact;
+
+      container.innerHTML = `
+        <div class="contact-item">
+          <div class="contact-item-icon"><i class="fa-solid fa-user-tie"></i></div>
+          <div class="contact-item-details">
+            <h5>Festival Coordinator</h5>
+            <p><strong>${c.coordinatorName}</strong></p>
+            <p>Phone: <a href="tel:${c.coordinatorPhone}" style="color:var(--primary-emerald); font-weight:500;">${c.coordinatorPhone}</a></p>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-item-icon"><i class="fa-solid fa-laptop-code"></i></div>
+          <div class="contact-item-details">
+            <h5>Technical Support Desk</h5>
+            <p><strong>${c.techSupportName}</strong></p>
+            <p>Phone: <a href="tel:${c.techSupportPhone}" style="color:var(--primary-emerald); font-weight:500;">${c.techSupportPhone}</a></p>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-item-icon"><i class="fa-solid fa-envelope"></i></div>
+          <div class="contact-item-details">
+            <h5>Official Correspondence</h5>
+            <p>Email: <a href="mailto:${c.email}" style="color:var(--primary-emerald); font-weight:500;">${c.email}</a></p>
+          </div>
+        </div>
+
+        <div class="contact-item" style="margin-bottom:0;">
+          <div class="contact-item-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <div class="contact-item-details">
+            <h5>Festival Office & Venue</h5>
+            <p style="max-width: 450px;">${c.address}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleContactSubmit(event) {
+      event.preventDefault();
+      showAlert("Message sent successfully! Our helpline desk will contact you soon.", "success");
+      event.target.reset();
+    }
+  </script>
+</body>
+</html>

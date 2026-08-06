@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THANAFUS Dars Fest 2026 | Results Portal</title>
+  
+  <!-- Poppins Font & Stylesheets -->
+  <link rel="stylesheet" href="../style.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Header & Navigation -->
+  <header>
+    <nav class="navbar">
+      <a href="../index.html" class="logo-container">
+        <div class="logo-icon">T</div>
+        <div class="logo">
+          <h2>THANAFUS<span>2026</span></h2>
+        </div>
+      </a>
+      
+      <button class="hamburger" aria-label="Toggle Navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <ul class="nav-links">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="results.html">Results</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="appeal.html">Appeal Panel</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="section" style="padding-top: 40px;">
+      <div class="text-center">
+        <h1 class="section-title">Results Portal</h1>
+        <p class="section-subtitle" id="portal-sub">Choose a category to browse program, student, or team scores</p>
+      </div>
+
+      <!-- Category Selector (Stage 1) -->
+      <div class="category-select-wrapper" id="category-picker">
+        <div class="category-card-btn" onclick="selectCategory('Sub Junior')">
+          <h3>Sub Junior</h3>
+          <p>Browse Sub Junior events</p>
+          <div class="btn btn-primary btn-sm" style="margin-top: 15px;">Enter Category</div>
+        </div>
+        <div class="category-card-btn" onclick="selectCategory('Junior')">
+          <h3>Junior</h3>
+          <p>Browse Junior events</p>
+          <div class="btn btn-primary btn-sm" style="margin-top: 15px;">Enter Category</div>
+        </div>
+        <div class="category-card-btn" onclick="selectCategory('Senior')">
+          <h3>Senior</h3>
+          <p>Browse Senior events</p>
+          <div class="btn btn-primary btn-sm" style="margin-top: 15px;">Enter Category</div>
+        </div>
+      </div>
+
+      <!-- Results Interface Dashboard (Stage 2 - Hidden initially) -->
+      <div id="results-dashboard" style="display: none;">
+        <!-- Category switcher header -->
+        <div class="flex-between" style="border-bottom: 1px solid #cbd5e1; padding-bottom: 15px; margin-bottom: 25px;">
+          <h2 style="color: var(--primary-emerald);">Category: <span id="current-category-name" style="color: var(--accent-gold-dark);">Sub Junior</span></h2>
+          <button class="btn btn-outline btn-sm" onclick="showCategoryPicker()"><i class="fa-solid fa-rotate-left"></i> Change Category</button>
+        </div>
+
+        <!-- Sub-navigation tabs -->
+        <div class="sub-menu-tabs">
+          <div class="tab-btn active" onclick="switchTab('program')" id="tab-program">Programme Results</div>
+          <div class="tab-btn" onclick="switchTab('student')" id="tab-student">Student Results</div>
+          <div class="tab-btn" onclick="switchTab('team')" id="tab-team">Team Results</div>
+        </div>
+
+        <!-- Results Content area -->
+        <div class="results-content-area">
+          
+          <!-- TAB 1: PROGRAMME RESULTS -->
+          <div id="panel-program" class="tab-panel">
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px;" class="results-split-layout">
+              <!-- Left: Search & Program List -->
+              <div>
+                <div class="search-wrapper" style="margin-bottom: 20px;">
+                  <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                  <input type="text" class="search-input" id="search-prog" placeholder="Search programmes..." onkeyup="filterProgramList()">
+                </div>
+                <div class="prog-list-grid" id="programme-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 500px; overflow-y: auto;">
+                  <!-- Dynamic programme items -->
+                </div>
+              </div>
+              
+              <!-- Right: Selected Programme Detail -->
+              <div id="programme-detail-container">
+                <div class="card text-center" style="padding: 50px 20px;">
+                  <i class="fa-solid fa-bullhorn" style="font-size: 3rem; color: var(--text-gray); margin-bottom: 15px;"></i>
+                  <h3>Select a Programme</h3>
+                  <p style="color: var(--text-gray);">Choose a programme from the list to view detailed result standings, podium placements, and scores.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: STUDENT RESULTS -->
+          <div id="panel-student" class="tab-panel" style="display: none;">
+            <div class="search-wrapper">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" class="search-input" id="search-student" placeholder="Search student name..." onkeyup="handleStudentSearch(this.value)">
+              <div id="student-suggestions" style="position: absolute; width: 100%; background: white; border-radius: 8px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); z-index: 10; max-height: 200px; overflow-y: auto; margin-top: 5px; display: none;">
+                <!-- Suggestions -->
+              </div>
+            </div>
+            
+            <div id="student-profile-container">
+              <div class="card text-center" style="padding: 50px 20px; max-width: 700px; margin: 0 auto;">
+                <i class="fa-solid fa-user-graduate" style="font-size: 3.5rem; color: var(--text-gray); margin-bottom: 15px;"></i>
+                <h3>Search Student Profile</h3>
+                <p style="color: var(--text-gray);">Type a student's name above to see their detailed profile, score breakdown, overall position, and participation list.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: TEAM RESULTS -->
+          <div id="panel-team" class="tab-panel" style="display: none;">
+            <div class="grid-4" id="teams-grid-container" style="margin-bottom: 30px;">
+              <!-- Dynamic Team scorecards -->
+            </div>
+            
+            <div id="selected-team-detail-container">
+              <div class="card text-center" style="padding: 40px 20px;">
+                <i class="fa-solid fa-people-group" style="font-size: 3.5rem; color: var(--text-gray); margin-bottom: 15px;"></i>
+                <h3>Select a Team Above</h3>
+                <p style="color: var(--text-gray);">Click any team card above to view a complete breakdown of points, team members, grade counts, and winning events.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Lightbox Modal -->
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-content">
+      <button class="lightbox-close">&times;</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-bottom">
+      <p>&copy; 2026 THANAFUS Dars Fest. All Rights Reserved. | Powered by <strong>THANAFUS IT Team</strong></p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../js/db.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    let currentCategory = "";
+    let activeTab = "program";
+
+    function selectCategory(category) {
+      currentCategory = category;
+      document.getElementById("category-picker").style.display = "none";
+      document.getElementById("results-dashboard").style.display = "block";
+      document.getElementById("current-category-name").innerText = category;
+      document.getElementById("portal-sub").innerText = `Browsing result records for ${category} category`;
+      
+      // Initialize view
+      switchTab(activeTab);
+    }
+
+    function showCategoryPicker() {
+      document.getElementById("category-picker").style.display = "grid";
+      document.getElementById("results-dashboard").style.display = "none";
+      document.getElementById("portal-sub").innerText = "Choose a category to browse program, student, or team scores";
+      
+      // Clear detail content
+      document.getElementById("programme-detail-container").innerHTML = `
+        <div class="card text-center" style="padding: 50px 20px;">
+          <i class="fa-solid fa-bullhorn" style="font-size: 3rem; color: var(--text-gray); margin-bottom: 15px;"></i>
+          <h3>Select a Programme</h3>
+          <p style="color: var(--text-gray);">Choose a programme from the list to view detailed result standings, podium placements, and scores.</p>
+        </div>
+      `;
+      document.getElementById("student-profile-container").innerHTML = `
+        <div class="card text-center" style="padding: 50px 20px; max-width: 700px; margin: 0 auto;">
+          <i class="fa-solid fa-user-graduate" style="font-size: 3.5rem; color: var(--text-gray); margin-bottom: 15px;"></i>
+          <h3>Search Student Profile</h3>
+          <p style="color: var(--text-gray);">Type a student's name above to see their detailed profile, score breakdown, overall position, and participation list.</p>
+        </div>
+      `;
+      document.getElementById("selected-team-detail-container").innerHTML = `
+        <div class="card text-center" style="padding: 40px 20px;">
+          <i class="fa-solid fa-people-group" style="font-size: 3.5rem; color: var(--text-gray); margin-bottom: 15px;"></i>
+          <h3>Select a Team Above</h3>
+          <p style="color: var(--text-gray);">Click any team card above to view a complete breakdown of points, team members, grade counts, and winning events.</p>
+        </div>
+      `;
+      document.getElementById("search-student").value = "";
+      document.getElementById("search-prog").value = "";
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+      
+      // Update active classes
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.getElementById(`tab-${tab}`).classList.add("active");
+      
+      // Hide all panels
+      document.querySelectorAll(".tab-panel").forEach(panel => panel.style.display = "none");
+      document.getElementById(`panel-${tab}`).style.display = "block";
+
+      if (tab === "program") {
+        loadProgrammes();
+      } else if (tab === "student") {
+        // Nothing special to load initially
+      } else if (tab === "team") {
+        loadTeams();
+      }
+    }
+
+    /* ===================================================
+       PROGRAMME RESULTS MODULE
+    =================================================== */
+    function loadProgrammes() {
+      const listContainer = document.getElementById("programme-list");
+      const programmes = ThanafusDB.db.programmes.filter(p => p.category === currentCategory);
+
+      if (programmes.length === 0) {
+        listContainer.innerHTML = "<p class='text-center'>No programmes found in this category.</p>";
+        return;
+      }
+
+      let html = "";
+      programmes.forEach(p => {
+        const publishStatus = p.resultsPublished 
+          ? `<span style="font-size:0.75rem;color:#10b981;font-weight:600;"><i class="fa-solid fa-circle-check"></i> Published</span>` 
+          : `<span style="font-size:0.75rem;color:var(--text-gray);"><i class="fa-regular fa-clock"></i> Pending</span>`;
+          
+        html += `
+          <div class="prog-item-card" onclick="viewProgrammeDetails('${p.id}')" data-name="${p.name.toLowerCase()}">
+            <h4>${p.name}</h4>
+            <div class="flex-between" style="margin-top: 5px; margin-bottom: 0;">
+              <span class="venue"><i class="fa-solid fa-location-dot"></i> ${p.venue}</span>
+              ${publishStatus}
+            </div>
+          </div>
+        `;
+      });
+      listContainer.innerHTML = html;
+    }
+
+    function filterProgramList() {
+      const val = document.getElementById("search-prog").value.toLowerCase();
+      const items = document.querySelectorAll("#programme-list .prog-item-card");
+      items.forEach(item => {
+        const name = item.getAttribute("data-name");
+        if (name.includes(val)) {
+          item.style.display = "block";
+        } else {
+          item.style.display = "none";
+        }
+      });
+    }
+
+    function viewProgrammeDetails(id) {
+      const container = document.getElementById("programme-detail-container");
+      const prog = ThanafusDB.db.programmes.find(p => p.id === id);
+      if (!prog) return;
+
+      if (!prog.resultsPublished) {
+        container.innerHTML = `
+          <div class="card text-center" style="padding: 50px 20px;">
+            <i class="fa-solid fa-hourglass-half" style="font-size: 3.5rem; color: var(--accent-gold); margin-bottom: 15px;"></i>
+            <h2>${prog.name}</h2>
+            <p class="prog-meta-badge" style="display:inline-block; margin-bottom:15px;">Venue: ${prog.venue} | Judge: ${prog.judge}</p>
+            <h3 style="color: var(--text-gray); margin-top:10px;">Results Pending</h3>
+            <p style="color: var(--text-gray);">The evaluations for this programme are currently in progress. Standard rankings will be shown once uploaded by the coordinator.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Find top 3 winners
+      const place1 = prog.results.find(r => r.rank === 1);
+      const place2 = prog.results.find(r => r.rank === 2);
+      const place3 = prog.results.find(r => r.rank === 3);
+
+      const getStudentData = (resItem) => {
+        if (!resItem) return { name: "No Placement", teamName: "", photo: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop" };
+        const student = ThanafusDB.db.students.find(s => s.id === resItem.studentId);
+        const team = student ? ThanafusDB.db.teams.find(t => t.id === student.teamId) : null;
+        return {
+          name: student ? student.name : "Unknown Student",
+          teamName: team ? team.name : "N/A",
+          photo: student && student.photo ? student.photo : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop",
+          grade: resItem.grade || "No Grade"
+        };
+      };
+
+      const s1 = getStudentData(place1);
+      const s2 = getStudentData(place2);
+      const s3 = getStudentData(place3);
+
+      // Create participants table list
+      let rowsHtml = "";
+      // Order participants by rank (1,2,3 first, then rest)
+      const sortedParticipants = [...prog.results].sort((a, b) => {
+        if (a.rank && b.rank) return a.rank - b.rank;
+        if (a.rank) return -1;
+        if (b.rank) return 1;
+        return (a.grade || 'Z').localeCompare(b.grade || 'Z');
+      });
+
+      sortedParticipants.forEach(res => {
+        const stud = ThanafusDB.db.students.find(s => s.id === res.studentId);
+        const teamObj = stud ? ThanafusDB.db.teams.find(t => t.id === stud.teamId) : null;
+        const pts = ThanafusDB.calculatePoints(res.rank, res.grade);
+        
+        rowsHtml += `
+          <tr>
+            <td><strong>${res.rank ? res.rank + ' Place' : 'Participation'}</strong></td>
+            <td>${stud ? stud.name : 'Unknown'}</td>
+            <td>${teamObj ? teamObj.name : 'N/A'}</td>
+            <td><span class="prog-meta-badge" style="background-color:${res.grade === 'A' ? '#e2fdf2' : res.grade === 'B' ? '#fffbeb' : '#f1f5f9'}; color:${res.grade === 'A' ? '#10b981' : res.grade === 'B' ? '#d97706' : '#64748b'};">${res.grade || 'N/A'}</span></td>
+            <td><strong>${pts} pts</strong></td>
+          </tr>
+        `;
+      });
+
+      container.innerHTML = `
+        <div class="prog-detail-view" style="margin-top:0;">
+          <div class="prog-header-info">
+            <div>
+              <h2 style="color:var(--primary-emerald);">${prog.name}</h2>
+              <p style="color:var(--text-gray);font-size:0.9rem;margin-top:2px;">
+                <i class="fa-solid fa-location-dot"></i> ${prog.venue} &nbsp;|&nbsp; <i class="fa-solid fa-user-tie"></i> Judge: ${prog.judge}
+              </p>
+            </div>
+            <span class="prog-meta-badge" style="background:#10b981; color:white;"><i class="fa-solid fa-circle-check"></i> Published</span>
+          </div>
+
+          <!-- Podium Standings -->
+          <h3 class="text-center" style="color:var(--primary-emerald); margin-bottom:10px;">Podium Winners</h3>
+          <div class="podium-container">
+            <!-- 2nd Place -->
+            <div class="podium-step place-2">
+              <img src="${s2.photo}" class="podium-avatar" alt="2nd Place">
+              <div class="podium-place-box">2nd</div>
+              <div class="podium-name">${s2.name}</div>
+              <div class="podium-team">${s2.teamName}</div>
+              ${place2 ? `<div style="font-size:0.8rem;color:var(--accent-gold-dark);font-weight:bold;">Grade: ${s2.grade}</div>` : ''}
+            </div>
+            <!-- 1st Place -->
+            <div class="podium-step place-1">
+              <img src="${s1.photo}" class="podium-avatar" alt="1st Place">
+              <div class="podium-place-box">1st</div>
+              <div class="podium-name">${s1.name}</div>
+              <div class="podium-team">${s1.teamName}</div>
+              ${place1 ? `<div style="font-size:0.8rem;color:var(--accent-gold-dark);font-weight:bold;">Grade: ${s1.grade}</div>` : ''}
+            </div>
+            <!-- 3rd Place -->
+            <div class="podium-step place-3">
+              <img src="${s3.photo}" class="podium-avatar" alt="3rd Place">
+              <div class="podium-place-box">3rd</div>
+              <div class="podium-name">${s3.name}</div>
+              <div class="podium-team">${s3.teamName}</div>
+              ${place3 ? `<div style="font-size:0.8rem;color:var(--accent-gold-dark);font-weight:bold;">Grade: ${s3.grade}</div>` : ''}
+            </div>
+          </div>
+
+          <!-- Table of participants -->
+          <h3 style="color:var(--primary-emerald); margin-bottom:15px; margin-top:40px;">Detailed Leaderboard</h3>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Student Name</th>
+                  <th>Team</th>
+                  <th>Grade</th>
+                  <th>Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    /* ===================================================
+       STUDENT RESULTS MODULE
+    =================================================== */
+    function handleStudentSearch(val) {
+      const suggestions = document.getElementById("student-suggestions");
+      if (!val || val.trim().length === 0) {
+        suggestions.style.display = "none";
+        return;
+      }
+
+      // Find students in current category
+      const matched = ThanafusDB.searchStudents(val).filter(s => s.category === currentCategory);
+
+      if (matched.length === 0) {
+        suggestions.innerHTML = `<div style="padding:10px;color:var(--text-gray);font-size:0.9rem;">No students found in ${currentCategory}</div>`;
+        suggestions.style.display = "block";
+        return;
+      }
+
+      let html = "";
+      matched.forEach(s => {
+        html += `
+          <div style="padding:10px 15px;cursor:pointer;border-bottom:1px solid #f1f5f9;font-size:0.95rem;transition:0.2s;" 
+               class="student-suggest-item" 
+               onclick="selectStudent('${s.id}')">
+            <strong>${s.name}</strong> &mdash; <span style="font-size:0.85rem;color:var(--text-gray);">${s.teamName}</span>
+          </div>
+        `;
+      });
+      suggestions.innerHTML = html;
+      suggestions.style.display = "block";
+
+      // hover style helper
+      const items = suggestions.querySelectorAll(".student-suggest-item");
+      items.forEach(el => {
+        el.addEventListener("mouseenter", () => el.style.background = "#e2ede8");
+        el.addEventListener("mouseleave", () => el.style.background = "white");
+      });
+    }
+
+    function selectStudent(id) {
+      document.getElementById("student-suggestions").style.display = "none";
+      const profileContainer = document.getElementById("student-profile-container");
+      
+      const profile = ThanafusDB.getStudentProfile(id);
+      if (!profile) return;
+
+      const photoUrl = profile.photo || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop";
+
+      let participationsHtml = "";
+      if (profile.participations.length === 0) {
+        participationsHtml = `<tr><td colspan="5" class="text-center" style="color:var(--text-gray);">No participations or published results found for this student.</td></tr>`;
+      } else {
+        profile.participations.forEach(p => {
+          participationsHtml += `
+            <tr>
+              <td><strong>${p.programmeName}</strong></td>
+              <td>${p.venue}</td>
+              <td>${p.rank ? `<span style="color:var(--accent-gold-dark);font-weight:bold;">${p.rank} Place</span>` : 'Participation'}</td>
+              <td><span class="prog-meta-badge" style="background-color:${p.grade === 'A' ? '#e2fdf2' : p.grade === 'B' ? '#fffbeb' : '#f1f5f9'}; color:${p.grade === 'A' ? '#10b981' : p.grade === 'B' ? '#d97706' : '#64748b'};">${p.grade || 'N/A'}</span></td>
+              <td><strong>${p.points} pts</strong></td>
+            </tr>
+          `;
+        });
+      }
+
+      profileContainer.innerHTML = `
+        <div class="student-profile-card">
+          <div class="student-profile-header">
+            <img src="${photoUrl}" class="student-large-avatar" alt="${profile.name}">
+            <div class="student-info-meta">
+              <h3>${profile.name}</h3>
+              <p style="color:var(--text-gray);font-weight:500;">Team: <span style="color:var(--primary-emerald);">${profile.teamName}</span></p>
+              <p style="color:var(--text-gray);font-size:0.9rem;">Category: ${profile.category}</p>
+              
+              <div class="student-stats-row">
+                <div class="student-stat-pill">
+                  <span>Overall Rank</span>
+                  <strong>#${profile.position}</strong>
+                </div>
+                <div class="student-stat-pill">
+                  <span>Total Score</span>
+                  <strong>${profile.totalScore} pts</strong>
+                </div>
+                <div class="student-stat-pill">
+                  <span>Total wins (1st/2nd/3rd)</span>
+                  <strong>${profile.rankCount[1] + profile.rankCount[2] + profile.rankCount[3]}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h3 style="color:var(--primary-emerald); margin-bottom:15px; margin-top:40px;">Programmes Participated</h3>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Programme</th>
+                  <th>Venue</th>
+                  <th>Rank</th>
+                  <th>Grade</th>
+                  <th>Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${participationsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      // Set input value to name
+      document.getElementById("search-student").value = profile.name;
+    }
+
+    /* ===================================================
+       TEAM RESULTS MODULE
+    =================================================== */
+    function loadTeams() {
+      const grid = document.getElementById("teams-grid-container");
+      const teams = ThanafusDB.db.teams;
+
+      // Sort by rank ascending
+      const sortedTeams = [...teams].sort((a, b) => a.rank - b.rank);
+
+      let html = "";
+      sortedTeams.forEach(team => {
+        let medal = "";
+        if (team.rank === 1) medal = "🥇";
+        else if (team.rank === 2) medal = "🥈";
+        else if (team.rank === 3) medal = "🥉";
+        else medal = "🎗️";
+
+        html += `
+          <div class="card standings-card rank-${team.rank}" style="cursor:pointer;" onclick="selectTeam('${team.id}')">
+            <div class="team-rank-badge">${medal}</div>
+            <h3>${team.name}</h3>
+            <p class="details">Captain: ${team.captain}</p>
+            <div class="score">${team.totalScore} <span style="font-size:0.9rem;font-weight:normal;color:var(--text-gray);">Points</span></div>
+          </div>
+        `;
+      });
+      grid.innerHTML = html;
+    }
+
+    function selectTeam(id) {
+      const container = document.getElementById("selected-team-detail-container");
+      const team = ThanafusDB.db.teams.find(t => t.id === id);
+      if (!team) return;
+
+      // Get members tags
+      let membersHtml = "";
+      team.members.forEach(m => {
+        membersHtml += `<span class="team-member-chip">${m}</span>`;
+      });
+
+      // Get team wins
+      // We filter wins by the currentCategory to show category-specific wins or all?
+      // The prompt says: "Team Results: Show Team Name, Captain, Members, Total Score, Overall Rank, Programme-wise Points, Grade Count, Winning Programmes"
+      // Show details matching this category first, but listing overall is fine. Let's filter team wins for this category
+      const catWins = team.wins.filter(w => w.category === currentCategory);
+      let winsHtml = "";
+      if (catWins.length === 0) {
+        winsHtml = "<p style='color:var(--text-gray);font-size:0.9rem;'>No winning placements in this category yet.</p>";
+      } else {
+        winsHtml += `<div class="table-wrapper"><table><thead><tr><th>Programme</th><th>Student</th><th>Rank</th><th>Grade</th><th>Points</th></tr></thead><tbody>`;
+        catWins.forEach(win => {
+          winsHtml += `
+            <tr>
+              <td><strong>${win.programmeName}</strong></td>
+              <td>${win.studentName}</td>
+              <td>${win.rank} Place</td>
+              <td><span class="prog-meta-badge" style="background-color:${win.grade === 'A' ? '#e2fdf2' : win.grade === 'B' ? '#fffbeb' : '#f1f5f9'};">${win.grade || 'N/A'}</span></td>
+              <td><strong>${win.points} pts</strong></td>
+            </tr>
+          `;
+        });
+        winsHtml += `</tbody></table></div>`;
+      }
+
+      // Programme wise points breakdown in this category
+      // We check all programmes in this category, and if team has got points in it
+      let breakdownHtml = "";
+      const catProgrammes = ThanafusDB.db.programmes.filter(p => p.category === currentCategory && p.resultsPublished);
+      let pointsBreakdownList = [];
+
+      catProgrammes.forEach(prog => {
+        let progPts = 0;
+        let studentsWithPts = [];
+
+        prog.results.forEach(res => {
+          const student = ThanafusDB.db.students.find(s => s.id === res.studentId);
+          if (student && student.teamId === id) {
+            const pts = ThanafusDB.calculatePoints(res.rank, res.grade);
+            progPts += pts;
+            studentsWithPts.push(`${student.name} (${res.rank ? res.rank + ' Place' : ''}${res.grade ? ' ' + res.grade : ''}: ${pts}pts)`);
+          }
+        });
+
+        if (progPts > 0) {
+          pointsBreakdownList.push({
+            progName: prog.name,
+            points: progPts,
+            details: studentsWithPts.join(", ")
+          });
+        }
+      });
+
+      if (pointsBreakdownList.length === 0) {
+        breakdownHtml = "<tr><td colspan='3' class='text-center' style='color:var(--text-gray);'>No points earned in this category yet.</td></tr>";
+      } else {
+        pointsBreakdownList.forEach(item => {
+          breakdownHtml += `
+            <tr>
+              <td><strong>${item.progName}</strong></td>
+              <td>${item.details}</td>
+              <td><strong>${item.points} pts</strong></td>
+            </tr>
+          `;
+        });
+      }
+
+      container.innerHTML = `
+        <div class="team-results-card">
+          <div class="team-header-flex">
+            <div>
+              <h2 style="color:var(--primary-emerald);">${team.name} <span style="font-size:1.1rem;font-weight:normal;color:var(--text-gray);">Position: #${team.rank}</span></h2>
+              <p style="color:var(--text-gray);font-weight:500;">Captain: ${team.captain}</p>
+            </div>
+            
+            <div class="student-stats-row" style="margin-top: 0;">
+              <div class="student-stat-pill">
+                <span>Total Score</span>
+                <strong>${team.totalScore} pts</strong>
+              </div>
+              <div class="student-stat-pill">
+                <span>A Grades</span>
+                <strong>${team.grades.A || 0}</strong>
+              </div>
+              <div class="student-stat-pill">
+                <span>B Grades</span>
+                <strong>${team.grades.B || 0}</strong>
+              </div>
+              <div class="student-stat-pill">
+                <span>C Grades</span>
+                <strong>${team.grades.C || 0}</strong>
+              </div>
+            </div>
+          </div>
+
+          <h4 style="color:var(--primary-emerald); margin-bottom:10px;">Team Members</h4>
+          <div class="team-members-list" style="margin-bottom:30px;">
+            ${membersHtml}
+          </div>
+
+          <h3 style="color:var(--primary-emerald); margin-bottom:15px; margin-top:30px;">Winning Programmes (${currentCategory})</h3>
+          <div style="margin-bottom:30px;">
+            ${winsHtml}
+          </div>
+
+          <h3 style="color:var(--primary-emerald); margin-bottom:15px;">Programme-wise Points Breakdown (${currentCategory})</h3>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Programme</th>
+                  <th>Scoring Students</th>
+                  <th>Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${breakdownHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

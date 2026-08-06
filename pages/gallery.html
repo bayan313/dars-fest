@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THANAFUS Dars Fest 2026 | Media Gallery</title>
+  
+  <!-- Poppins Font & Stylesheets -->
+  <link rel="stylesheet" href="../style.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Header & Navigation -->
+  <header>
+    <nav class="navbar">
+      <a href="../index.html" class="logo-container">
+        <div class="logo-icon">T</div>
+        <div class="logo">
+          <h2>THANAFUS<span>2026</span></h2>
+        </div>
+      </a>
+      
+      <button class="hamburger" aria-label="Toggle Navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <ul class="nav-links">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="results.html">Results</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="appeal.html">Appeal Panel</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="text-center">
+        <h1 class="section-title">Media Gallery</h1>
+        <p class="section-subtitle">Visual highlights and stage action from THANAFUS Dars Fest 2026</p>
+      </div>
+
+      <!-- Format Tabs -->
+      <div class="sub-menu-tabs" style="max-width: 400px; margin-bottom: 35px;">
+        <div class="tab-btn active" onclick="switchMediaType('image')" id="tab-type-image">Photos</div>
+        <div class="tab-btn" onclick="switchMediaType('video')" id="tab-type-video">Videos</div>
+      </div>
+
+      <!-- Media Grid -->
+      <div class="gallery-grid" id="gallery-items-grid">
+        <!-- Dynamic loading of media cards -->
+      </div>
+      
+      <!-- Empty State -->
+      <div class="card text-center" id="gallery-empty-state" style="display: none; padding: 60px 20px;">
+        <i class="fa-regular fa-image" style="font-size: 4rem; color: var(--text-gray); margin-bottom: 15px;"></i>
+        <h3>No media elements found</h3>
+        <p style="color: var(--text-gray);">Please check back later for updates.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Lightbox Modal -->
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-content">
+      <button class="lightbox-close">&times;</button>
+      <!-- Media will load here -->
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-bottom">
+      <p>&copy; 2026 THANAFUS Dars Fest. All Rights Reserved. | Powered by <strong>THANAFUS IT Team</strong></p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../js/db.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    let activeMediaType = "image";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadGallery();
+    });
+
+    function switchMediaType(type) {
+      activeMediaType = type;
+      document.querySelectorAll(".sub-menu-tabs .tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.getElementById(`tab-type-${type}`).classList.add("active");
+      loadGallery();
+    }
+
+    // Load gallery items
+    function loadGallery() {
+      const grid = document.getElementById("gallery-items-grid");
+      const emptyState = document.getElementById("gallery-empty-state");
+
+      // Filter data only by media type
+      const filtered = ThanafusDB.db.gallery.filter(item => item.type === activeMediaType);
+
+      if (filtered.length === 0) {
+        grid.innerHTML = "";
+        emptyState.style.display = "block";
+        return;
+      }
+
+      emptyState.style.display = "none";
+      let html = "";
+      
+      filtered.forEach(item => {
+        if (item.type === 'image') {
+          html += `
+            <div class="gallery-item" onclick="openLightbox('image', '${item.url}', '${item.title}')">
+              <div class="gallery-image-wrapper">
+                <img src="${item.url}" alt="${item.title}" loading="lazy">
+                <span class="media-type-icon"><i class="fa-solid fa-camera"></i></span>
+              </div>
+              <div class="gallery-info">
+                <h5>${item.title}</h5>
+                <p>${item.day} &bull; ${item.category} &bull; ${item.event}</p>
+              </div>
+            </div>
+          `;
+        } else {
+          // Video items
+          const thumb = "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=400&auto=format&fit=crop";
+          html += `
+            <div class="gallery-item" onclick="openLightbox('video', '${item.url}', '${item.title}')">
+              <div class="gallery-image-wrapper">
+                <img src="${thumb}" alt="${item.title}" loading="lazy" style="filter: brightness(0.6);">
+                <span class="media-type-icon" style="background:var(--accent-gold); color:var(--primary-emerald-dark);"><i class="fa-solid fa-play"></i></span>
+              </div>
+              <div class="gallery-info">
+                <h5>${item.title}</h5>
+                <p>${item.day} &bull; ${item.category} &bull; ${item.event}</p>
+              </div>
+            </div>
+          `;
+        }
+      });
+      grid.innerHTML = html;
+    }
+
+    // Modal Lightbox controller
+    function openLightbox(type, url, title) {
+      const lightbox = document.getElementById("lightbox");
+      const content = lightbox.querySelector(".lightbox-content");
+      
+      let element = "";
+      if (type === 'image') {
+        element = `<img src="${url}" alt="${title}">`;
+      } else {
+        element = `
+          <video controls autoplay style="width:100%; max-width:800px; display:block;">
+            <source src="${url}" type="video/mp4">
+            Your browser does not support HTML5 video player.
+          </video>
+        `;
+      }
+      
+      content.innerHTML = `
+        <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+        ${element}
+        <div class="lightbox-title">${title}</div>
+      `;
+      
+      lightbox.style.display = "flex";
+    }
+
+    function closeLightbox() {
+      const lightbox = document.getElementById("lightbox");
+      const content = lightbox.querySelector(".lightbox-content");
+      lightbox.style.display = "none";
+      content.innerHTML = "";
+    }
+  </script>
+</body>
+</html>

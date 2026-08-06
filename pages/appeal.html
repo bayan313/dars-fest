@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THANAFUS Dars Fest 2026 | Appeal Panel</title>
+  
+  <!-- Poppins Font & Stylesheets -->
+  <link rel="stylesheet" href="../style.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Header & Navigation -->
+  <header>
+    <nav class="navbar">
+      <a href="../index.html" class="logo-container">
+        <div class="logo-icon">T</div>
+        <div class="logo">
+          <h2>THANAFUS<span>2026</span></h2>
+        </div>
+      </a>
+      
+      <button class="hamburger" aria-label="Toggle Navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <ul class="nav-links">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="results.html">Results</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="appeal.html">Appeal Panel</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="text-center">
+        <h1 class="section-title">Appeal Panel</h1>
+        <p class="section-subtitle">Submit and track official appeals for published results</p>
+      </div>
+
+      <!-- Main appeal layout split -->
+      <div class="appeal-container">
+        
+        <!-- Left: Form to submit appeal -->
+        <div class="appeal-form-card">
+          <h3 style="color: var(--primary-emerald); margin-bottom: 20px;"><i class="fa-regular fa-paper-plane"></i> Submit New Appeal</h3>
+          <form id="appealForm" onsubmit="handleAppealSubmit(event)">
+            
+            <div class="form-group">
+              <label for="app-student">Student Name</label>
+              <input type="text" class="form-control" id="app-student" placeholder="Enter student full name" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div class="form-group">
+                <label for="app-team">Team Name</label>
+                <select class="form-control" id="app-team" required>
+                  <option value="">Select Team</option>
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="app-category">Category</label>
+                <select class="form-control" id="app-category" onchange="populateProgrammeDropdown(this.value)" required>
+                  <option value="">Select Category</option>
+                  <option value="Sub Junior">Sub Junior</option>
+                  <option value="Junior">Junior</option>
+                  <option value="Senior">Senior</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div class="form-group">
+                <label for="app-programme">Programme / Event</label>
+                <select class="form-control" id="app-programme" required>
+                  <option value="">Select Category First</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="app-phone">Phone Number</label>
+                <input type="tel" class="form-control" id="app-phone" placeholder="Enter contact number" pattern="[0-9]{10}" title="Ten digit mobile number" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="app-desc">Description / Reason of Appeal</label>
+              <textarea class="form-control" id="app-desc" placeholder="Explain the grounds for your appeal in detail..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; padding: 12px;">
+              <i class="fa-solid fa-file-signature"></i> Submit Appeal Form
+            </button>
+
+          </form>
+        </div>
+
+        <!-- Right: Official rules, warnings & status checker -->
+        <div class="appeal-sidebar">
+          <!-- Warnings & Notices -->
+          <div class="notice-box">
+            <h4><i class="fa-solid fa-circle-exclamation"></i> Appeal Guidelines</h4>
+            <ul>
+              <li>Appeals must be submitted within <strong>1 hour</strong> of publishing the respective program's results.</li>
+              <li>A non-refundable appeal fee of <strong>Rs. 100</strong> must be deposited at the Dars Fest counter before processing.</li>
+              <li>Sufficient proof or reference to rules must be detailed in the description.</li>
+              <li>The Decision of the Grand Jury of THANAFUS 2026 will be final and binding.</li>
+              <li>Any false or malicious appeals can lead to point deduction for the team.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-bottom">
+      <p>&copy; 2026 THANAFUS Dars Fest. All Rights Reserved. | Powered by <strong>THANAFUS IT Team</strong></p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../js/db.js"></script>
+  <script src="../js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      populateTeams();
+    });
+
+    // Populate team selection list
+    function populateTeams() {
+      const select = document.getElementById("app-team");
+      const teams = ThanafusDB.db.teams;
+      
+      teams.forEach(t => {
+        select.innerHTML += `<option value="${t.name}">${t.name}</option>`;
+      });
+    }
+
+    // Populate programme selection dynamically based on category
+    function populateProgrammeDropdown(category) {
+      const select = document.getElementById("app-programme");
+      if (!category) {
+        select.innerHTML = '<option value="">Select Category First</option>';
+        return;
+      }
+
+      const progs = ThanafusDB.db.programmes.filter(p => p.category === category);
+      select.innerHTML = '<option value="">Select Programme</option>';
+      
+      progs.forEach(p => {
+        const pubLabel = p.resultsPublished ? " (Results Published)" : " (Results Pending)";
+        select.innerHTML += `<option value="${p.name}">${p.name}${pubLabel}</option>`;
+      });
+    }
+
+    // Submit new appeal
+    function handleAppealSubmit(event) {
+      event.preventDefault();
+      
+      const name = document.getElementById("app-student").value;
+      const team = document.getElementById("app-team").value;
+      const category = document.getElementById("app-category").value;
+      const programme = document.getElementById("app-programme").value;
+      const phone = document.getElementById("app-phone").value;
+      const desc = document.getElementById("app-desc").value;
+
+      try {
+        ThanafusDB.addAppeal(name, team, category, programme, phone, desc);
+        showAlert("Appeal submitted successfully! It will be reviewed by the jury coordinator.", "success");
+        
+        // Reset form
+        document.getElementById("appealForm").reset();
+        document.getElementById("app-programme").innerHTML = '<option value="">Select Category First</option>';
+      } catch (e) {
+        showAlert("Failed to submit appeal. Please try again.", "danger");
+      }
+    }
+  </script>
+</body>
+</html>

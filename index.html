@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Official results portal of THANAFUS Dars Fest 2026. Striving for Excellence in Dars Education.">
+  <title>THANAFUS Dars Fest 2026 | Home</title>
+  
+  <!-- Poppins Font & Stylesheets -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- FontAwesome Icons (Free CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Header & Navigation -->
+  <header>
+    <nav class="navbar">
+      <a href="index.html" class="logo-container">
+        <div class="logo-icon">T</div>
+        <div class="logo">
+          <h2>THANAFUS<span>2026</span></h2>
+        </div>
+      </a>
+      
+      <button class="hamburger" aria-label="Toggle Navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="pages/results.html">Results</a></li>
+        <li><a href="pages/gallery.html">Gallery</a></li>
+        <li><a href="pages/appeal.html">Appeal Panel</a></li>
+        <li><a href="pages/contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <p class="hero-subtitle">THANAFUS</p>
+        <h1 class="hero-title">DARS FEST <span>2026</span></h1>
+        <p class="hero-motto">"Cultivating Knowledge, Ethics, and Islamic Artistry"</p>
+        <a href="pages/results.html" class="btn btn-gold">
+          <i class="fa-solid fa-trophy"></i> View Results
+        </a>
+      </div>
+    </section>
+
+    <!-- Live Standings (4 Teams) -->
+    <section class="section">
+      <div class="text-center">
+        <h2 class="section-title">Live Team Standings</h2>
+        <p class="section-subtitle">Real-time leaderboard updates from published programs</p>
+      </div>
+      
+      <div class="grid-4" id="standings-leaderboard">
+        <!-- Dynamic loading of exactly 4 teams -->
+        <div class="card text-center" style="grid-column: 1 / -1;">
+          <p><i class="fa-solid fa-spinner fa-spin"></i> Loading Leaderboard Standings...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Current Kalaprathibha Section -->
+    <section class="section" style="background-color: rgba(11, 79, 53, 0.03); border-top: 1px solid rgba(11, 79, 53, 0.05); border-bottom: 1px solid rgba(11, 79, 53, 0.05);">
+      <div class="text-center">
+        <h2 class="section-title">Current Kalaprathibha</h2>
+        <p class="section-subtitle">Leading individual achievers of Dars Fest 2026</p>
+      </div>
+
+      <div class="grid-3" id="kalaprathibha-container">
+        <!-- Dynamically generated Sub Junior, Junior, and Senior cards -->
+        <div class="card text-center" style="grid-column: 1 / -1;">
+          <p><i class="fa-solid fa-spinner fa-spin"></i> Loading Kalaprathibha awards...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notifications & Prospectus Grid -->
+    <section class="section">
+      <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 40px; align-items: start;" class="notif-prospectus-wrapper">
+        
+        <!-- Latest Notifications -->
+        <div>
+          <h2 class="section-title" style="margin-bottom: 15px; font-size: 1.8rem;">Latest Notifications</h2>
+          <div class="notification-container" id="notif-list">
+            <!-- Dynamic notifications loading -->
+          </div>
+          <button class="btn btn-outline btn-sm" id="view-all-notif-btn">View All Announcements</button>
+        </div>
+
+        <!-- Prospectus Card -->
+        <div>
+          <h2 class="section-title" style="margin-bottom: 15px; font-size: 1.8rem;">Festival Prospectus</h2>
+          <div class="prospectus-section" style="margin-top: 0; padding: 35px 20px;">
+            <div class="prospectus-container">
+              <div class="prospectus-icon">
+                <i class="fa-solid fa-file-pdf"></i>
+              </div>
+              <h3>Official Prospectus</h3>
+              <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 8px; margin-bottom: 20px;">
+                Download the official THANAFUS Dars Fest 2026 handbook for rules, event schedule, stage details, and guidelines.
+              </p>
+              <div class="prospectus-buttons">
+                <button class="btn btn-gold btn-sm" id="btn-view-pdf">
+                  <i class="fa-solid fa-eye"></i> View PDF
+                </button>
+                <button class="btn btn-primary btn-sm" id="btn-download-pdf">
+                  <i class="fa-solid fa-download"></i> Download PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>THANAFUS 2026</h3>
+        <p style="opacity: 0.8; font-size: 0.9rem; margin-top: 10px;">
+          The biennial arts and cultural festival celebrating educational excellence, creative expression, and spiritual values of Dars students.
+        </p>
+        <div class="social-icons">
+          <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+        </div>
+      </div>
+      
+      <div class="footer-links">
+        <h4>Navigation Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="pages/results.html">Results Portal</a></li>
+          <li><a href="pages/gallery.html">Media Gallery</a></li>
+          <li><a href="pages/appeal.html">Appeal Panel</a></li>
+          <li><a href="pages/contact.html">Contact Us</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-contact" id="footer-contact-info">
+        <h4>Contact Information</h4>
+        <!-- Contact details populated from JS -->
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2026 THANAFUS Dars Fest. All Rights Reserved. | Powered by <strong>THANAFUS IT Team</strong></p>
+    </div>
+  </footer>
+
+  <!-- View All Notifications Modal -->
+  <div class="modal-overlay" id="notif-modal">
+    <div class="modal-card" style="max-height: 80vh; display: flex; flex-direction: column;">
+      <button class="modal-close-btn" id="notif-modal-close">&times;</button>
+      <h3 style="color: var(--primary-emerald); margin-bottom: 20px;">All Notifications & Announcements</h3>
+      <div style="overflow-y: auto; flex-grow: 1; padding-right: 10px;" id="all-notif-modal-list">
+        <!-- Populate list -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared JavaScript Files -->
+  <script src="js/db.js"></script>
+  <script src="js/main.js"></script>
+
+  <!-- Page Logic -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      loadLeaderboard();
+      loadKalaprathibha();
+      loadNotifications();
+      loadContactDetails();
+      setupProspectus();
+    });
+
+    // Populate Leaderboard
+    function loadLeaderboard() {
+      const container = document.getElementById("standings-leaderboard");
+      const teams = ThanafusDB.db.teams; // loaded and rank calculated
+      
+      // Sort teams by rank ascending
+      const sortedTeams = [...teams].sort((a, b) => a.rank - b.rank).slice(0, 4);
+
+      let html = "";
+      sortedTeams.forEach(team => {
+        let medal = "";
+        if (team.rank === 1) medal = "🥇";
+        else if (team.rank === 2) medal = "🥈";
+        else if (team.rank === 3) medal = "🥉";
+        else medal = "🎗️";
+
+        html += `
+          <div class="card standings-card rank-${team.rank}">
+            <div class="team-rank-badge">${medal}</div>
+            <h3>${team.name}</h3>
+            <p class="details">Captain: ${team.captain}</p>
+            <div class="score">${team.totalScore} <span style="font-size:0.9rem;font-weight:normal;color:var(--text-gray);">Points</span></div>
+            <p class="details" style="margin-top: 5px;">
+              A: ${team.grades.A || 0} | B: ${team.grades.B || 0} | C: ${team.grades.C || 0}
+            </p>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    // Populate Kalaprathibha
+    function loadKalaprathibha() {
+      const container = document.getElementById("kalaprathibha-container");
+      const categories = ["Sub Junior", "Junior", "Senior"];
+      let html = "";
+
+      categories.forEach(cat => {
+        const champ = ThanafusDB.getKalaprathibha(cat);
+        const photoUrl = champ.student.photo || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop";
+        const pointsLabel = champ.points === 1 ? "Point" : "Points";
+        
+        html += `
+          <div class="card kalaprathibha-card">
+            <span class="cat-badge">${cat}</span>
+            <div class="student-avatar-container">
+              <span class="crown-icon">👑</span>
+              <img src="${photoUrl}" alt="${champ.student.name}" class="student-avatar">
+            </div>
+            <h4>${champ.student.name}</h4>
+            <p class="team-name">${champ.teamName}</p>
+            <div class="points">${champ.points} <span style="font-size:0.85rem;font-weight:normal;color:var(--text-gray);">${pointsLabel}</span></div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    // Populate Notifications
+    function loadNotifications() {
+      const notifList = document.getElementById("notif-list");
+      const allNotifModalList = document.getElementById("all-notif-modal-list");
+      const notifs = ThanafusDB.db.notifications;
+
+      if (notifs.length === 0) {
+        notifList.innerHTML = "<p>No notifications found.</p>";
+        return;
+      }
+
+      // Display top 3 notifications
+      let shortHtml = "";
+      notifs.slice(0, 3).forEach(n => {
+        shortHtml += createNotifCard(n);
+      });
+      notifList.innerHTML = shortHtml;
+
+      // Modal Full List
+      let modalHtml = "";
+      notifs.forEach(n => {
+        modalHtml += createNotifCard(n);
+      });
+      allNotifModalList.innerHTML = modalHtml;
+
+      // Setup Modal Controls
+      const modal = document.getElementById("notif-modal");
+      const openBtn = document.getElementById("view-all-notif-btn");
+      const closeBtn = document.getElementById("notif-modal-close");
+
+      openBtn.addEventListener("click", () => {
+        modal.style.display = "flex";
+      });
+      closeBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+      });
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) modal.style.display = "none";
+      });
+    }
+
+    function createNotifCard(n) {
+      return `
+        <div class="notif-card ${n.type}">
+          <div class="notif-body">
+            <h4 class="notif-title">${n.title}</h4>
+            <p class="notif-desc">${n.content}</p>
+            <p class="notif-time"><i class="fa-regular fa-clock"></i> ${formatDate(n.date)}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // Populate Contact Details in Footer
+    function loadContactDetails() {
+      const container = document.getElementById("footer-contact-info");
+      const contact = ThanafusDB.db.contact;
+      
+      container.innerHTML = `
+        <h4>Contact Information</h4>
+        <p><i class="fa-solid fa-user-tie"></i> <span><strong>Coordinator:</strong> ${contact.coordinatorName}</span></p>
+        <p><i class="fa-solid fa-phone"></i> <span><strong>Phone:</strong> <a href="tel:${contact.coordinatorPhone}">${contact.coordinatorPhone}</a></span></p>
+        <p><i class="fa-solid fa-headset"></i> <span><strong>Tech Support:</strong> ${contact.techSupportPhone}</span></p>
+        <p><i class="fa-solid fa-envelope"></i> <span><strong>Email:</strong> <a href="mailto:${contact.email}">${contact.email}</a></span></p>
+        <p><i class="fa-solid fa-location-dot"></i> <span><strong>Office:</strong> ${contact.address}</span></p>
+      `;
+    }
+
+    // Setup Prospectus Actions
+    function setupProspectus() {
+      const btnView = document.getElementById("btn-view-pdf");
+      const btnDownload = document.getElementById("btn-download-pdf");
+
+      const handlePdf = (action) => {
+        const prospectusUrl = ThanafusDB.db.settings.prospectusUrl;
+        if (!prospectusUrl) {
+          showAlert("Prospectus has not been uploaded yet. Access the admin dashboard to upload.", "warning");
+          return;
+        }
+
+        if (action === "view") {
+          // Open PDF in new tab
+          const newWindow = window.open();
+          newWindow.document.write(`<iframe src="${prospectusUrl}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+        } else if (action === "download") {
+          // Trigger download
+          const link = document.createElement("a");
+          link.href = prospectusUrl;
+          link.download = "THANAFUS_Dars_Fest_2026_Prospectus.pdf";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      };
+
+      btnView.addEventListener("click", () => handlePdf("view"));
+      btnDownload.addEventListener("click", () => handlePdf("download"));
+    }
+  </script>
+</body>
+</html>
