@@ -315,9 +315,24 @@ class Database {
   }
 
   // CRUD Teams
+  // Ensure every roster member (and captain) also exists as a student (unassigned category)
+  syncRosterToStudents(teamId, names) {
+    const existing = this.db.students.filter(s => s.teamId === teamId);
+    names.forEach(raw => {
+      const name = (raw || "").trim();
+      if (!name) return;
+      const found = existing.find(s => (s.name || "").trim().toLowerCase() === name.toLowerCase());
+      if (!found) {
+        const id = "stud-" + (Date.now()) + "-" + Math.floor(Math.random() * 1000);
+        this.db.students.push({ id, name, teamId, category: "", photo: "" });
+      }
+    });
+  }
+
   addTeam(name, captain, viceCaptain, members = []) {
     const id = "team-" + (Date.now());
     this.db.teams.push({ id, name, captain, viceCaptain: viceCaptain || "", members, totalScore: 0, rank: this.db.teams.length + 1, grades: { A: 0, B: 0, C: 0 }, wins: [] });
+    this.syncRosterToStudents(id, [captain, viceCaptain, ...members]);
     this.save();
     this.calculateLeaderboard();
     return id;
@@ -330,6 +345,7 @@ class Database {
       team.captain = captain;
       team.viceCaptain = viceCaptain || "";
       team.members = members;
+      this.syncRosterToStudents(team.id, [captain, viceCaptain, ...members]);
       this.save();
       this.calculateLeaderboard();
     }
