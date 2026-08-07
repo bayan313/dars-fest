@@ -1,23 +1,23 @@
 /* ==========================================================
    THANAFUS Dars Fest 2026 - Premium Stylesheet
-   Theme: Emerald Green, Gold, and White
+   Theme: Indigo Violet, Lavender, and White
 ========================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --primary-emerald: #0b4f35;
-  --primary-emerald-light: #156d4b;
-  --primary-emerald-dark: #073825;
-  --accent-gold: #cba135;
-  --accent-gold-light: #dfb751;
-  --accent-gold-dark: #a27e24;
-  --text-dark: #1e293b;
+  --primary-emerald: #4f46e5;
+  --primary-emerald-light: #6366f1;
+  --primary-emerald-dark: #3730a3;
+  --accent-gold: #8b5cf6;
+  --accent-gold-light: #a78bfa;
+  --accent-gold-dark: #7c3aed;
+  --text-dark: #1e1b4b;
   --text-light: #f8fafc;
   --text-gray: #64748b;
-  --bg-light: #f3f7f5;
+  --bg-light: #eef2fb;
   --card-bg: #ffffff;
-  --card-shadow: 0 10px 30px -10px rgba(11, 79, 53, 0.1);
+  --card-shadow: 0 10px 30px -10px rgba(79, 70, 229, 0.12);
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --border-radius: 16px;
   --border-radius-sm: 8px;
@@ -40,7 +40,7 @@ body {
   color: var(--text-dark);
   line-height: 1.6;
   overflow-x: hidden;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><path d="M40 0 L80 40 L40 80 L0 40 Z" fill="none" stroke="%230b4f35" stroke-width="0.5" opacity="0.04"/><circle cx="40" cy="40" r="6" fill="none" stroke="%23cba135" stroke-width="0.5" opacity="0.1"/></svg>');
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><path d="M40 0 L80 40 L40 80 L0 40 Z" fill="none" stroke="%234f46e5" stroke-width="0.5" opacity="0.04"/><circle cx="40" cy="40" r="6" fill="none" stroke="%238b5cf6" stroke-width="0.5" opacity="0.1"/></svg>');
 }
 
 a {
@@ -112,7 +112,7 @@ img, video {
 .btn-primary:hover {
   background: var(--primary-emerald-light);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(11, 79, 53, 0.2);
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);
 }
 
 .btn-gold {
@@ -152,7 +152,7 @@ header {
   top: 0;
   left: 0;
   z-index: 1000;
-  background: rgba(11, 79, 53, 0.95);
+  background: rgba(79, 70, 229, 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 2px solid var(--accent-gold);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -347,7 +347,7 @@ main {
   border-radius: var(--border-radius);
   padding: 30px;
   box-shadow: var(--card-shadow);
-  border: 1px solid rgba(11, 79, 53, 0.05);
+  border: 1px solid rgba(79, 70, 229, 0.05);
   transition: var(--transition);
   position: relative;
   overflow: hidden;
@@ -355,7 +355,7 @@ main {
 
 .card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px -15px rgba(11, 79, 53, 0.15);
+  box-shadow: 0 20px 40px -15px rgba(79, 70, 229, 0.15);
   border-color: rgba(203, 161, 53, 0.3);
 }
 
@@ -538,7 +538,7 @@ main {
 
 /* Prospectus Section */
 .prospectus-section {
-  background: linear-gradient(135deg, #073825, #0b4f35);
+  background: linear-gradient(135deg, #3730a3, #4f46e5);
   color: var(--text-light);
   border-radius: var(--border-radius);
   padding: 50px;
@@ -716,7 +716,7 @@ footer {
   background: #e2ede8;
   padding: 6px;
   border-radius: 50px;
-  border: 1px solid rgba(11, 79, 53, 0.1);
+  border: 1px solid rgba(79, 70, 229, 0.1);
 }
 
 .tab-btn {
@@ -752,7 +752,7 @@ footer {
 .search-input {
   width: 100%;
   padding: 14px 20px 14px 50px;
-  border: 1px solid rgba(11, 79, 53, 0.15);
+  border: 1px solid rgba(79, 70, 229, 0.15);
   background: var(--card-bg);
   border-radius: var(--border-radius-sm);
   font-family: inherit;
@@ -815,7 +815,7 @@ footer {
   box-shadow: var(--card-shadow);
   padding: 35px;
   margin-top: 20px;
-  border: 1px solid rgba(11, 79, 53, 0.05);
+  border: 1px solid rgba(79, 70, 229, 0.05);
 }
 
 .prog-header-info {
@@ -952,7 +952,7 @@ tr:nth-child(even) td {
   box-shadow: var(--card-shadow);
   padding: 30px;
   margin-bottom: 30px;
-  border: 1px solid rgba(11, 79, 53, 0.05);
+  border: 1px solid rgba(79, 70, 229, 0.05);
 }
 
 .student-profile-header {
@@ -1050,7 +1050,7 @@ tr:nth-child(even) td {
 .gallery-select {
   padding: 10px 15px;
   border-radius: var(--border-radius-sm);
-  border: 1px solid rgba(11, 79, 53, 0.15);
+  border: 1px solid rgba(79, 70, 229, 0.15);
   background: var(--card-bg);
   outline: none;
   font-family: inherit;
@@ -1068,7 +1068,7 @@ tr:nth-child(even) td {
   border-radius: var(--border-radius-sm);
   overflow: hidden;
   box-shadow: var(--card-shadow);
-  border: 1px solid rgba(11, 79, 53, 0.05);
+  border: 1px solid rgba(79, 70, 229, 0.05);
   cursor: pointer;
   position: relative;
   transition: var(--transition);
@@ -1192,7 +1192,7 @@ tr:nth-child(even) td {
   border-radius: var(--border-radius);
   padding: 35px;
   box-shadow: var(--card-shadow);
-  border: 1px solid rgba(11, 79, 53, 0.05);
+  border: 1px solid rgba(79, 70, 229, 0.05);
 }
 
 .form-group {
@@ -1211,7 +1211,7 @@ tr:nth-child(even) td {
   width: 100%;
   padding: 10px 15px;
   border-radius: var(--border-radius-sm);
-  border: 1px solid rgba(11, 79, 53, 0.15);
+  border: 1px solid rgba(79, 70, 229, 0.15);
   font-family: inherit;
   font-size: 0.95rem;
   outline: none;
