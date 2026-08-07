@@ -525,7 +525,13 @@
     <div class="modal-card">
       <button class="modal-close-btn" onclick="closeProgModal()">&times;</button>
       <h3 style="color: var(--primary-emerald); margin-bottom: 20px;" id="prog-modal-title">Register Programme</h3>
-      
+
+      <div style="display:flex; gap:10px; justify-content:center; margin-bottom:20px;">
+        <button type="button" class="btn btn-primary btn-sm" id="prog-mode-single" onclick="setProgMode('single')"><i class="fa-solid fa-plus"></i> Single</button>
+        <button type="button" class="btn btn-outline btn-sm" id="prog-mode-bulk" onclick="setProgMode('bulk')"><i class="fa-solid fa-layer-group"></i> Bulk Add</button>
+      </div>
+
+      <div id="prog-single-block">
       <form id="progForm" onsubmit="handleProgSave(event)">
         <input type="hidden" id="prog-id">
         <div class="form-group">
@@ -544,13 +550,13 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
           <div class="form-group">
-            <label for="prog-venue">Venue Name</label>
-            <input type="text" class="form-control" id="prog-venue" placeholder="E.g. Stage A" required>
+            <label for="prog-venue">Venue Name <span style="opacity:0.6;">(optional)</span></label>
+            <input type="text" class="form-control" id="prog-venue" placeholder="E.g. Stage A">
           </div>
 
           <div class="form-group">
-            <label for="prog-judge">Assigned Judge</label>
-            <input type="text" class="form-control" id="prog-judge" placeholder="Usthad Name" required>
+            <label for="prog-judge">Assigned Judge <span style="opacity:0.6;">(optional)</span></label>
+            <input type="text" class="form-control" id="prog-judge" placeholder="Usthad Name">
           </div>
         </div>
 
@@ -558,6 +564,18 @@
           <i class="fa-solid fa-save"></i> Save Programme Details
         </button>
       </form>
+      </div>
+
+      <div id="prog-bulk-block" style="display:none;">
+        <div class="form-group">
+          <label for="prog-bulk-input">Bulk Programmes (one per line)</label>
+          <textarea id="prog-bulk-input" class="form-control" style="min-height:160px;" placeholder="Programme Name | Category | Venue | Judge&#10;Lecture | Junior | Stage A | Imam Ali&#10;Quiz Competition | Senior |"></textarea>
+          <span style="font-size:0.75rem; color:var(--text-gray);">Format: <strong>Name | Category | Venue | Judge</strong> — Venue &amp; Judge (optional). ഓരോ programme ഒരരു വരയിൽ.</span>
+        </div>
+        <button type="button" class="btn btn-gold" style="width:100%; justify-content:center; padding:12px; margin-top:10px;" onclick="handleBulkProgSave()">
+          <i class="fa-solid fa-layer-group"></i> Add All Programmes
+        </button>
+      </div>
     </div>
   </div>
 
@@ -895,7 +913,41 @@
       });
     }
 
+    function setProgMode(mode) {
+      const single = mode === 'single';
+      document.getElementById("prog-single-block").style.display = single ? "" : "none";
+      document.getElementById("prog-bulk-block").style.display = single ? "none" : "";
+      const sBtn = document.getElementById("prog-mode-single");
+      const bBtn = document.getElementById("prog-mode-bulk");
+      sBtn.className = "btn btn-sm " + (single ? "btn-primary" : "btn-outline");
+      bBtn.className = "btn btn-sm " + (single ? "btn-outline" : "btn-primary");
+    }
+
+    function handleBulkProgSave() {
+      const text = document.getElementById("prog-bulk-input").value.trim();
+      if (!text) { showAlert("Enter at least one programme.", "warning"); return; }
+
+      let added = 0;
+      text.split("\n").forEach(line => {
+        line = line.trim();
+        if (!line) return;
+        const parts = line.split("|").map(p => p.trim());
+        const name = parts[0] || "";
+        if (!name) return;
+        const category = parts[1] || "";
+        const venue = parts[2] || "";
+        const judge = parts[3] || "";
+        ThanafusDB.addProgramme(name, category, venue, judge);
+        added++;
+      });
+
+      closeProgModal();
+      renderProgsTable();
+      showAlert(added + " programme(s) added successfully.", "success");
+    }
+
     function openProgModal(id = "") {
+      setProgMode('single');
       const modal = document.getElementById("prog-modal");
       const title = document.getElementById("prog-modal-title");
       const form = document.getElementById("progForm");
