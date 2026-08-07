@@ -189,8 +189,7 @@
                   <tr>
                     <th>Programme Name</th>
                     <th>Category</th>
-                    <th>Venue</th>
-                    <th>Judge</th>
+                    <th>Team / Group</th>
                     <th>Results Status</th>
                     <th>Actions</th>
                   </tr>
@@ -465,6 +464,7 @@
               <option value="Sub Junior">Sub Junior</option>
               <option value="Junior">Junior</option>
               <option value="Senior">Senior</option>
+              <option value="General">General</option>
             </select>
           </div>
 
@@ -549,19 +549,15 @@
             <option value="Sub Junior">Sub Junior</option>
             <option value="Junior">Junior</option>
             <option value="Senior">Senior</option>
+            <option value="General">General</option>
           </select>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-          <div class="form-group">
-            <label for="prog-venue">Venue Name</label>
-            <input type="text" class="form-control" id="prog-venue" placeholder="E.g. Stage A">
-          </div>
-
-          <div class="form-group">
-            <label for="prog-judge">Assigned Judge</label>
-            <input type="text" class="form-control" id="prog-judge" placeholder="Usthad Name">
-          </div>
+        <div class="form-group">
+          <label for="prog-team">Team / Group <span style="opacity:0.6;">(General group events — select team)</span></label>
+          <select class="form-control" id="prog-team">
+            <option value="">— Individual (no group) —</option>
+          </select>
         </div>
 
         <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; padding: 12px; margin-top: 15px;">
@@ -573,8 +569,8 @@
       <div id="prog-bulk-block" style="display:none;">
         <div class="form-group">
           <label for="prog-bulk-input">Bulk Programmes (one per line)</label>
-          <textarea id="prog-bulk-input" class="form-control" style="min-height:160px;" placeholder="Programme Name | Category | Venue | Judge&#10;Lecture | Junior | Stage A | Imam Ali&#10;Quiz Competition | Senior |"></textarea>
-          <span style="font-size:0.75rem; color:var(--text-gray);">Format: <strong>Name | Category | Venue | Judge</strong> — Venue &amp; Judge (optional). ഓരോ programme ഒരരു വരയിൽ.</span>
+          <textarea id="prog-bulk-input" class="form-control" style="min-height:160px;" placeholder="Programme Name | Category | Team&#10;Lecture | Junior |&#10;Group Quiz | General | Al Fath"></textarea>
+          <span style="font-size:0.75rem; color:var(--text-gray);">Format: <strong>Name | Category | Team</strong> — Team (optional, General group events-നു ഉപയോഗിക്കുക). ഓരോ programme ഒരരു വരയിൽ.</span>
         </div>
         <button type="button" class="btn btn-gold" style="width:100%; justify-content:center; padding:12px; margin-top:10px;" onclick="handleBulkProgSave()">
           <i class="fa-solid fa-layer-group"></i> Add All Programmes
@@ -921,8 +917,7 @@
           <tr>
             <td><strong>${p.name}</strong></td>
             <td>${p.category}</td>
-            <td>${p.venue}</td>
-            <td>${p.judge}</td>
+            <td>${p.teamId ? (ThanafusDB.db.teams.find(t => t.id === p.teamId) || {}).name || p.teamId : '—'}</td>
             <td>${statusText}</td>
             <td>
               <div style="display:flex; gap:6px;">
@@ -958,9 +953,9 @@
         const name = parts[0] || "";
         if (!name) return;
         const category = parts[1] || "";
-        const venue = parts[2] || "";
-        const judge = parts[3] || "";
-        ThanafusDB.addProgramme(name, category, venue, judge);
+        const teamName = (parts[2] || "").trim();
+        const teamId = teamName ? (ThanafusDB.db.teams.find(t => t.name === teamName) || {}).id || "" : "";
+        ThanafusDB.addProgramme(name, category, teamId);
         added++;
       });
 
@@ -975,6 +970,16 @@
       const title = document.getElementById("prog-modal-title");
       const form = document.getElementById("progForm");
 
+      // Populate team/group dropdown from current teams
+      const teamSel = document.getElementById("prog-team");
+      teamSel.innerHTML = '<option value="">— Individual (no group) —</option>';
+      ThanafusDB.db.teams.forEach(t => {
+        const opt = document.createElement("option");
+        opt.value = t.id;
+        opt.textContent = t.name;
+        teamSel.appendChild(opt);
+      });
+
       if (id) {
         title.innerText = "Edit Programme Details";
         const prog = ThanafusDB.db.programmes.find(p => p.id === id);
@@ -982,13 +987,13 @@
           document.getElementById("prog-id").value = prog.id;
           document.getElementById("prog-name").value = prog.name;
           document.getElementById("prog-cat").value = prog.category;
-          document.getElementById("prog-venue").value = prog.venue;
-          document.getElementById("prog-judge").value = prog.judge;
+          document.getElementById("prog-team").value = prog.teamId || "";
         }
       } else {
         title.innerText = "Register Programme";
         form.reset();
         document.getElementById("prog-id").value = "";
+        document.getElementById("prog-team").value = "";
       }
 
       modal.style.display = "flex";
@@ -1003,14 +1008,13 @@
       const id = document.getElementById("prog-id").value;
       const name = document.getElementById("prog-name").value;
       const category = document.getElementById("prog-cat").value;
-      const venue = document.getElementById("prog-venue").value;
-      const judge = document.getElementById("prog-judge").value;
+      const teamId = document.getElementById("prog-team").value;
 
       if (id) {
-        ThanafusDB.editProgramme(id, name, category, venue, judge);
+        ThanafusDB.editProgramme(id, name, category, teamId);
         showAlert("Programme updated successfully.", "success");
       } else {
-        ThanafusDB.addProgramme(name, category, venue, judge);
+        ThanafusDB.addProgramme(name, category, teamId);
         showAlert("New programme created.", "success");
       }
       closeProgModal();

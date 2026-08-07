@@ -154,10 +154,19 @@ class Database {
       if (!prog.resultsPublished) return;
 
       prog.results.forEach(res => {
-        const student = this.db.students.find(s => s.id === res.studentId);
-        if (!student) return;
+        let team = null;
+        let studentName = "";
 
-        const team = this.db.teams.find(t => t.id === student.teamId);
+        if (prog.teamId) {
+          // General group event: score goes to the selected team directly
+          team = this.db.teams.find(t => t.id === prog.teamId);
+          studentName = team ? team.name : "Team";
+        } else {
+          const student = this.db.students.find(s => s.id === res.studentId);
+          if (!student) return;
+          team = this.db.teams.find(t => t.id === student.teamId);
+          studentName = student.name;
+        }
         if (!team) return;
 
         const pts = this.calculatePoints(res.rank, res.grade);
@@ -172,7 +181,7 @@ class Database {
             programmeId: prog.id,
             programmeName: prog.name,
             category: prog.category,
-            studentName: student.name,
+            studentName: studentName,
             rank: res.rank,
             grade: res.grade,
             points: pts
@@ -393,20 +402,19 @@ class Database {
   }
 
   // CRUD Programmes
-  addProgramme(name, category, venue, judge) {
+  addProgramme(name, category, teamId) {
     const id = "prog-" + (Date.now());
-    this.db.programmes.push({ id, name, category, venue, judge, resultsPublished: false, results: [] });
+    this.db.programmes.push({ id, name, category, teamId: teamId || "", resultsPublished: false, results: [] });
     this.save();
     return id;
   }
 
-  editProgramme(id, name, category, venue, judge) {
+  editProgramme(id, name, category, teamId) {
     const prog = this.db.programmes.find(p => p.id === id);
     if (prog) {
       prog.name = name;
       prog.category = category;
-      prog.venue = venue;
-      prog.judge = judge;
+      prog.teamId = teamId || "";
       this.save();
       this.calculateLeaderboard();
     }
