@@ -124,6 +124,10 @@
           </div>
           
           <div class="admin-section-content">
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:15px; flex-wrap:wrap;">
+              <input type="text" id="student-search" class="form-control" placeholder="Search students by name, category or team..." oninput="renderStudentsTable()" style="max-width:400px;">
+              <span id="student-count" style="color:var(--text-gray); font-size:0.85rem;"></span>
+            </div>
             <div class="table-wrapper">
               <table>
                 <thead>
@@ -699,9 +703,28 @@
     // 2. STUDENTS
     function renderStudentsTable() {
       const tbody = document.getElementById("admin-students-table");
+      const countSpan = document.getElementById("student-count");
       tbody.innerHTML = "";
 
-      ThanafusDB.db.students.forEach(s => {
+      const q = (document.getElementById("student-search") ? document.getElementById("student-search").value : "").trim().toLowerCase();
+
+      const filtered = ThanafusDB.db.students.filter(s => {
+        if (!q) return true;
+        const teamObj = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+        const teamName = teamObj ? teamObj.name : "";
+        return (s.name || "").toLowerCase().includes(q) ||
+               (s.category || "").toLowerCase().includes(q) ||
+               teamName.toLowerCase().includes(q);
+      });
+
+      if (countSpan) countSpan.innerText = filtered.length + " student(s)";
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-gray);">No students found.</td></tr>';
+        return;
+      }
+
+      filtered.forEach(s => {
         const teamObj = ThanafusDB.db.teams.find(t => t.id === s.teamId);
         const photoLabel = s.photo ? '<span style="color:#10b981;"><i class="fa-solid fa-check"></i> Uploaded</span>' : '<span style="color:var(--text-gray);">None</span>';
         
