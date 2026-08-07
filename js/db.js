@@ -141,6 +141,40 @@ class Database {
     }
   }
 
+  // Group event scoring (max 15)
+  calculateGroupPoints(rank, grade) {
+    const r = parseInt(rank) || null;
+    const g = grade ? grade.toUpperCase().trim() : null;
+
+    if (r === 1) {
+      if (g === 'A') return 15;
+      if (g === 'B') return 13;
+      if (g === 'C') return 11;
+      return 10;
+    } else if (r === 2) {
+      if (g === 'A') return 13;
+      if (g === 'B') return 11;
+      if (g === 'C') return 9;
+      return 8;
+    } else if (r === 3) {
+      if (g === 'A') return 11;
+      if (g === 'B') return 9;
+      if (g === 'C') return 7;
+      return 6;
+    } else {
+      if (g === 'A') return 5;
+      if (g === 'B') return 3;
+      if (g === 'C') return 1;
+      return 0;
+    }
+  }
+
+  // Programme points by type (individual vs group)
+  programmePoints(prog, rank, grade) {
+    const isGroup = prog.type === 'group' || prog.category === 'General';
+    return isGroup ? this.calculateGroupPoints(rank, grade) : this.calculatePoints(rank, grade);
+  }
+
   calculateLeaderboard() {
     // Reset Team scores, grades counts and wins
     this.db.teams.forEach(team => {
@@ -157,9 +191,9 @@ class Database {
         let team = null;
         let studentName = "";
 
-        if (prog.teamId) {
-          // General group event: score goes to the selected team directly
-          team = this.db.teams.find(t => t.id === prog.teamId);
+        if (prog.category === 'General') {
+          // General team event: score goes to the participating team directly
+          team = this.db.teams.find(t => t.id === (res.teamId || prog.teamId));
           studentName = team ? team.name : "Team";
         } else {
           const student = this.db.students.find(s => s.id === res.studentId);
@@ -169,7 +203,7 @@ class Database {
         }
         if (!team) return;
 
-        const pts = this.calculatePoints(res.rank, res.grade);
+        const pts = this.programmePoints(prog, res.rank, res.grade);
         team.totalScore += pts;
 
         if (res.grade === 'A') team.grades.A++;
@@ -214,7 +248,7 @@ class Database {
 
       prog.results.forEach(res => {
         if (studentPoints[res.studentId]) {
-          const pts = this.calculatePoints(res.rank, res.grade);
+const pts = this.programmePoints(prog, res.rank, res.grade);
           studentPoints[res.studentId].points += pts;
           if (res.rank === 1) studentPoints[res.studentId].rank1Count++;
           if (res.grade === 'A') studentPoints[res.studentId].gradeACount++;
@@ -267,7 +301,7 @@ class Database {
 
       const result = prog.results.find(r => r.studentId === studentId);
       if (result) {
-        const pts = this.calculatePoints(result.rank, result.grade);
+        const pts = this.programmePoints(prog, result.rank, result.grade);
         totalScore += pts;
         if (result.rank) rankCount[result.rank]++;
         if (result.grade) gradeCount[result.grade]++;
@@ -402,18 +436,19 @@ class Database {
   }
 
   // CRUD Programmes
-  addProgramme(name, category, teamId) {
+  addProgramme(name, category, type, teamId) {
     const id = "prog-" + (Date.now());
-    this.db.programmes.push({ id, name, category, teamId: teamId || "", resultsPublished: false, results: [] });
+    this.db.programmes.push({ id, name, category, type: type || "individual", teamId: teamId || "", resultsPublished: false, results: [] });
     this.save();
     return id;
   }
 
-  editProgramme(id, name, category, teamId) {
+  editProgramme(id, name, category, type, teamId) {
     const prog = this.db.programmes.find(p => p.id === id);
     if (prog) {
       prog.name = name;
       prog.category = category;
+      prog.type = (prog.category === 'General') ? 'group' : (type || prog.type || "individual");
       prog.teamId = teamId || "";
       this.save();
       this.calculateLeaderboard();
@@ -432,7 +467,8 @@ class Database {
     if (prog) {
       prog.results = resultsArray.map(r => ({
         rank: r.rank ? parseInt(r.rank) : null,
-        studentId: r.studentId,
+        studentId: r.studentId || null,
+        teamId: (prog.category === 'General') ? (r.teamId || null) : null,
         grade: r.grade ? r.grade.toUpperCase().trim() : null
       }));
       prog.resultsPublished = true;

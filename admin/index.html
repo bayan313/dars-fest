@@ -189,7 +189,8 @@
                   <tr>
                     <th>Programme Name</th>
                     <th>Category</th>
-                    <th>Team / Group</th>
+                    <th>Type</th>
+                    <th>Team</th>
                     <th>Results Status</th>
                     <th>Actions</th>
                   </tr>
@@ -464,7 +465,6 @@
               <option value="Sub Junior">Sub Junior</option>
               <option value="Junior">Junior</option>
               <option value="Senior">Senior</option>
-              <option value="General">General</option>
             </select>
           </div>
 
@@ -553,10 +553,18 @@
           </select>
         </div>
 
-        <div class="form-group">
-          <label for="prog-team">Team / Group <span style="opacity:0.6;">(General group events — select team)</span></label>
+        <div class="form-group" id="prog-type-group">
+          <label for="prog-type">Event Type <span style="opacity:0.6;">(scoring)</span></label>
+          <select class="form-control" id="prog-type">
+            <option value="individual">വ്യക്തിത്വം (Individual) — max 10</option>
+            <option value="group">ഗ്രൂപ്പ് (Group) — max 15</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="prog-team-group">
+          <label for="prog-team">Team / Group <span style="opacity:0.6;">(General team events — whole team)</span></label>
           <select class="form-control" id="prog-team">
-            <option value="">— Individual (no group) —</option>
+            <option value="">— Select team —</option>
           </select>
         </div>
 
@@ -569,8 +577,8 @@
       <div id="prog-bulk-block" style="display:none;">
         <div class="form-group">
           <label for="prog-bulk-input">Bulk Programmes (one per line)</label>
-          <textarea id="prog-bulk-input" class="form-control" style="min-height:160px;" placeholder="Programme Name | Category | Team&#10;Lecture | Junior |&#10;Group Quiz | General | Al Fath"></textarea>
-          <span style="font-size:0.75rem; color:var(--text-gray);">Format: <strong>Name | Category | Team</strong> — Team (optional, General group events-നു ഉപയോഗിക്കുക). ഓരോ programme ഒരരു വരയിൽ.</span>
+          <textarea id="prog-bulk-input" class="form-control" style="min-height:160px;" placeholder="Programme Name | Category | Team | Type&#10;Lecture | Junior | | individual&#10;Group Quiz | General | Al Fath | group"></textarea>
+          <span style="font-size:0.75rem; color:var(--text-gray);">Format: <strong>Name | Category | Team | Type</strong> — Team (General-ന് required), Type: <em>individual</em> (max 10) / <em>group</em> (max 15), General ആണെങ്കിൽ automatic group. ഓരോ programme ഒരരു വരയിൽ.</span>
         </div>
         <button type="button" class="btn btn-gold" style="width:100%; justify-content:center; padding:12px; margin-top:10px;" onclick="handleBulkProgSave()">
           <i class="fa-solid fa-layer-group"></i> Add All Programmes
@@ -913,11 +921,19 @@
           ? `<span style="color:#10b981;font-weight:600;"><i class="fa-solid fa-circle-check"></i> Published (${p.results.length} entries)</span>` 
           : `<span style="color:var(--text-gray);"><i class="fa-regular fa-clock"></i> Pending</span>`;
 
+        const typeLabel = (p.type === 'group' || p.category === 'General') 
+          ? (p.category === 'General' ? 'ഗ്രൂപ്പ് (Team)' : 'ഗ്രൂപ്പ് (Group)') 
+          : 'വ്യക്തിത്വം';
+        const teamLabel = (p.category === 'General' && p.teamId) 
+          ? (ThanafusDB.db.teams.find(t => t.id === p.teamId) || {}).name || p.teamId 
+          : '—';
+
         tbody.innerHTML += `
           <tr>
             <td><strong>${p.name}</strong></td>
             <td>${p.category}</td>
-            <td>${p.teamId ? (ThanafusDB.db.teams.find(t => t.id === p.teamId) || {}).name || p.teamId : '—'}</td>
+            <td>${typeLabel}</td>
+            <td>${teamLabel}</td>
             <td>${statusText}</td>
             <td>
               <div style="display:flex; gap:6px;">
@@ -955,7 +971,8 @@
         const category = parts[1] || "";
         const teamName = (parts[2] || "").trim();
         const teamId = teamName ? (ThanafusDB.db.teams.find(t => t.name === teamName) || {}).id || "" : "";
-        ThanafusDB.addProgramme(name, category, teamId);
+        const type = (category === "General") ? "group" : (parts[3] ? parts[3].trim() : "individual");
+        ThanafusDB.addProgramme(name, category, type, teamId);
         added++;
       });
 
@@ -972,7 +989,7 @@
 
       // Populate team/group dropdown from current teams
       const teamSel = document.getElementById("prog-team");
-      teamSel.innerHTML = '<option value="">— Individual (no group) —</option>';
+      teamSel.innerHTML = '<option value="">— Select team —</option>';
       ThanafusDB.db.teams.forEach(t => {
         const opt = document.createElement("option");
         opt.value = t.id;
@@ -987,16 +1004,28 @@
           document.getElementById("prog-id").value = prog.id;
           document.getElementById("prog-name").value = prog.name;
           document.getElementById("prog-cat").value = prog.category;
+          document.getElementById("prog-type").value = prog.type || "individual";
           document.getElementById("prog-team").value = prog.teamId || "";
         }
       } else {
         title.innerText = "Register Programme";
         form.reset();
-        document.getElementById("prog-id").value = "";
+        document.getElementById("prog-type").value = "individual";
         document.getElementById("prog-team").value = "";
       }
 
+      syncProgCatUI();
       modal.style.display = "flex";
+    }
+
+    function syncProgCatUI() {
+      const isGeneral = document.getElementById("prog-cat").value === "General";
+      document.getElementById("prog-type-group").style.display = isGeneral ? "none" : "block";
+      document.getElementById("prog-team-group").style.display = isGeneral ? "block" : "none";
+      if (isGeneral) {
+        // General events are whole-team (group scoring)
+        document.getElementById("prog-type").value = "group";
+      }
     }
 
     function closeProgModal() {
@@ -1008,13 +1037,14 @@
       const id = document.getElementById("prog-id").value;
       const name = document.getElementById("prog-name").value;
       const category = document.getElementById("prog-cat").value;
+      const type = document.getElementById("prog-type").value;
       const teamId = document.getElementById("prog-team").value;
 
       if (id) {
-        ThanafusDB.editProgramme(id, name, category, teamId);
+        ThanafusDB.editProgramme(id, name, category, type, teamId);
         showAlert("Programme updated successfully.", "success");
       } else {
-        ThanafusDB.addProgramme(name, category, teamId);
+        ThanafusDB.addProgramme(name, category, type, teamId);
         showAlert("New programme created.", "success");
       }
       closeProgModal();
@@ -1061,13 +1091,23 @@
       // Filter students who are in the matching category
       const categoryStudents = ThanafusDB.db.students.filter(s => s.category === prog.category);
 
-      let options = `<option value="">Choose Participant</option>`;
-      categoryStudents.forEach(s => {
-        const teamObj = ThanafusDB.db.teams.find(t => t.id === s.teamId);
-        const teamLabel = teamObj ? `(${teamObj.name})` : '';
-        const selectedAttr = s.id === selectedStudentId ? 'selected' : '';
-        options += `<option value="${s.id}" ${selectedAttr}>${s.name} ${teamLabel}</option>`;
-      });
+      let options = "";
+      if (prog.category === 'General') {
+        // General team event: participants are teams
+        options = `<option value="">Choose Team</option>`;
+        ThanafusDB.db.teams.forEach(t => {
+          const selectedAttr = t.id === selectedStudentId ? 'selected' : '';
+          options += `<option value="${t.id}" ${selectedAttr}>${t.name}</option>`;
+        });
+      } else {
+        options = `<option value="">Choose Participant</option>`;
+        categoryStudents.forEach(s => {
+          const teamObj = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+          const teamLabel = teamObj ? `(${teamObj.name})` : '';
+          const selectedAttr = s.id === selectedStudentId ? 'selected' : '';
+          options += `<option value="${s.id}" ${selectedAttr}>${s.name} ${teamLabel}</option>`;
+        });
+      }
 
       const rowDiv = document.createElement("div");
       rowDiv.className = "result-row";
@@ -1118,6 +1158,7 @@
 
         resultsArray.push({
           studentId,
+          teamId: studentId,
           rank: rank ? parseInt(rank) : null,
           grade: grade || null
         });
