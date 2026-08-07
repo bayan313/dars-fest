@@ -4,10 +4,10 @@ const { Team, Student, Programme, Notification, Appeal, Gallery, Contact, Settin
 
 const DEFAULT_DB = {
   teams: [
-    { id: "team-1", name: "Al Fath", captain: "Ahmad Riza", members: ["Ahmad Riza", "Faris Rahman", "Zayd Ali", "Yousuf Hasan", "Basim K.P."], totalScore: 0, rank: 1, grades: { A: 0, B: 0, C: 0 }, wins: [] },
-    { id: "team-2", name: "Al Buruj", captain: "Safwan K.", members: ["Safwan K.", "Shamil V.P.", "Adnan Shah", "Raihan Ali", "Dilshad"], totalScore: 0, rank: 2, grades: { A: 0, B: 0, C: 0 }, wins: [] },
-    { id: "team-3", name: "Al Najm", captain: "Minhaj Uddin", members: ["Minhaj Uddin", "Nuaim P.", "Ajmal K.T.", "Jasir M.", "Anas K."], totalScore: 0, rank: 3, grades: { A: 0, B: 0, C: 0 }, wins: [] },
-    { id: "team-4", name: "Al Qalam", captain: "Luqmanul Hakeem", members: ["Luqmanul Hakeem", "Ashraf Ali", "Ramil K.", "Hisham P.", "Sahal"], totalScore: 0, rank: 4, grades: { A: 0, B: 0, C: 0 }, wins: [] }
+    { id: "team-1", name: "Al Fath", captain: "Ahmad Riza", viceCaptain: "Basim K.P.", members: ["Ahmad Riza", "Faris Rahman", "Zayd Ali", "Yousuf Hasan", "Basim K.P."], totalScore: 0, rank: 1, grades: { A: 0, B: 0, C: 0 }, wins: [] },
+    { id: "team-2", name: "Al Buruj", captain: "Safwan K.", viceCaptain: "Dilshad", members: ["Safwan K.", "Shamil V.P.", "Adnan Shah", "Raihan Ali", "Dilshad"], totalScore: 0, rank: 2, grades: { A: 0, B: 0, C: 0 }, wins: [] },
+    { id: "team-3", name: "Al Najm", captain: "Minhaj Uddin", viceCaptain: "Anas K.", members: ["Minhaj Uddin", "Nuaim P.", "Ajmal K.T.", "Jasir M.", "Anas K."], totalScore: 0, rank: 3, grades: { A: 0, B: 0, C: 0 }, wins: [] },
+    { id: "team-4", name: "Al Qalam", captain: "Luqmanul Hakeem", viceCaptain: "Sahal", members: ["Luqmanul Hakeem", "Ashraf Ali", "Ramil K.", "Hisham P.", "Sahal"], totalScore: 0, rank: 4, grades: { A: 0, B: 0, C: 0 }, wins: [] }
   ],
   students: [
     { id: "stud-1", name: "Faris Rahman", teamId: "team-1", category: "Sub Junior", photo: "" },
@@ -58,7 +58,7 @@ const DEFAULT_DB = {
   },
   settings: {
     prospectusUrl: "",
-    adminPassword: "admin"
+    adminPassword: "admin@9526"
   }
 };
 

@@ -504,6 +504,11 @@
         </div>
 
         <div class="form-group">
+          <label for="team-vice-captain">Assistant Captain Name</label>
+          <input type="text" class="form-control" id="team-vice-captain" placeholder="Assistant / Vice Captain Name">
+        </div>
+
+        <div class="form-group">
           <label for="team-members">Roster Members (Comma separated)</label>
           <textarea class="form-control" id="team-members" placeholder="Faris Rahman, Yousuf Hasan, Zayd Ali" style="min-height: 80px;" required></textarea>
         </div>
@@ -788,7 +793,7 @@
         tbody.innerHTML += `
           <tr>
             <td><strong>${team.name}</strong></td>
-            <td>${team.captain}</td>
+            <td>${team.captain}${team.viceCaptain ? '<br/><small style="color:var(--text-gray);">Asst: ' + team.viceCaptain + '</small>' : ''}</td>
             <td>${team.members.length} members</td>
             <td><strong>${team.totalScore} pts</strong></td>
             <td>Rank #${team.rank}</td>
@@ -813,6 +818,7 @@
           document.getElementById("team-id").value = team.id;
           document.getElementById("team-name").value = team.name;
           document.getElementById("team-captain").value = team.captain;
+          document.getElementById("team-vice-captain").value = team.viceCaptain || "";
           document.getElementById("team-members").value = team.members.join(", ");
         }
       } else {
@@ -833,14 +839,15 @@
       const id = document.getElementById("team-id").value;
       const name = document.getElementById("team-name").value;
       const captain = document.getElementById("team-captain").value;
+      const viceCaptain = document.getElementById("team-vice-captain").value;
       const membersText = document.getElementById("team-members").value;
       const members = membersText.split(",").map(m => m.trim()).filter(m => m.length > 0);
 
       if (id) {
-        ThanafusDB.editTeam(id, name, captain, members);
+        ThanafusDB.editTeam(id, name, captain, viceCaptain, members);
         showAlert("Team details updated.", "success");
       } else {
-        ThanafusDB.addTeam(name, captain, members);
+        ThanafusDB.addTeam(name, captain, viceCaptain, members);
         showAlert("New team added.", "success");
       }
       closeTeamModal();

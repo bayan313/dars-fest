@@ -9,7 +9,7 @@ async function connectDB() {
 }
 
 const teamSchema = new mongoose.Schema({
-  id: String, name: String, captain: String,
+  id: String, name: String, captain: String, viceCaptain: String,
   members: [String], totalScore: { type: Number, default: 0 },
   rank: { type: Number, default: 0 },
   grades: { A: { type: Number, default: 0 }, B: { type: Number, default: 0 }, C: { type: Number, default: 0 } },

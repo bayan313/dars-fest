@@ -4,6 +4,7 @@ const teamSchema = new mongoose.Schema({
   id: String,
   name: String,
   captain: String,
+  viceCaptain: String,
   members: [String],
   totalScore: { type: Number, default: 0 },
   rank: { type: Number, default: 0 },
