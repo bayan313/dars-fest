@@ -734,11 +734,11 @@
         
         tbody.innerHTML += `
           <tr>
-            <td><strong>${s.name}</strong></td>
-            <td>${s.category}</td>
-            <td>${teamObj ? teamObj.name : '<span style="color:red;">No Team</span>'}</td>
-            <td>${photoLabel}</td>
-            <td>
+            <td data-label="Student Name"><strong>${s.name}</strong></td>
+            <td data-label="Category">${s.category}</td>
+            <td data-label="Team">${teamObj ? teamObj.name : '<span style="color:red;">No Team</span>'}</td>
+            <td data-label="Photo Status">${photoLabel}</td>
+            <td data-label="Actions" class="action-cell">
               <button class="btn btn-primary btn-sm" onclick="openStudentModal('${s.id}')" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-pen"></i></button>
               <button class="btn btn-outline btn-sm" onclick="deleteStudent('${s.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
             </td>
@@ -837,12 +837,12 @@
       ThanafusDB.db.teams.forEach(team => {
         tbody.innerHTML += `
           <tr>
-            <td><strong>${team.name}</strong></td>
-            <td>${team.captain}${team.viceCaptain ? '<br/><small style="color:var(--text-gray);">Asst: ' + team.viceCaptain + '</small>' : ''}</td>
-            <td>${team.members.length} members</td>
-            <td><strong>${team.totalScore} pts</strong></td>
-            <td>Rank #${team.rank}</td>
-            <td>
+            <td data-label="Team Name"><strong>${team.name}</strong></td>
+            <td data-label="Captain">${team.captain}${team.viceCaptain ? '<br/><small style="color:var(--text-gray);">Asst: ' + team.viceCaptain + '</small>' : ''}</td>
+            <td data-label="Members">${team.members.length} members</td>
+            <td data-label="Score"><strong>${team.totalScore} pts</strong></td>
+            <td data-label="Rank">Rank #${team.rank}</td>
+            <td data-label="Actions" class="action-cell">
               <button class="btn btn-primary btn-sm" onclick="openTeamModal('${team.id}')" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-pen"></i></button>
               <button class="btn btn-outline btn-sm" onclick="deleteTeam('${team.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
             </td>
@@ -930,12 +930,12 @@
 
         tbody.innerHTML += `
           <tr>
-            <td><strong>${p.name}</strong></td>
-            <td>${p.category}</td>
-            <td>${typeLabel}</td>
-            <td>${teamLabel}</td>
-            <td>${statusText}</td>
-            <td>
+            <td data-label="Programme Name"><strong>${p.name}</strong></td>
+            <td data-label="Category">${p.category}</td>
+            <td data-label="Type">${typeLabel}</td>
+            <td data-label="Team">${teamLabel}</td>
+            <td data-label="Results Status">${statusText}</td>
+            <td data-label="Actions" class="action-cell">
               <div style="display:flex; gap:6px;">
                 ${publishButton}
                 <button class="btn btn-primary btn-sm" onclick="openProgModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-pen"></i></button>
@@ -1253,10 +1253,10 @@
           
         tbody.innerHTML += `
           <tr>
-            <td>${preview}</td>
-            <td><strong>${item.title}</strong></td>
-            <td><span class="prog-meta-badge">${item.type.toUpperCase()}</span></td>
-            <td>
+            <td data-label="Preview">${preview}</td>
+            <td data-label="Title"><strong>${item.title}</strong></td>
+            <td data-label="Format"><span class="prog-meta-badge">${item.type.toUpperCase()}</span></td>
+            <td data-label="Action" class="action-cell">
               <button class="btn btn-outline btn-sm" onclick="deleteMedia('${item.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
@@ -1340,13 +1340,13 @@
 
         tbody.innerHTML += `
           <tr>
-            <td style="font-size:0.8rem;color:var(--text-gray);">${formatDate(a.date)}</td>
-            <td><strong>${a.studentName}</strong></td>
-            <td>${a.team}</td>
-            <td>${a.programme} <span style="font-size:0.75rem;color:var(--text-gray);">(${a.category})</span></td>
-            <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${a.description}">${a.description}</td>
-            <td>${statusBadge}</td>
-            <td>${actionBtn}</td>
+            <td data-label="Date" style="font-size:0.8rem;color:var(--text-gray);">${formatDate(a.date)}</td>
+            <td data-label="Student"><strong>${a.studentName}</strong></td>
+            <td data-label="Team">${a.team}</td>
+            <td data-label="Programme">${a.programme} <span style="font-size:0.75rem;color:var(--text-gray);">(${a.category})</span></td>
+            <td data-label="Description" style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${a.description}">${a.description}</td>
+            <td data-label="Status">${statusBadge}</td>
+            <td data-label="Action" class="action-cell">${actionBtn}</td>
           </tr>
         `;
       });
@@ -1420,10 +1420,13 @@
     }
 
     function handleDatabaseReset() {
-      if (confirm("DANGER: This action wipes all published evaluations, uploaded gallery media, appeals and registrations. Restore to factories default seed data?")) {
+      const confirmText = prompt("⚠️ DANGER: This will permanently delete ALL data (students, teams, programmes, results, gallery, appeals, notifications).\n\nType exactly:  RESTORE FACTORY DATA  \n\nto confirm and proceed.");
+      if (confirmText === "RESTORE FACTORY DATA") {
         ThanafusDB.reset();
         showAlert("Database successfully restored to original factory defaults.", "info");
         switchAdminTab('dash');
+      } else if (confirmText !== null) {
+        showAlert("Incorrect confirmation text. Reset cancelled.", "warning");
       }
     }
 

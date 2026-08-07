@@ -332,11 +332,11 @@
         
         rowsHtml += `
           <tr>
-            <td><strong>${res.rank ? res.rank + ' Place' : 'Participation'}</strong></td>
-            <td>${stud ? stud.name : 'Unknown'}</td>
-            <td>${teamObj ? teamObj.name : 'N/A'}</td>
-            <td><span class="prog-meta-badge" style="background-color:${res.grade === 'A' ? '#e2fdf2' : res.grade === 'B' ? '#fffbeb' : '#f1f5f9'}; color:${res.grade === 'A' ? '#10b981' : res.grade === 'B' ? '#d97706' : '#64748b'};">${res.grade || 'N/A'}</span></td>
-            <td><strong>${pts} pts</strong></td>
+            <td data-label="Rank"><strong>${res.rank ? res.rank + ' Place' : 'Participation'}</strong></td>
+            <td data-label="Student">${stud ? stud.name : 'Unknown'}</td>
+            <td data-label="Team">${teamObj ? teamObj.name : 'N/A'}</td>
+            <td data-label="Grade"><span class="prog-meta-badge" style="background-color:${res.grade === 'A' ? '#e2fdf2' : res.grade === 'B' ? '#fffbeb' : '#f1f5f9'}; color:${res.grade === 'A' ? '#10b981' : res.grade === 'B' ? '#d97706' : '#64748b'};">${res.grade || 'N/A'}</span></td>
+            <td data-label="Points"><strong>${pts} pts</strong></td>
           </tr>
         `;
       });
@@ -460,11 +460,11 @@
         profile.participations.forEach(p => {
           participationsHtml += `
             <tr>
-              <td><strong>${p.programmeName}</strong></td>
-              <td>${p.venue}</td>
-              <td>${p.rank ? `<span style="color:var(--accent-gold-dark);font-weight:bold;">${p.rank} Place</span>` : 'Participation'}</td>
-              <td><span class="prog-meta-badge" style="background-color:${p.grade === 'A' ? '#e2fdf2' : p.grade === 'B' ? '#fffbeb' : '#f1f5f9'}; color:${p.grade === 'A' ? '#10b981' : p.grade === 'B' ? '#d97706' : '#64748b'};">${p.grade || 'N/A'}</span></td>
-              <td><strong>${p.points} pts</strong></td>
+              <td data-label="Programme"><strong>${p.programmeName}</strong></td>
+              <td data-label="Venue">${p.venue}</td>
+              <td data-label="Rank">${p.rank ? `<span style="color:var(--accent-gold-dark);font-weight:bold;">${p.rank} Place</span>` : 'Participation'}</td>
+              <td data-label="Grade"><span class="prog-meta-badge" style="background-color:${p.grade === 'A' ? '#e2fdf2' : p.grade === 'B' ? '#fffbeb' : '#f1f5f9'}; color:${p.grade === 'A' ? '#10b981' : p.grade === 'B' ? '#d97706' : '#64748b'};">${p.grade || 'N/A'}</span></td>
+              <td data-label="Points"><strong>${p.points} pts</strong></td>
             </tr>
           `;
         });
@@ -574,11 +574,11 @@
         catWins.forEach(win => {
           winsHtml += `
             <tr>
-              <td><strong>${win.programmeName}</strong></td>
-              <td>${win.studentName}</td>
-              <td>${win.rank} Place</td>
-              <td><span class="prog-meta-badge" style="background-color:${win.grade === 'A' ? '#e2fdf2' : win.grade === 'B' ? '#fffbeb' : '#f1f5f9'};">${win.grade || 'N/A'}</span></td>
-              <td><strong>${win.points} pts</strong></td>
+              <td data-label="Programme"><strong>${win.programmeName}</strong></td>
+              <td data-label="Student">${win.studentName}</td>
+              <td data-label="Rank">${win.rank} Place</td>
+              <td data-label="Grade"><span class="prog-meta-badge" style="background-color:${win.grade === 'A' ? '#e2fdf2' : win.grade === 'B' ? '#fffbeb' : '#f1f5f9'};">${win.grade || 'N/A'}</span></td>
+              <td data-label="Points"><strong>${win.points} pts</strong></td>
             </tr>
           `;
         });
@@ -619,9 +619,9 @@
         pointsBreakdownList.forEach(item => {
           breakdownHtml += `
             <tr>
-              <td><strong>${item.progName}</strong></td>
-              <td>${item.details}</td>
-              <td><strong>${item.points} pts</strong></td>
+              <td data-label="Programme"><strong>${item.progName}</strong></td>
+              <td data-label="Scoring Students">${item.details}</td>
+              <td data-label="Points"><strong>${item.points} pts</strong></td>
             </tr>
           `;
         });
