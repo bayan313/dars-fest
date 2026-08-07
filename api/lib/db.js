@@ -39,6 +39,9 @@ async function syncAdminPassword() {
     const settings = await Settings.findOne();
     if (!settings) {
       await Settings.create({ adminPassword: envPass });
+    } else if (settings.adminPassword !== envPass) {
+      settings.adminPassword = envPass;
+      await settings.save();
     }
   } catch (e) { /* silent */ }
 }

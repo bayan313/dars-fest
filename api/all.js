@@ -9,6 +9,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   await connectDB();
+  await syncAdminPassword();
 
   if (req.method === 'GET') {
     const data = await getAllData();

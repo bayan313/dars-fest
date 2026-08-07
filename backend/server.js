@@ -15,6 +15,10 @@ const syncAdminPassword = async () => {
       // Create settings if missing
       await Settings.create({ adminPassword: envPass });
       console.log('Created Settings with admin password from .env');
+    } else if (settings.adminPassword !== envPass) {
+      settings.adminPassword = envPass;
+      await settings.save();
+      console.log('Updated admin password in Settings to match .env');
     }
   } catch (err) {
     console.error('Error syncing admin password:', err);
@@ -45,6 +49,7 @@ app.use(express.static(path.join(__dirname, '../')));
 
 // Get all data
 app.get('/api/all', async (req, res) => {
+  await syncAdminPassword();
   const data = await getAllData();
   res.json(data);
 });
