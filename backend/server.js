@@ -7,18 +7,19 @@ const { Team, Student, Programme, Notification, Appeal, Gallery, Contact, Settin
 
 const app = express();
 // Ensure admin password in Settings matches environment variable
+const ADMIN_PASSWORD_FIXED = "admin@9526";
+
 const syncAdminPassword = async () => {
   try {
     const settings = await Settings.findOne();
-    const envPass = process.env.ADMIN_PASSWORD || "admin";
     if (!settings) {
       // Create settings if missing
-      await Settings.create({ adminPassword: envPass });
-      console.log('Created Settings with admin password from .env');
-    } else if (settings.adminPassword !== envPass) {
-      settings.adminPassword = envPass;
+      await Settings.create({ adminPassword: ADMIN_PASSWORD_FIXED });
+      console.log('Created Settings with admin password');
+    } else if (settings.adminPassword !== ADMIN_PASSWORD_FIXED) {
+      settings.adminPassword = ADMIN_PASSWORD_FIXED;
       await settings.save();
-      console.log('Updated admin password in Settings to match .env');
+      console.log('Updated admin password in Settings');
     }
   } catch (err) {
     console.error('Error syncing admin password:', err);
