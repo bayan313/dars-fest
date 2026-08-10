@@ -183,6 +183,8 @@
           </div>
 
           <div style="display: flex; gap: 15px; margin: 15px 0; flex-wrap: wrap; align-items: center;">
+            <label style="font-weight: 500; color: var(--text-dark);">Search:</label>
+            <input type="text" id="prog-search-input" class="form-control" style="width: auto; min-width: 200px;" placeholder="Search programme name..." oninput="renderProgsTable()">
             <label style="font-weight: 500; color: var(--text-dark);">Filter by Category:</label>
             <select id="prog-category-filter" class="form-control" style="width: auto; min-width: 180px;" onchange="renderProgsTable()">
               <option value="all">All Categories</option>
@@ -925,17 +927,19 @@
       tbody.innerHTML = "";
 
       const filter = document.getElementById("prog-category-filter").value;
+      const search = document.getElementById("prog-search-input").value.toLowerCase().trim();
       const allProgs = ThanafusDB.db.programmes;
-      const filtered = filter === "all" ? allProgs : allProgs.filter(p => p.category === filter);
+      let filtered = filter === "all" ? allProgs : allProgs.filter(p => p.category === filter);
+      if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search));
 
       // Update count display
       const countEl = document.getElementById("prog-filter-count");
       const counts = {};
       allProgs.forEach(p => { counts[p.category] = (counts[p.category] || 0) + 1; });
-      if (filter === "all") {
+      if (filter === "all" && !search) {
         countEl.textContent = `Total: ${allProgs.length} (Sub Junior: ${counts["Sub Junior"]||0}, Junior: ${counts["Junior"]||0}, Senior: ${counts["Senior"]||0}, General: ${counts["General"]||0})`;
       } else {
-        countEl.textContent = `Showing ${filtered.length} of ${allProgs.length} (${filter}: ${counts[filter]||0})`;
+        countEl.textContent = `Showing ${filtered.length} of ${allProgs.length}${filter !== "all" ? ` (${filter}: ${counts[filter]||0})` : ""}${search ? ` — search: "${search}"` : ""}`;
       }
 
       filtered.forEach(p => {
