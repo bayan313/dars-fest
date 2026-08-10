@@ -1172,6 +1172,8 @@
       const resultsArray = [];
       let hasDuplicateStudent = false;
       const selectedStudents = new Set();
+      const prog = ThanafusDB.db.programmes.find(p => p.id === resultPublishProgId);
+      const isGeneral = prog && prog.category === 'General';
 
       for (let i = 0; i < rows.length; i++) {
         const studentId = rows[i].querySelector(".res-student").value;
@@ -1186,12 +1188,22 @@
         }
         selectedStudents.add(studentId);
 
-        resultsArray.push({
-          studentId,
-          teamId: studentId,
-          rank: rank ? parseInt(rank) : null,
-          grade: grade || null
-        });
+        if (isGeneral) {
+          // For General programmes, studentId is actually teamId
+          resultsArray.push({
+            studentId: null,
+            teamId: studentId,
+            rank: rank ? parseInt(rank) : null,
+            grade: grade || null
+          });
+        } else {
+          resultsArray.push({
+            studentId,
+            teamId: null,
+            rank: rank ? parseInt(rank) : null,
+            grade: grade || null
+          });
+        }
       }
 
       if (hasDuplicateStudent) {
