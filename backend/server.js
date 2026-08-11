@@ -43,6 +43,12 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
+// Prevent caching of static frontend files so JS/HTML updates always reach the browser
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  next();
+});
+
 // Serve static frontend files from the parent directory
 app.use(express.static(path.join(__dirname, '../')));
 
