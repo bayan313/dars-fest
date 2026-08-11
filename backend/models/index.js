@@ -27,6 +27,7 @@ const studentSchema = new mongoose.Schema({
 const resultSchema = new mongoose.Schema({
   rank: Number,
   studentId: String,
+  teamId: String,
   grade: String
 });
 
@@ -36,6 +37,8 @@ const programmeSchema = new mongoose.Schema({
   category: String,
   venue: String,
   judge: String,
+  type: String,
+  teamId: String,
   resultsPublished: Boolean,
   results: [resultSchema]
 });
