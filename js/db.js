@@ -108,35 +108,66 @@ class Database {
     this.calculateLeaderboard();
   }
 
-  // Calculate points according to rule (rank-only scoring):
-  // Individual: 1st = 5, 2nd = 3, 3rd = 1
-  // Group/General: 1st = 10, 2nd = 8, 3rd = 6
-  // Grade only (no rank): A = 5, B = 3, C = 1
+  // Calculate points according to rule:
+  // Individual: 1+A=10, 1+B=8, 1+C=6 | 2+A=8, 2+B=6, 2+C=4 | 3+A=6, 3+B=4, 3+C=2
+  // Rank only (no grade): 1st=5, 2nd=3, 3rd=1
+  // Grade only (no rank): A=5, B=3, C=1
   calculatePoints(rank, grade) {
     const r = parseInt(rank) || null;
     const g = grade ? grade.toUpperCase().trim() : null;
 
-    if (r === 1) return 5;
-    if (r === 2) return 3;
-    if (r === 3) return 1;
-    if (g === 'A') return 5;
-    if (g === 'B') return 3;
-    if (g === 'C') return 1;
-    return 0;
+    if (r === 1) {
+      if (g === 'A') return 10;
+      if (g === 'B') return 8;
+      if (g === 'C') return 6;
+      return 5;
+    } else if (r === 2) {
+      if (g === 'A') return 8;
+      if (g === 'B') return 6;
+      if (g === 'C') return 4;
+      return 3;
+    } else if (r === 3) {
+      if (g === 'A') return 6;
+      if (g === 'B') return 4;
+      if (g === 'C') return 2;
+      return 1;
+    } else {
+      if (g === 'A') return 5;
+      if (g === 'B') return 3;
+      if (g === 'C') return 1;
+      return 0;
+    }
   }
 
-  // Group event scoring (rank-only, max 10)
+  // Group/General event scoring:
+  // 1+A=15, 1+B=13, 1+C=11 | 2+A=13, 2+B=11, 2+C=9 | 3+A=11, 3+B=9, 3+C=7
+  // Rank only (no grade): 1st=10, 2nd=8, 3rd=6
+  // Grade only (no rank): A=5, B=3, C=1
   calculateGroupPoints(rank, grade) {
     const r = parseInt(rank) || null;
     const g = grade ? grade.toUpperCase().trim() : null;
 
-    if (r === 1) return 10;
-    if (r === 2) return 8;
-    if (r === 3) return 6;
-    if (g === 'A') return 5;
-    if (g === 'B') return 3;
-    if (g === 'C') return 1;
-    return 0;
+    if (r === 1) {
+      if (g === 'A') return 15;
+      if (g === 'B') return 13;
+      if (g === 'C') return 11;
+      return 10;
+    } else if (r === 2) {
+      if (g === 'A') return 13;
+      if (g === 'B') return 11;
+      if (g === 'C') return 9;
+      return 8;
+    } else if (r === 3) {
+      if (g === 'A') return 11;
+      if (g === 'B') return 9;
+      if (g === 'C') return 7;
+      return 6;
+    } else {
+      if (g === 'A') return 5;
+      if (g === 'B') return 3;
+      if (g === 'C') return 1;
+      return 0;
+    }
   }
 
   // Programme points by type (individual vs group)
