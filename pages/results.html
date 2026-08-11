@@ -64,6 +64,11 @@
           <p>Browse Senior events</p>
           <div class="btn btn-primary btn-sm" style="margin-top: 15px;">Enter Category</div>
         </div>
+        <div class="category-card-btn" onclick="selectCategory('General')">
+          <h3>General</h3>
+          <p>Browse General team events</p>
+          <div class="btn btn-primary btn-sm" style="margin-top: 15px;">Enter Category</div>
+        </div>
       </div>
 
       <!-- Results Interface Dashboard (Stage 2 - Hidden initially) -->
@@ -226,7 +231,19 @@
       if (tab === "program") {
         loadProgrammes();
       } else if (tab === "student") {
-        // Nothing special to load initially
+        // General has no individual students
+        if (currentCategory === "General") {
+          const sContainer = document.getElementById("student-profile-container");
+          sContainer.innerHTML = `
+            <div class="card text-center" style="padding: 50px 20px; max-width: 700px; margin: 0 auto;">
+              <i class="fa-solid fa-people-group" style="font-size: 3.5rem; color: var(--text-gray); margin-bottom: 15px;"></i>
+              <h3>General Events are Team-Based</h3>
+              <p style="color: var(--text-gray);">General category events score whole teams. Use the Programme or Team tabs to browse results.</p>
+            </div>
+          `;
+          document.getElementById("search-student").value = "";
+          document.getElementById("student-suggestions").style.display = "none";
+        }
       } else if (tab === "team") {
         loadTeams();
       }
@@ -254,7 +271,7 @@
           <div class="prog-item-card" onclick="viewProgrammeDetails('${p.id}')" data-name="${p.name.toLowerCase()}">
             <h4>${p.name}</h4>
             <div class="flex-between" style="margin-top: 5px; margin-bottom: 0;">
-              <span class="venue"><i class="fa-solid fa-location-dot"></i> ${p.venue}</span>
+              <span class="venue"><i class="fa-solid fa-people-group"></i> ${p.category === 'General' ? (ThanafusDB.db.teams.find(t => t.id === p.teamId) ? ThanafusDB.db.teams.find(t => t.id === p.teamId).name : 'Team event') : (p.venue || 'Venue TBA')}</span>
               ${publishStatus}
             </div>
           </div>
@@ -286,7 +303,9 @@
           <div class="card text-center" style="padding: 50px 20px;">
             <i class="fa-solid fa-hourglass-half" style="font-size: 3.5rem; color: var(--accent-gold); margin-bottom: 15px;"></i>
             <h2>${prog.name}</h2>
-            <p class="prog-meta-badge" style="display:inline-block; margin-bottom:15px;">Venue: ${prog.venue} | Judge: ${prog.judge}</p>
+            ${prog.category === 'General' 
+              ? `<p class="prog-meta-badge" style="display:inline-block; margin-bottom:15px;">General Team Event</p>`
+              : `<p class="prog-meta-badge" style="display:inline-block; margin-bottom:15px;">Venue: ${prog.venue} | Judge: ${prog.judge}</p>`}
             <h3 style="color: var(--text-gray); margin-top:10px;">Results Pending</h3>
             <p style="color: var(--text-gray);">The evaluations for this programme are currently in progress. Standard rankings will be shown once uploaded by the coordinator.</p>
           </div>
@@ -301,6 +320,15 @@
 
       const getStudentData = (resItem) => {
         if (!resItem) return { name: "No Placement", teamName: "", photo: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop" };
+        if (prog.category === 'General') {
+          const team = ThanafusDB.db.teams.find(t => t.id === (resItem.teamId || prog.teamId));
+          return {
+            name: team ? team.name : "Team",
+            teamName: team ? "General Event" : "N/A",
+            photo: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop",
+            grade: resItem.grade || "No Grade"
+          };
+        }
         const student = ThanafusDB.db.students.find(s => s.id === resItem.studentId);
         const team = student ? ThanafusDB.db.teams.find(t => t.id === student.teamId) : null;
         return {
@@ -326,15 +354,24 @@
       });
 
       sortedParticipants.forEach(res => {
-        const stud = ThanafusDB.db.students.find(s => s.id === res.studentId);
-        const teamObj = stud ? ThanafusDB.db.teams.find(t => t.id === stud.teamId) : null;
-        const pts = ThanafusDB.calculatePoints(res.rank, res.grade);
+        let studName = "Unknown";
+        let teamName = "N/A";
+        if (prog.category === 'General') {
+          const t = ThanafusDB.db.teams.find(tm => tm.id === (res.teamId || prog.teamId));
+          if (t) { studName = t.name; teamName = "General Event"; }
+        } else {
+          const stud = ThanafusDB.db.students.find(s => s.id === res.studentId);
+          const teamObj = stud ? ThanafusDB.db.teams.find(t => t.id === stud.teamId) : null;
+          if (stud) studName = stud.name;
+          if (teamObj) teamName = teamObj.name;
+        }
+        const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
         
         rowsHtml += `
           <tr>
             <td data-label="Rank"><strong>${res.rank ? res.rank + ' Place' : 'Participation'}</strong></td>
-            <td data-label="Student">${stud ? stud.name : 'Unknown'}</td>
-            <td data-label="Team">${teamObj ? teamObj.name : 'N/A'}</td>
+            <td data-label="Student">${studName}</td>
+            <td data-label="Team">${teamName}</td>
             <td data-label="Grade"><span class="prog-meta-badge" style="background-color:${res.grade === 'A' ? '#e2fdf2' : res.grade === 'B' ? '#fffbeb' : '#f1f5f9'}; color:${res.grade === 'A' ? '#10b981' : res.grade === 'B' ? '#d97706' : '#64748b'};">${res.grade || 'N/A'}</span></td>
             <td data-label="Points"><strong>${pts} pts</strong></td>
           </tr>
@@ -347,7 +384,9 @@
             <div>
               <h2 style="color:var(--primary-emerald);">${prog.name}</h2>
               <p style="color:var(--text-gray);font-size:0.9rem;margin-top:2px;">
-                <i class="fa-solid fa-location-dot"></i> ${prog.venue} &nbsp;|&nbsp; <i class="fa-solid fa-user-tie"></i> Judge: ${prog.judge}
+                ${prog.category === 'General' 
+                  ? `<i class="fa-solid fa-people-group"></i> Team Event &nbsp;|&nbsp; <i class="fa-solid fa-users"></i> Whole Team Scoring`
+                  : `<i class="fa-solid fa-location-dot"></i> ${prog.venue} &nbsp;|&nbsp; <i class="fa-solid fa-user-tie"></i> Judge: ${prog.judge}`}
               </p>
             </div>
             <span class="prog-meta-badge" style="background:#10b981; color:white;"><i class="fa-solid fa-circle-check"></i> Published</span>
@@ -595,14 +634,25 @@
         let progPts = 0;
         let studentsWithPts = [];
 
-        prog.results.forEach(res => {
-          const student = ThanafusDB.db.students.find(s => s.id === res.studentId);
-          if (student && student.teamId === id) {
-        const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
-            progPts += pts;
-            studentsWithPts.push(`${student.name} (${res.rank ? res.rank + ' Place' : ''}${res.grade ? ' ' + res.grade : ''}: ${pts}pts)`);
-          }
-        });
+        if (prog.category === 'General') {
+          // Whole-team General event: check if this teamId matches
+          prog.results.forEach(res => {
+            if ((res.teamId || prog.teamId) === id) {
+              const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
+              progPts += pts;
+              studentsWithPts.push(`${team.name} (${res.rank ? res.rank + ' Place' : ''}${res.grade ? ' ' + res.grade : ''}: ${pts}pts)`);
+            }
+          });
+        } else {
+          prog.results.forEach(res => {
+            const student = ThanafusDB.db.students.find(s => s.id === res.studentId);
+            if (student && student.teamId === id) {
+              const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
+              progPts += pts;
+              studentsWithPts.push(`${student.name} (${res.rank ? res.rank + ' Place' : ''}${res.grade ? ' ' + res.grade : ''}: ${pts}pts)`);
+            }
+          });
+        }
 
         if (progPts > 0) {
           pointsBreakdownList.push({
