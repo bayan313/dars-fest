@@ -598,7 +598,7 @@
         prog.results.forEach(res => {
           const student = ThanafusDB.db.students.find(s => s.id === res.studentId);
           if (student && student.teamId === id) {
-            const pts = ThanafusDB.calculatePoints(res.rank, res.grade);
+        const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
             progPts += pts;
             studentsWithPts.push(`${student.name} (${res.rank ? res.rank + ' Place' : ''}${res.grade ? ' ' + res.grade : ''}: ${pts}pts)`);
           }
