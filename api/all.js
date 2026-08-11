@@ -18,14 +18,15 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'POST') {
     const db = req.body;
-    if (db.teams)         { await Team.deleteMany({});         await Team.insertMany(db.teams); }
-    if (db.students)      { await Student.deleteMany({});      await Student.insertMany(db.students); }
-    if (db.programmes)    { await Programme.deleteMany({});    await Programme.insertMany(db.programmes); }
-    if (db.notifications) { await Notification.deleteMany({}); await Notification.insertMany(db.notifications); }
-    if (db.appeals)       { await Appeal.deleteMany({});       await Appeal.insertMany(db.appeals); }
-    if (db.gallery)       { await Gallery.deleteMany({});      await Gallery.insertMany(db.gallery); }
-    if (db.contact)       { await Contact.deleteMany({});      await Contact.create(db.contact); }
-    if (db.settings)      { await Settings.deleteMany({});     await Settings.create(db.settings); await syncAdminPassword(); }
+    const stripIds = (docs) => (docs || []).map(d => { const { _id, ...rest } = d; return rest; });
+    if (db.teams)         { await Team.deleteMany({});         await Team.insertMany(stripIds(db.teams)); }
+    if (db.students)      { await Student.deleteMany({});      await Student.insertMany(stripIds(db.students)); }
+    if (db.programmes)    { await Programme.deleteMany({});    await Programme.insertMany(stripIds(db.programmes)); }
+    if (db.notifications) { await Notification.deleteMany({}); await Notification.insertMany(stripIds(db.notifications)); }
+    if (db.appeals)       { await Appeal.deleteMany({});       await Appeal.insertMany(stripIds(db.appeals)); }
+    if (db.gallery)       { await Gallery.deleteMany({});      await Gallery.insertMany(stripIds(db.gallery)); }
+    if (db.contact)       { await Contact.deleteMany({});      await Contact.create(stripIds([db.contact])[0] || {}); }
+    if (db.settings)      { await Settings.deleteMany({});     await Settings.create(stripIds([db.settings])[0] || {}); await syncAdminPassword(); }
     const updated = await getAllData();
     return res.status(200).json(updated);
   }

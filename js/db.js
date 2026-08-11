@@ -249,7 +249,7 @@ class Database {
 
       prog.results.forEach(res => {
         if (studentPoints[res.studentId]) {
-const pts = this.programmePoints(prog, res.rank, res.grade);
+          const pts = this.programmePoints(prog, res.rank, res.grade);
           studentPoints[res.studentId].points += pts;
           if (res.rank === 1) studentPoints[res.studentId].rank1Count++;
           if (res.grade === 'A') studentPoints[res.studentId].gradeACount++;

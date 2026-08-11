@@ -80,8 +80,8 @@ app.post('/api/all', async (req, res) => {
   if (db.notifications) { await Notification.deleteMany({}); await Notification.insertMany(stripIds(db.notifications)); }
   if (db.appeals) { await Appeal.deleteMany({}); await Appeal.insertMany(stripIds(db.appeals)); }
   if (db.gallery) { await Gallery.deleteMany({}); await Gallery.insertMany(stripIds(db.gallery)); }
-  if (db.contact) { await Contact.deleteMany({}); await Contact.create(stripIds([db.contact])[0] || db.contact); }
-  if (db.settings) { await Settings.deleteMany({}); await Settings.create(stripIds([db.settings])[0] || db.settings); await syncAdminPassword(); }
+  if (db.contact) { await Contact.deleteMany({}); await Contact.create(stripIds([db.contact])[0] || {}); }
+  if (db.settings) { await Settings.deleteMany({}); await Settings.create(stripIds([db.settings])[0] || {}); await syncAdminPassword(); }
   const updatedData = await getAllData();
   res.json(updatedData);
 });

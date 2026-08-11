@@ -16,8 +16,8 @@ const teamSchema = new mongoose.Schema({
   wins: [mongoose.Schema.Types.Mixed]
 });
 const studentSchema = new mongoose.Schema({ id: String, name: String, teamId: String, category: String, photo: String });
-const resultSchema = new mongoose.Schema({ rank: Number, studentId: String, grade: String });
-const programmeSchema = new mongoose.Schema({ id: String, name: String, category: String, venue: String, judge: String, resultsPublished: Boolean, results: [resultSchema] });
+const resultSchema = new mongoose.Schema({ rank: Number, studentId: String, teamId: String, grade: String });
+const programmeSchema = new mongoose.Schema({ id: String, name: String, category: String, venue: String, judge: String, type: String, teamId: String, resultsPublished: Boolean, results: [resultSchema] });
 const notificationSchema = new mongoose.Schema({ id: String, title: String, content: String, type: String, date: String });
 const appealSchema = new mongoose.Schema({ id: String, studentName: String, team: String, category: String, programme: String, phoneNumber: String, description: String, status: String, response: String, date: String });
 const gallerySchema = new mongoose.Schema({ id: String, type: String, title: String, url: String, day: String, category: String, event: String });
