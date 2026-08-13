@@ -38,12 +38,24 @@ module.exports = async function handler(req, res) {
         return true;
       });
     };
-    if (db.teams)         { await Team.deleteMany({});         await Team.insertMany(stripIds(dedupe(db.teams))); }
-    if (db.students)      { await Student.deleteMany({});      await Student.insertMany(stripIds(dedupe(db.students))); }
-    if (db.programmes)    { await Programme.deleteMany({});    await Programme.insertMany(stripIds(dedupe(db.programmes))); }
-    if (db.notifications) { await Notification.deleteMany({}); await Notification.insertMany(stripIds(dedupe(db.notifications))); }
-    if (db.appeals)       { await Appeal.deleteMany({});       await Appeal.insertMany(stripIds(dedupe(db.appeals))); }
-    if (db.gallery)       { await Gallery.deleteMany({});      await Gallery.insertMany(stripIds(dedupe(db.gallery))); }
+    const syncCollection = async (Model, docs) => {
+      const clean = stripIds(dedupe(docs));
+      const ids = clean.filter(d => d.id != null).map(d => String(d.id));
+      if (clean.length > 0) {
+        await Model.bulkWrite(clean.map(d => ({
+          replaceOne: { filter: { id: String(d.id) }, replacement: d, upsert: true }
+        })));
+      }
+      if (ids.length > 0) {
+        await Model.deleteMany({ id: { $nin: ids } });
+      }
+    };
+    if (db.teams)         { await syncCollection(Team, db.teams); }
+    if (db.students)      { await syncCollection(Student, db.students); }
+    if (db.programmes)    { await syncCollection(Programme, db.programmes); }
+    if (db.notifications) { await syncCollection(Notification, db.notifications); }
+    if (db.appeals)       { await syncCollection(Appeal, db.appeals); }
+    if (db.gallery)       { await syncCollection(Gallery, db.gallery); }
     if (db.contact)       { await Contact.deleteMany({});      await Contact.create(stripIds([db.contact])[0] || {}); }
     if (db.settings)      { await Settings.deleteMany({});     await Settings.create(stripIds([db.settings])[0] || {}); await syncAdminPassword(); }
     const updated = await getAllData();
