@@ -288,6 +288,47 @@ class Database {
     };
   }
 
+  // Top 3 Kalaprathibha contenders for a category (1st, 2nd, 3rd)
+  getKalaprathibhaTop3(category) {
+    const studentPoints = {};
+
+    this.db.students.forEach(s => {
+      if (s.category === category) {
+        studentPoints[s.id] = { student: s, points: 0, rank1Count: 0, gradeACount: 0 };
+      }
+    });
+
+    this.db.programmes.forEach(prog => {
+      if (!prog.resultsPublished || prog.category !== category) return;
+
+      prog.results.forEach(res => {
+        if (studentPoints[res.studentId]) {
+          const pts = this.programmePoints(prog, res.rank, res.grade);
+          studentPoints[res.studentId].points += pts;
+          if (res.rank === 1) studentPoints[res.studentId].rank1Count++;
+          if (res.grade === 'A') studentPoints[res.studentId].gradeACount++;
+        }
+      });
+    });
+
+    const list = Object.values(studentPoints).filter(item => item.points > 0);
+
+    list.sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.rank1Count !== a.rank1Count) return b.rank1Count - a.rank1Count;
+      return b.gradeACount - a.gradeACount;
+    });
+
+    return list.slice(0, 3).map(item => {
+      const team = this.db.teams.find(t => t.id === item.student.teamId);
+      return {
+        student: item.student,
+        points: item.points,
+        teamName: team ? team.name : "Unknown Team"
+      };
+    });
+  }
+
   // Get student profile and program participations
   getStudentProfile(studentId) {
     const student = this.db.students.find(s => s.id === studentId);
