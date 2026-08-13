@@ -139,6 +139,19 @@
     .winner-name { font-size: clamp(1.05rem, 2.2vw, 1.5rem); font-weight: 700; }
     .winner-team { color: #a5b4fc; font-size: clamp(0.75rem,1.5vw,0.95rem); }
     .winner-grade { margin-left: auto; font-size: clamp(0.85rem,1.8vw,1.1rem); font-weight: 700; color: #fbbf24; }
+    .winner-row.winner-first {
+      padding: 30px 40px; justify-content: center; text-align: center;
+      background: linear-gradient(135deg, rgba(245,158,11,0.18), rgba(251,191,36,0.08));
+      border: 2px solid rgba(251,191,36,0.45);
+    }
+    .winner-row.winner-first .winner-place {
+      width: 84px; height: 84px; font-size: 2.6rem;
+      background: linear-gradient(135deg,#f59e0b,#fbbf24); color:#0f172a;
+      box-shadow: 0 10px 30px rgba(245,158,11,0.4);
+    }
+    .winner-row.winner-first .winner-name { font-size: clamp(1.6rem, 3.6vw, 2.6rem); font-weight: 800; }
+    .winner-row.winner-first .winner-team { font-size: clamp(0.9rem, 1.8vw, 1.15rem); margin-top: 4px; }
+    .winner-row.winner-first .winner-grade { font-size: clamp(1rem, 2vw, 1.3rem); }
 
     /* bottom bar */
     .slide-footer {
@@ -251,7 +264,7 @@
       sub.textContent = `${prog.name} &middot; ${prog.category}`;
 
       const top = [...prog.results]
-        .filter(r => r.rank === 1 || r.rank === 2 || r.rank === 3)
+        .filter(r => r.rank === 1)
         .sort((a, b) => a.rank - b.rank);
 
       if (top.length === 0) {
@@ -272,10 +285,9 @@
           name = s ? s.name : "—";
           teamName = t ? t.name : "";
         }
-        const place = w.rank === 1 ? "🥇" : w.rank === 2 ? "🥈" : "🥉";
         html += `
-          <div class="winner-row">
-            <div class="winner-place">${place}</div>
+          <div class="winner-row winner-first">
+            <div class="winner-place">🥇</div>
             <div>
               <div class="winner-name">${name}</div>
               <div class="winner-team">${teamName}</div>
