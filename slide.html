@@ -208,82 +208,44 @@
 
     function buildSlides() {
       const stage = document.getElementById("slide-stage");
-      const published = ThanafusDB.db.programmes.filter(p => p.resultsPublished)
-        .sort((a, b) => new Date((b.resultsPublishedAt || 0)) - new Date((a.resultsPublishedAt || 0)));
 
       // Remove previously generated category slides
       stage.querySelectorAll(".slide[data-generated]").forEach(el => el.remove());
 
-      // One slide per category (Senior, Junior, Sub Junior, General)
+      // One slide per category (Senior, Junior, Sub Junior, General) showing per-team points & rank
       CATEGORIES.forEach(cat => {
-        const prog = published.find(p => p.category === cat) || null;
         const sec = document.createElement("section");
         sec.className = "slide";
         sec.setAttribute("data-generated", "1");
-        if (prog) {
-          sec.innerHTML = `
-            <div class="slide-logo">Latest ${cat} Result</div>
-            <h2 class="slide-heading">${cat} Winners</h2>
-            <p class="slide-sub">${prog.name} &middot; Published Results</p>
-            <div class="prog-card" data-prog-id="${prog.id}"></div>
-          `;
-          stage.insertBefore(sec, document.querySelector(".slide-footer"));
-          renderProgDetail(sec.querySelector(".prog-card"), prog);
-        } else {
-          sec.innerHTML = `
-            <div class="slide-logo">${cat}</div>
-            <h2 class="slide-heading">${cat} Winners</h2>
-            <p class="slide-sub">Awaiting first published result</p>
-            <div class="prog-card">
-              <div style="text-align:center;color:#a5b4fc;padding:24px;">No results published yet in ${cat}.</div>
+        const teams = ThanafusDB.getCategoryTeamPoints(cat);
+        let body;
+        if (teams.length > 0) {
+          body = teams.map((item, i) => `
+            <div class="team-tile cat-team-tile">
+              <div class="team-rank-box">${item.rank}</div>
+              <div class="team-info">
+                <div class="team-name">${item.team.name}</div>
+                <div class="team-captain">${item.team.captain || ""}</div>
+              </div>
+              <div class="team-score">${item.points}<small>pts</small></div>
             </div>
-          `;
-          stage.insertBefore(sec, document.querySelector(".slide-footer"));
+          `).join("");
+        } else {
+          body = `<div style="text-align:center;color:#a5b4fc;padding:40px;">No published results yet in ${cat}.</div>`;
         }
+        sec.innerHTML = `
+          <div class="slide-logo">${cat} Points</div>
+          <h2 class="slide-heading">${cat} Standings</h2>
+          <p class="slide-sub">Team points from published ${cat} results</p>
+          <div class="team-grid">${body}</div>
+        `;
+        stage.insertBefore(sec, document.querySelector(".slide-footer"));
       });
 
       // Rebuild slide list (include generated ones)
       slideEls = [...stage.querySelectorAll(".slide")];
       buildDotNav();
       showSlide(0);
-    }
-
-    function renderProgDetail(card, prog) {
-      const winners = [...prog.results]
-        .filter(r => r.rank === 1 || r.rank === 2 || r.rank === 3)
-        .sort((a, b) => a.rank - b.rank);
-
-      if (winners.length === 0) {
-        card.innerHTML = `<div style="text-align:center;color:#a5b4fc;">No ranked results yet.</div>`;
-        return;
-      }
-
-      let html = "";
-      winners.forEach(w => {
-        let name = "—", teamName = "—";
-        if (prog.category === "General") {
-          const t = ThanafusDB.db.teams.find(tm => tm.id === (w.teamId || prog.teamId));
-          name = t ? t.name : "Team";
-          teamName = t ? "General Event" : "";
-        } else {
-          const s = ThanafusDB.db.students.find(st => st.id === w.studentId);
-          const t = s ? ThanafusDB.db.teams.find(tm => tm.id === s.teamId) : null;
-          name = s ? s.name : "—";
-          teamName = t ? t.name : "";
-        }
-        const place = w.rank === 1 ? "🥇" : w.rank === 2 ? "🥈" : "🥉";
-        html += `
-          <div class="winner-row">
-            <div class="winner-place">${place}</div>
-            <div>
-              <div class="winner-name">${name}</div>
-              <div class="winner-team">${teamName}</div>
-            </div>
-            <div class="winner-grade">${w.grade ? 'Grade ' + w.grade : '—'}</div>
-          </div>
-        `;
-      });
-      card.innerHTML = html;
     }
 
     function renderStandings() {

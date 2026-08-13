@@ -235,6 +235,34 @@ class Database {
     });
   }
 
+  // Team points within a single category (Sub Junior/Junior/Senior/General), ranked
+  getCategoryTeamPoints(category) {
+    const teamPoints = {};
+    this.db.teams.forEach(t => { teamPoints[t.id] = { team: t, points: 0 }; });
+
+    this.db.programmes.forEach(prog => {
+      if (!prog.resultsPublished || prog.category !== category) return;
+
+      prog.results.forEach(res => {
+        let team = null;
+        if (prog.category === 'General') {
+          team = this.db.teams.find(t => t.id === (res.teamId || prog.teamId));
+        } else {
+          const student = this.db.students.find(s => s.id === res.studentId);
+          if (!student) return;
+          team = this.db.teams.find(t => t.id === student.teamId);
+        }
+        if (!team || !teamPoints[team.id]) return;
+        teamPoints[team.id].points += this.programmePoints(prog, res.rank, res.grade);
+      });
+    });
+
+    const list = Object.values(teamPoints).filter(item => item.points > 0);
+    list.sort((a, b) => b.points - a.points);
+    list.forEach((item, idx) => { item.rank = idx + 1; });
+    return list;
+  }
+
   // Calculate Kalaprathibha (Arts Champion)
   // Highest point-scoring student in individual events for each category
   getKalaprathibha(category) {
