@@ -19,10 +19,10 @@
       display: none; flex-direction: column; align-items: center; justify-content: center;
       padding: 40px;
       background: linear-gradient(135deg, #13163a 0%, #1b1f52 55%, #0d0f2b 100%);
-      animation: slideIn 0.6s ease;
+      animation: slideFade 0.8s ease;
     }
     .slide.active { display: flex; }
-    @keyframes slideIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+    @keyframes slideFade { from { opacity: 0; } to { opacity: 1; } }
 
     /* decorative orbs */
     .slide::before, .slide::after {
@@ -134,22 +134,6 @@
     .winner-team { color: #a5b4fc; font-size: clamp(0.75rem,1.5vw,0.95rem); }
     .winner-grade { margin-left: auto; font-size: clamp(0.85rem,1.8vw,1.1rem); font-weight: 700; color: #fbbf24; }
 
-    /* ALL CATEGORIES OVERVIEW */
-    .cat-summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; width: min(1150px, 94vw); }
-    .cat-summary-card {
-      border-radius: 18px; padding: 24px 26px; text-align: center;
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); backdrop-filter: blur(6px);
-    }
-    .cat-summary-card .prog-cat-badge { margin-bottom: 8px; }
-    .cat-summary-prog { font-size: clamp(0.95rem,1.8vw,1.2rem); color: #c7d2fe; font-weight: 600; margin-bottom: 14px; }
-    .cat-leader {
-      display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 10px;
-    }
-    .cat-leader .winner-place { width: 46px; height: 46px; font-size: 1.1rem; }
-    .cat-leader-name { font-size: clamp(1.1rem,2.2vw,1.5rem); font-weight: 800; }
-    .cat-leader-team { color: #a5b4fc; font-size: clamp(0.75rem,1.4vw,0.9rem); }
-    .cat-pts { color: #fbbf24; font-weight: 800; font-size: clamp(1rem,2vw,1.3rem); }
-
     /* bottom bar */
     .slide-footer {
       position: absolute; bottom: 22px; left: 0; right: 0; z-index: 5;
@@ -164,7 +148,6 @@
     @media (max-width: 800px) {
       .team-grid { grid-template-columns: 1fr; }
       .kala-grid { grid-template-columns: 1fr; }
-      .cat-summary-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -195,21 +178,7 @@
       <div class="kala-grid" id="slide-kalaprathibha"></div>
     </section>
 
-    <!-- SLIDE 4: LATEST RESULTS OVERVIEW -->
-    <section class="slide" id="latest-slide">
-      <div class="slide-logo">Latest Published Results</div>
-      <h2 class="slide-heading">Category Winners</h2>
-      <p class="slide-sub">Most recent published results by category</p>
-      <div class="cat-summary-grid" id="slide-latest"></div>
-    </section>
-
-    <!-- SLIDE 5+: PER-PROGRAMME DETAIL -->
-    <section class="slide" id="prog-detail-slide">
-      <div class="slide-logo">Latest Published Result</div>
-      <h2 class="slide-heading">Programme Winners</h2>
-      <p class="slide-sub">Most recent published result</p>
-      <div class="prog-card" id="slide-prog-detail"></div>
-    </section>
+    <!-- SLIDE 4+: PER-CATEGORY DETAIL (generated per category) -->
 
     <div class="slide-footer">
       <span>THANAFUS DARS FEST 2026</span>
@@ -228,43 +197,44 @@
     let slideEls = [];
     let currentSlide = 0;
     let slideTimer = null;
-    const SLIDE_DURATION = 8000; // 8 seconds per slide
+    const SLIDE_DURATION = 10000; // 10 seconds per slide
     const REFRESH_INTERVAL = 15000; // refresh data every 15s
 
     function buildSlides() {
       const stage = document.getElementById("slide-stage");
-      const slides = [...stage.querySelectorAll(".slide")];
-      const dynamicProgSlides = [];
       const published = ThanafusDB.db.programmes.filter(p => p.resultsPublished)
         .sort((a, b) => new Date((b.resultsPublishedAt || 0)) - new Date((a.resultsPublishedAt || 0)));
 
-      // Remove previously generated programme slides
+      // Remove previously generated category slides
       stage.querySelectorAll(".slide[data-generated]").forEach(el => el.remove());
 
-      // For each category, pick its most recently published programme
+      // One slide per category (Senior, Junior, Sub Junior, General)
       CATEGORIES.forEach(cat => {
-        const prog = published.find(p => p.category === cat);
-        if (!prog) return;
-        dynamicProgSlides.push({ cat, prog });
-      });
-
-      // Only create detail slides if we have at least one published programme
-      if (published.length > 0) {
-        // One detail slide per category (most recent published programme per category)
-        dynamicProgSlides.forEach(({ cat, prog }) => {
-          const sec = document.createElement("section");
-          sec.className = "slide";
-          sec.setAttribute("data-generated", "1");
+        const prog = published.find(p => p.category === cat) || null;
+        const sec = document.createElement("section");
+        sec.className = "slide";
+        sec.setAttribute("data-generated", "1");
+        if (prog) {
           sec.innerHTML = `
             <div class="slide-logo">Latest ${cat} Result</div>
-            <h2 class="slide-heading">${prog.name}</h2>
-            <p class="slide-sub">${cat} &middot; Published Results</p>
+            <h2 class="slide-heading">${cat} Winners</h2>
+            <p class="slide-sub">${prog.name} &middot; Published Results</p>
             <div class="prog-card" data-prog-id="${prog.id}"></div>
           `;
           stage.insertBefore(sec, document.querySelector(".slide-footer"));
           renderProgDetail(sec.querySelector(".prog-card"), prog);
-        });
-      }
+        } else {
+          sec.innerHTML = `
+            <div class="slide-logo">${cat}</div>
+            <h2 class="slide-heading">${cat} Winners</h2>
+            <p class="slide-sub">Awaiting first published result</p>
+            <div class="prog-card">
+              <div style="text-align:center;color:#a5b4fc;padding:24px;">No results published yet in ${cat}.</div>
+            </div>
+          `;
+          stage.insertBefore(sec, document.querySelector(".slide-footer"));
+        }
+      });
 
       // Rebuild slide list (include generated ones)
       slideEls = [...stage.querySelectorAll(".slide")];
@@ -349,52 +319,6 @@
       container.innerHTML = html;
     }
 
-    function renderLatest() {
-      const container = document.getElementById("slide-latest");
-      const published = ThanafusDB.db.programmes.filter(p => p.resultsPublished)
-        .sort((a, b) => new Date((b.resultsPublishedAt || 0)) - new Date((a.resultsPublishedAt || 0)));
-
-      let html = "";
-      CATEGORIES.forEach(cat => {
-        const prog = published.find(p => p.category === cat);
-        if (!prog) return;
-        const w1 = prog.results.find(r => r.rank === 1);
-        let leadName = "—", leadTeam = "—", pts = 0;
-        if (w1) {
-          if (prog.category === "General") {
-            const t = ThanafusDB.db.teams.find(tm => tm.id === (w1.teamId || prog.teamId));
-            leadName = t ? t.name : "Team";
-            leadTeam = t ? "General Event" : "";
-          } else {
-            const s = ThanafusDB.db.students.find(st => st.id === w1.studentId);
-            const t = s ? ThanafusDB.db.teams.find(tm => tm.id === s.teamId) : null;
-            leadName = s ? s.name : "—";
-            leadTeam = t ? t.name : "";
-          }
-          pts = ThanafusDB.programmePoints(prog, w1.rank, w1.grade);
-        }
-        html += `
-          <div class="cat-summary-card">
-            <div class="prog-cat-badge">${cat}</div>
-            <div class="cat-summary-prog">${prog.name}</div>
-            <div class="cat-leader">
-              <div class="winner-place">🥇</div>
-              <div>
-                <div class="cat-leader-name">${leadName}</div>
-                <div class="cat-leader-team">${leadTeam}</div>
-              </div>
-            </div>
-            <div class="cat-pts">${pts} pts</div>
-          </div>
-        `;
-      });
-
-      if (!html) {
-        html = `<div style="grid-column:1/-1;text-align:center;color:#a5b4fc;padding:40px;">No results published yet.</div>`;
-      }
-      container.innerHTML = html;
-    }
-
     function buildDotNav() {
       const nav = document.getElementById("dot-nav");
       nav.innerHTML = "";
@@ -426,9 +350,7 @@
         ThanafusDB.calculateLeaderboard();
         renderStandings();
         renderKalaprathibha();
-        renderLatest();
-        // Rebuild dynamic programme slides (order may change after new publish)
-        const currentProgSlides = slideEls.length;
+        // Rebuild dynamic category slides (order may change after new publish)
         buildSlides();
       } catch (e) {
         console.error("Refresh failed", e);
@@ -442,7 +364,6 @@
     function init() {
       renderStandings();
       renderKalaprathibha();
-      renderLatest();
       buildSlides();
       updateClock();
       setInterval(updateClock, 1000);
