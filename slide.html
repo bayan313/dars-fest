@@ -217,12 +217,34 @@
         const sec = document.createElement("section");
         sec.className = "slide";
         sec.setAttribute("data-generated", "1");
+        sec.setAttribute("data-cat", cat);
+        sec.innerHTML = `
+          <div class="slide-logo">${cat} Points</div>
+          <h2 class="slide-heading">${cat} Standings</h2>
+          <p class="slide-sub">Team points from published ${cat} results</p>
+          <div class="team-grid cat-grid"></div>
+        `;
+        stage.insertBefore(sec, document.querySelector(".slide-footer"));
+      });
+
+      // Rebuild slide list (include generated ones)
+      slideEls = [...stage.querySelectorAll(".slide")];
+      buildDotNav();
+      showSlide(0);
+    }
+
+    // Refresh the content of the 4 category slides WITHOUT resetting rotation
+    function renderCategorySlides() {
+      CATEGORIES.forEach(cat => {
+        const sec = document.querySelector(`.slide[data-cat="${cat}"]`);
+        if (!sec) return;
+        const grid = sec.querySelector(".cat-grid");
         const teams = ThanafusDB.getCategoryTeamPoints(cat);
         let body;
         if (teams.length > 0) {
           body = teams.map((item, i) => `
             <div class="team-tile cat-team-tile">
-              <div class="team-rank-box">${item.rank}</div>
+              <div class="team-rank-box">${item.points > 0 ? item.rank : "—"}</div>
               <div class="team-info">
                 <div class="team-name">${item.team.name}</div>
                 <div class="team-captain">${item.team.captain || ""}</div>
@@ -233,19 +255,8 @@
         } else {
           body = `<div style="text-align:center;color:#a5b4fc;padding:40px;">No published results yet in ${cat}.</div>`;
         }
-        sec.innerHTML = `
-          <div class="slide-logo">${cat} Points</div>
-          <h2 class="slide-heading">${cat} Standings</h2>
-          <p class="slide-sub">Team points from published ${cat} results</p>
-          <div class="team-grid">${body}</div>
-        `;
-        stage.insertBefore(sec, document.querySelector(".slide-footer"));
+        grid.innerHTML = body;
       });
-
-      // Rebuild slide list (include generated ones)
-      slideEls = [...stage.querySelectorAll(".slide")];
-      buildDotNav();
-      showSlide(0);
     }
 
     function renderStandings() {
@@ -328,8 +339,8 @@
         ThanafusDB.calculateLeaderboard();
         renderStandings();
         renderKalaprathibha();
-        // Rebuild dynamic category slides (order may change after new publish)
-        buildSlides();
+        // Update category slide content WITHOUT resetting the rotation
+        renderCategorySlides();
       } catch (e) {
         console.error("Refresh failed", e);
       }

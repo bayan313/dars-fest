@@ -236,6 +236,7 @@ class Database {
   }
 
   // Team points within a single category (Sub Junior/Junior/Senior/General), ranked
+  // Returns ALL teams (including 0-point) so the standings are always complete
   getCategoryTeamPoints(category) {
     const teamPoints = {};
     this.db.teams.forEach(t => { teamPoints[t.id] = { team: t, points: 0 }; });
@@ -257,7 +258,7 @@ class Database {
       });
     });
 
-    const list = Object.values(teamPoints).filter(item => item.points > 0);
+    const list = Object.values(teamPoints);
     list.sort((a, b) => b.points - a.points);
     list.forEach((item, idx) => { item.rank = idx + 1; });
     return list;
