@@ -72,6 +72,22 @@ async function getAllData() {
 // Update all data
 app.post('/api/all', async (req, res) => {
   const db = req.body;
+  // Safety guard: block saves from stale clients that would wipe published results.
+  // If the server currently has published results but the incoming data has none,
+  // the client is almost certainly running old cached data - refuse to overwrite.
+  try {
+    const existingPublished = await Programme.countDocuments({ resultsPublished: true });
+    const incomingPublished = Array.isArray(db.programmes)
+      ? db.programmes.filter(p => p.resultsPublished).length
+      : -1;
+    if (!db.reset && existingPublished > 0 && incomingPublished === 0) {
+      return res.status(409).json({
+        error: 'Data loss protection: the incoming data has no published results but the server has ' + existingPublished + '. Hard refresh the page (Ctrl+Shift+R) and retry.'
+      });
+    }
+  } catch (e) {
+    // If the check itself fails, proceed with the write
+  }
   // Strip MongoDB _id fields sent by the client to avoid duplicate key errors on insertMany
   const stripIds = (docs) => (docs || []).map(d => { const { _id, ...rest } = d; return rest; });
   if (db.teams) { await Team.deleteMany({}); await Team.insertMany(stripIds(db.teams)); }

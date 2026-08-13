@@ -88,11 +88,13 @@ class Database {
     }
   }
 
-  save() {
+  save(isReset) {
+    const payload = Object.assign({}, this.db);
+    if (isReset) payload.reset = true;
     fetch('/api/all', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(this.db)
+      body: JSON.stringify(payload)
     })
       .then(res => res.json())
       .then(data => {
@@ -104,7 +106,7 @@ class Database {
 
   reset() {
     this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
-    this.save();
+    this.save(true);
     this.calculateLeaderboard();
   }
 
