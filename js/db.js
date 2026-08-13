@@ -473,6 +473,7 @@ class Database {
         grade: r.grade ? r.grade.toUpperCase().trim() : null
       }));
       prog.resultsPublished = true;
+      prog.resultsPublishedAt = new Date().toISOString();
       this.save();
       this.calculateLeaderboard();
 
@@ -487,6 +488,7 @@ class Database {
     if (prog) {
       prog.results = [];
       prog.resultsPublished = false;
+      delete prog.resultsPublishedAt;
       this.save();
       this.calculateLeaderboard();
     }
