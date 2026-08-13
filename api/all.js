@@ -29,12 +29,21 @@ module.exports = async function handler(req, res) {
       });
     }
     const stripIds = (docs) => (docs || []).map(d => { const { _id, ...rest } = d; return rest; });
-    if (db.teams)         { await Team.deleteMany({});         await Team.insertMany(stripIds(db.teams)); }
-    if (db.students)      { await Student.deleteMany({});      await Student.insertMany(stripIds(db.students)); }
-    if (db.programmes)    { await Programme.deleteMany({});    await Programme.insertMany(stripIds(db.programmes)); }
-    if (db.notifications) { await Notification.deleteMany({}); await Notification.insertMany(stripIds(db.notifications)); }
-    if (db.appeals)       { await Appeal.deleteMany({});       await Appeal.insertMany(stripIds(db.appeals)); }
-    if (db.gallery)       { await Gallery.deleteMany({});      await Gallery.insertMany(stripIds(db.gallery)); }
+    const dedupe = (docs) => {
+      const seen = new Set();
+      return (docs || []).filter(d => {
+        const key = d.id != null ? String(d.id) : JSON.stringify(d);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    };
+    if (db.teams)         { await Team.deleteMany({});         await Team.insertMany(stripIds(dedupe(db.teams))); }
+    if (db.students)      { await Student.deleteMany({});      await Student.insertMany(stripIds(dedupe(db.students))); }
+    if (db.programmes)    { await Programme.deleteMany({});    await Programme.insertMany(stripIds(dedupe(db.programmes))); }
+    if (db.notifications) { await Notification.deleteMany({}); await Notification.insertMany(stripIds(dedupe(db.notifications))); }
+    if (db.appeals)       { await Appeal.deleteMany({});       await Appeal.insertMany(stripIds(dedupe(db.appeals))); }
+    if (db.gallery)       { await Gallery.deleteMany({});      await Gallery.insertMany(stripIds(dedupe(db.gallery))); }
     if (db.contact)       { await Contact.deleteMany({});      await Contact.create(stripIds([db.contact])[0] || {}); }
     if (db.settings)      { await Settings.deleteMany({});     await Settings.create(stripIds([db.settings])[0] || {}); await syncAdminPassword(); }
     const updated = await getAllData();
