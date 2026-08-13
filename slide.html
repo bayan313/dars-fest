@@ -209,23 +209,22 @@
     function buildSlides() {
       const stage = document.getElementById("slide-stage");
 
-      // Remove previously generated category slides
+      // Remove previously generated slides
       stage.querySelectorAll(".slide[data-generated]").forEach(el => el.remove());
 
-      // One slide per category (Senior, Junior, Sub Junior, General) showing per-team points & rank
-      CATEGORIES.forEach(cat => {
-        const sec = document.createElement("section");
-        sec.className = "slide";
-        sec.setAttribute("data-generated", "1");
-        sec.setAttribute("data-cat", cat);
-        sec.innerHTML = `
-          <div class="slide-logo">${cat} Points</div>
-          <h2 class="slide-heading">${cat} Standings</h2>
-          <p class="slide-sub">Team points from published ${cat} results</p>
-          <div class="team-grid cat-grid"></div>
-        `;
-        stage.insertBefore(sec, document.querySelector(".slide-footer"));
-      });
+      // Single slide: most recently published programme winners
+      const sec = document.createElement("section");
+      sec.className = "slide";
+      sec.setAttribute("data-generated", "1");
+      sec.innerHTML = `
+        <div class="slide-logo">Latest Published Result</div>
+        <h2 class="slide-heading">Latest Result</h2>
+        <p class="slide-sub" id="latest-sub"></p>
+        <div class="prog-card" id="latest-winners"></div>
+      `;
+      stage.insertBefore(sec, document.querySelector(".slide-footer"));
+
+      renderLatestResult();
 
       // Rebuild slide list (include generated ones)
       slideEls = [...stage.querySelectorAll(".slide")];
@@ -233,30 +232,59 @@
       showSlide(0);
     }
 
-    // Refresh the content of the 4 category slides WITHOUT resetting rotation
-    function renderCategorySlides() {
-      CATEGORIES.forEach(cat => {
-        const sec = document.querySelector(`.slide[data-cat="${cat}"]`);
-        if (!sec) return;
-        const grid = sec.querySelector(".cat-grid");
-        const teams = ThanafusDB.getCategoryTeamPoints(cat);
-        let body;
-        if (teams.length > 0) {
-          body = teams.map((item, i) => `
-            <div class="team-tile cat-team-tile">
-              <div class="team-rank-box">${item.points > 0 ? item.rank : "—"}</div>
-              <div class="team-info">
-                <div class="team-name">${item.team.name}</div>
-                <div class="team-captain">${item.team.captain || ""}</div>
-              </div>
-              <div class="team-score">${item.points}<small>pts</small></div>
-            </div>
-          `).join("");
+    // Fill the single latest-result slide WITHOUT resetting rotation
+    function renderLatestResult() {
+      const sub = document.getElementById("latest-sub");
+      const winners = document.getElementById("latest-winners");
+      if (!sub || !winners) return;
+
+      const published = ThanafusDB.db.programmes.filter(p => p.resultsPublished)
+        .sort((a, b) => new Date((b.resultsPublishedAt || 0)) - new Date((a.resultsPublishedAt || 0)));
+      const prog = published[0];
+
+      if (!prog) {
+        sub.textContent = "Awaiting first published result";
+        winners.innerHTML = `<div style="text-align:center;color:#a5b4fc;padding:30px;">No results published yet.</div>`;
+        return;
+      }
+
+      sub.textContent = `${prog.name} &middot; ${prog.category}`;
+
+      const top = [...prog.results]
+        .filter(r => r.rank === 1 || r.rank === 2 || r.rank === 3)
+        .sort((a, b) => a.rank - b.rank);
+
+      if (top.length === 0) {
+        winners.innerHTML = `<div style="text-align:center;color:#a5b4fc;padding:30px;">No ranked results yet.</div>`;
+        return;
+      }
+
+      let html = "";
+      top.forEach(w => {
+        let name = "—", teamName = "—";
+        if (prog.category === "General") {
+          const t = ThanafusDB.db.teams.find(tm => tm.id === (w.teamId || prog.teamId));
+          name = t ? t.name : "Team";
+          teamName = t ? "General Event" : "";
         } else {
-          body = `<div style="text-align:center;color:#a5b4fc;padding:40px;">No published results yet in ${cat}.</div>`;
+          const s = ThanafusDB.db.students.find(st => st.id === w.studentId);
+          const t = s ? ThanafusDB.db.teams.find(tm => tm.id === s.teamId) : null;
+          name = s ? s.name : "—";
+          teamName = t ? t.name : "";
         }
-        grid.innerHTML = body;
+        const place = w.rank === 1 ? "🥇" : w.rank === 2 ? "🥈" : "🥉";
+        html += `
+          <div class="winner-row">
+            <div class="winner-place">${place}</div>
+            <div>
+              <div class="winner-name">${name}</div>
+              <div class="winner-team">${teamName}</div>
+            </div>
+            <div class="winner-grade">${w.grade ? 'Grade ' + w.grade : '—'}</div>
+          </div>
+        `;
       });
+      winners.innerHTML = html;
     }
 
     function renderStandings() {
@@ -339,8 +367,8 @@
         ThanafusDB.calculateLeaderboard();
         renderStandings();
         renderKalaprathibha();
-        // Update category slide content WITHOUT resetting the rotation
-        renderCategorySlides();
+        // Update latest-result slide content WITHOUT resetting the rotation
+        renderLatestResult();
       } catch (e) {
         console.error("Refresh failed", e);
       }
