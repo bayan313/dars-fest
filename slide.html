@@ -85,6 +85,59 @@
     .team-score { font-size: clamp(1.5rem, 3.6vw, 2.4rem); font-weight: 800; color: #fbbf24; text-align: right; }
     .team-score small { font-size: 0.55em; font-weight: 500; color: #a5b4fc; display: block; }
 
+    /* PODIUM STANDINGS: 1st tallest, 2nd slightly shorter, etc. */
+    .podium {
+      display: flex; align-items: flex-end; justify-content: center; gap: 22px;
+      width: min(1150px, 94vw);
+    }
+    .podium-team { text-align: center; width: 260px; }
+    .podium-team .podium-name { font-size: clamp(1rem, 2.2vw, 1.5rem); font-weight: 800; }
+    .podium-team .podium-captain { color: #a5b4fc; font-size: clamp(0.7rem, 1.4vw, 0.9rem); margin-top: 4px; }
+    .podium-team .podium-score { font-size: clamp(1rem, 2vw, 1.4rem); font-weight: 800; color: #fbbf24; margin: 6px 0; }
+    .podium-block {
+      width: 100%; border-radius: 14px 14px 0 0; position: relative;
+      display: flex; align-items: flex-start; justify-content: center;
+      color: #0f172a; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900;
+      box-shadow: 0 -8px 30px rgba(0,0,0,0.3);
+    }
+    .podium-team:nth-child(1) { order: 2; }
+    .podium-team:nth-child(2) { order: 1; }
+    .podium-team:nth-child(3) { order: 3; }
+    .podium-team:nth-child(1) .podium-block { height: 190px; background: linear-gradient(180deg, #fbbf24, #f59e0b); font-size: 2.2rem; }
+    .podium-team:nth-child(2) .podium-block { height: 150px; background: linear-gradient(180deg, #e2e8f0, #94a3b8); }
+    .podium-team:nth-child(3) .podium-block { height: 110px; background: linear-gradient(180deg, #d97706, #b45309); }
+    .podium-team:nth-child(n+4) .podium-block { height: 80px; background: rgba(99,102,241,0.35); color: #e0e7ff; }
+
+    /* GROUPED CATEGORY STANDINGS (two categories per slide) */
+    .cat-group {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 30px; width: min(1250px, 94vw);
+    }
+    .cat-group-col { text-align: center; }
+    .cat-group-title {
+      display: inline-block; padding: 6px 18px; border-radius: 30px; margin-bottom: 18px;
+      font-size: clamp(0.85rem, 1.6vw, 1.05rem); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      background: rgba(168,85,247,0.2); border: 1px solid rgba(168,85,247,0.5); color: #f0abfc;
+    }
+    .cat-group-col .team-grid { grid-template-columns: 1fr; width: 100%; gap: 14px; }
+    .cat-group-col .team-tile { padding: 14px 18px; }
+    .cat-group-col .team-rank-box { width: 50px; height: 50px; font-size: 1.4rem; }
+    .cat-group-col .team-score { font-size: clamp(1.1rem, 2.2vw, 1.5rem); }
+
+    /* LATEST 10 RESULTS LIST */
+    .latest-list { width: min(1250px, 94vw); }
+    .latest-item {
+      display: flex; align-items: center; gap: 16px; padding: 12px 20px; border-radius: 12px; margin-bottom: 10px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    }
+    .latest-rank { font-size: 1.3rem; flex-shrink: 0; width: 40px; text-align: center; }
+    .latest-prog { flex: 1; min-width: 0; }
+    .latest-prog-name { font-size: clamp(0.85rem, 1.6vw, 1.05rem); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .latest-prog-cat { font-size: clamp(0.65rem, 1.2vw, 0.8rem); color: #a5b4fc; }
+    .latest-winner { flex: 1; min-width: 0; text-align: center; }
+    .latest-winner-name { font-size: clamp(0.9rem, 1.8vw, 1.2rem); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .latest-winner-team { font-size: clamp(0.65rem, 1.2vw, 0.8rem); color: #a5b4fc; }
+    .latest-points { color: #fbbf24; font-weight: 800; font-size: clamp(0.8rem, 1.6vw, 1rem); }
+
     /* KALAPRATHIBHA */
     .kala-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: min(1100px, 94vw); }
     .kala-card {
@@ -167,6 +220,10 @@
     @media (max-width: 800px) {
       .team-grid { grid-template-columns: 1fr; }
       .kala-grid { grid-template-columns: 1fr; }
+      .podium { flex-direction: column; align-items: center; }
+      .podium-team { width: min(90vw, 300px); }
+      .cat-group { grid-template-columns: 1fr; }
+      .latest-item { flex-wrap: wrap; }
     }
   </style>
 </head>
@@ -181,12 +238,12 @@
       <div class="live-badge"><span class="live-dot"></span> LIVE RESULTS DISPLAY</div>
     </section>
 
-    <!-- SLIDE 2: TEAM STANDINGS -->
+    <!-- SLIDE 2: OVERALL STANDINGS (podium style) -->
     <section class="slide" id="standings-slide">
       <div class="slide-logo">Live Leaderboard</div>
       <h2 class="slide-heading">Team Standings</h2>
       <p class="slide-sub">Real-time standings from published results</p>
-      <div class="team-grid" id="slide-standings"></div>
+      <div class="podium" id="slide-standings"></div>
     </section>
 
     <!-- SLIDE 3: KALAPRATHIBHA -->
@@ -197,7 +254,7 @@
       <div class="kala-grid" id="slide-kalaprathibha"></div>
     </section>
 
-    <!-- SLIDE 4+: PER-CATEGORY DETAIL (generated per category) -->
+    <!-- SLIDE 4+: GENERATED (grouped category standings + latest results) -->
 
     <div class="slide-footer">
       <span>THANAFUS DARS FEST 2026</span>
@@ -225,18 +282,61 @@
       // Remove previously generated slides
       stage.querySelectorAll(".slide[data-generated]").forEach(el => el.remove());
 
-      // Single slide: most recently published programme winners
-      const sec = document.createElement("section");
-      sec.className = "slide";
-      sec.setAttribute("data-generated", "1");
-      sec.innerHTML = `
-        <div class="slide-logo">Latest Published Result</div>
-        <h2 class="slide-heading">Latest Result</h2>
-        <p class="slide-sub" id="latest-sub"></p>
-        <div class="prog-card" id="latest-winners"></div>
+      // Slide A: Sub Junior + Junior grouped standings
+      const secA = document.createElement("section");
+      secA.className = "slide";
+      secA.setAttribute("data-generated", "1");
+      secA.innerHTML = `
+        <div class="slide-logo">Category Standings</div>
+        <h2 class="slide-heading">Sub Junior &amp; Junior</h2>
+        <p class="slide-sub">Team points from published Sub Junior &amp; Junior results</p>
+        <div class="cat-group">
+          <div class="cat-group-col">
+            <div class="cat-group-title">Sub Junior</div>
+            <div class="team-grid" data-catgrid="Sub Junior"></div>
+          </div>
+          <div class="cat-group-col">
+            <div class="cat-group-title">Junior</div>
+            <div class="team-grid" data-catgrid="Junior"></div>
+          </div>
+        </div>
       `;
-      stage.insertBefore(sec, document.querySelector(".slide-footer"));
+      stage.insertBefore(secA, document.querySelector(".slide-footer"));
 
+      // Slide B: Senior + General grouped standings
+      const secB = document.createElement("section");
+      secB.className = "slide";
+      secB.setAttribute("data-generated", "1");
+      secB.innerHTML = `
+        <div class="slide-logo">Category Standings</div>
+        <h2 class="slide-heading">Senior &amp; General</h2>
+        <p class="slide-sub">Team points from published Senior &amp; General results</p>
+        <div class="cat-group">
+          <div class="cat-group-col">
+            <div class="cat-group-title">Senior</div>
+            <div class="team-grid" data-catgrid="Senior"></div>
+          </div>
+          <div class="cat-group-col">
+            <div class="cat-group-title">General</div>
+            <div class="team-grid" data-catgrid="General"></div>
+          </div>
+        </div>
+      `;
+      stage.insertBefore(secB, document.querySelector(".slide-footer"));
+
+      // Slide C: Latest 10 results in one panel
+      const secC = document.createElement("section");
+      secC.className = "slide";
+      secC.setAttribute("data-generated", "1");
+      secC.innerHTML = `
+        <div class="slide-logo">Latest Published Results</div>
+        <h2 class="slide-heading">Latest Results</h2>
+        <p class="slide-sub">Most recent 10 published results</p>
+        <div class="latest-list" id="latest-winners"></div>
+      `;
+      stage.insertBefore(secC, document.querySelector(".slide-footer"));
+
+      renderCategorySlides();
       renderLatestResult();
 
       // Rebuild slide list (include generated ones)
@@ -245,57 +345,77 @@
       showSlide(0);
     }
 
-    // Fill the single latest-result slide WITHOUT resetting rotation
+    function renderCategorySlides() {
+      document.querySelectorAll("[data-catgrid]").forEach(grid => {
+        const cat = grid.getAttribute("data-catgrid");
+        const items = ThanafusDB.getCategoryTeamPoints(cat);
+        let body;
+        if (items.length > 0) {
+          body = items.map(item => `
+            <div class="team-tile">
+              <div class="team-rank-box">${item.points > 0 ? item.rank : "—"}</div>
+              <div class="team-info">
+                <div class="team-name">${item.team.name}</div>
+                <div class="team-captain">${item.team.captain || ""}</div>
+              </div>
+              <div class="team-score">${item.points}<small>pts</small></div>
+            </div>
+          `).join("");
+        } else {
+          body = `<div style="grid-column:1/-1;text-align:center;color:#a5b4fc;padding:20px;">No teams</div>`;
+        }
+        grid.innerHTML = body;
+      });
+    }
+
+    // Fill the latest-10-results slide WITHOUT resetting rotation
     function renderLatestResult() {
-      const sub = document.getElementById("latest-sub");
       const winners = document.getElementById("latest-winners");
-      if (!sub || !winners) return;
+      if (!winners) return;
 
       const published = ThanafusDB.db.programmes.filter(p => p.resultsPublished)
         .sort((a, b) => new Date((b.resultsPublishedAt || 0)) - new Date((a.resultsPublishedAt || 0)));
-      const prog = published[0];
 
-      if (!prog) {
-        sub.textContent = "Awaiting first published result";
-        winners.innerHTML = `<div style="text-align:center;color:#a5b4fc;padding:30px;">No results published yet.</div>`;
-        return;
-      }
-
-      sub.textContent = `${prog.name} &middot; ${prog.category}`;
-
-      const top = [...prog.results]
-        .filter(r => r.rank === 1)
-        .sort((a, b) => a.rank - b.rank);
-
-      if (top.length === 0) {
-        winners.innerHTML = `<div style="text-align:center;color:#a5b4fc;padding:30px;">No ranked results yet.</div>`;
-        return;
-      }
-
-      let html = "";
-      top.forEach(w => {
-        let name = "—", teamName = "—";
+      const items = [];
+      published.slice(0, 10).forEach(prog => {
+        const top = [...prog.results].filter(r => r.rank === 1).sort((a, b) => a.rank - b.rank);
+        const w = top[0];
+        if (!w) return;
+        let name = "—", teamName = "—", pts = 0;
         if (prog.category === "General") {
           const t = ThanafusDB.db.teams.find(tm => tm.id === (w.teamId || prog.teamId));
           name = t ? t.name : "Team";
           teamName = t ? "General Event" : "";
+          pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
         } else {
           const s = ThanafusDB.db.students.find(st => st.id === w.studentId);
           const t = s ? ThanafusDB.db.teams.find(tm => tm.id === s.teamId) : null;
           name = s ? s.name : "—";
           teamName = t ? t.name : "";
+          pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
         }
-        html += `
-          <div class="winner-row winner-first">
-            <div class="winner-place">🥇</div>
-            <div>
-              <div class="winner-name">${name}</div>
-              <div class="winner-team">${teamName}</div>
-            </div>
-            <div class="winner-grade">${w.grade ? 'Grade ' + w.grade : '—'}</div>
-          </div>
-        `;
+        items.push({ prog: prog.name, cat: prog.category, name, teamName, pts });
       });
+
+      let html;
+      if (items.length === 0) {
+        html = `<div style="text-align:center;color:#a5b4fc;padding:40px;">No results published yet.</div>`;
+      } else {
+        html = items.map(it => `
+          <div class="latest-item">
+            <div class="latest-rank">🥇</div>
+            <div class="latest-prog">
+              <div class="latest-prog-name">${it.prog}</div>
+              <div class="latest-prog-cat">${it.cat}</div>
+            </div>
+            <div class="latest-winner">
+              <div class="latest-winner-name">${it.name}</div>
+              <div class="latest-winner-team">${it.teamName}</div>
+            </div>
+            <div class="latest-points">${it.pts} pts</div>
+          </div>
+        `).join("");
+      }
       winners.innerHTML = html;
     }
 
@@ -304,15 +424,12 @@
       const teams = [...ThanafusDB.db.teams].sort((a, b) => a.rank - b.rank);
       let html = "";
       teams.forEach(t => {
-        const medal = t.rank === 1 ? "🥇" : t.rank === 2 ? "🥈" : t.rank === 3 ? "🥉" : t.rank;
         html += `
-          <div class="team-tile">
-            <div class="team-rank-box">${medal}</div>
-            <div class="team-info">
-              <div class="team-name">${t.name}</div>
-              <div class="team-captain">Captain: ${t.captain}</div>
-            </div>
-            <div class="team-score">${t.totalScore}<small>POINTS</small></div>
+          <div class="podium-team">
+            <div class="podium-name">${t.name}</div>
+            <div class="podium-captain">${t.captain || ""}</div>
+            <div class="podium-score">${t.totalScore} pts</div>
+            <div class="podium-block">${t.rank}</div>
           </div>
         `;
       });
@@ -379,7 +496,8 @@
         ThanafusDB.calculateLeaderboard();
         renderStandings();
         renderKalaprathibha();
-        // Update latest-result slide content WITHOUT resetting the rotation
+        // Update generated slide content WITHOUT resetting the rotation
+        renderCategorySlides();
         renderLatestResult();
       } catch (e) {
         console.error("Refresh failed", e);

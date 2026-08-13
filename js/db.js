@@ -235,14 +235,15 @@ class Database {
     });
   }
 
-  // Team points within a single category (Sub Junior/Junior/Senior/General), ranked
+  // Team points for one or more categories (e.g. ["Sub Junior","Junior"]), ranked
   // Returns ALL teams (including 0-point) so the standings are always complete
-  getCategoryTeamPoints(category) {
+  getCategoryTeamPoints(categories) {
+    const cats = Array.isArray(categories) ? categories : [categories];
     const teamPoints = {};
     this.db.teams.forEach(t => { teamPoints[t.id] = { team: t, points: 0 }; });
 
     this.db.programmes.forEach(prog => {
-      if (!prog.resultsPublished || prog.category !== category) return;
+      if (!prog.resultsPublished || !cats.includes(prog.category)) return;
 
       prog.results.forEach(res => {
         let team = null;
