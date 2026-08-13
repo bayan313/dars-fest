@@ -52,6 +52,11 @@ app.use((req, res, next) => {
 // Serve static frontend files from the parent directory
 app.use(express.static(path.join(__dirname, '../')));
 
+// Link-only projector page (extensionless URL)
+app.get('/slide', (req, res) => {
+  res.sendFile(path.join(__dirname, '../slide.html'));
+});
+
 // Duplicate mongoose connection removed; primary connection is established earlier with admin password sync
 
 // Get all data
