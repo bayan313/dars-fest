@@ -40,6 +40,7 @@ const programmeSchema = new mongoose.Schema({
   type: String,
   teamId: String,
   resultsPublished: Boolean,
+  resultsPublishedAt: String,
   results: [resultSchema]
 });
 
@@ -59,6 +60,7 @@ const appealSchema = new mongoose.Schema({
   programme: String,
   phoneNumber: String,
   description: String,
+  fee: Number,
   status: String,
   response: String,
   date: String
@@ -85,7 +87,8 @@ const contactSchema = new mongoose.Schema({
 
 const settingsSchema = new mongoose.Schema({
   prospectusUrl: String,
-  adminPassword: String
+  adminPassword: String,
+  revision: { type: Number, default: 0 }
 });
 
 const Team = mongoose.model('Team', teamSchema);

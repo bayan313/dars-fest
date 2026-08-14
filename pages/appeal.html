@@ -150,6 +150,21 @@
       populateTeams();
     });
 
+    // DATABASE SAFETY HOOKS
+    // If the server could not be reached, alert the visitor instead of
+    // silently accepting an appeal that was never stored.
+    window.__onDbSaveBlocked = function() {
+      showAlert("⚠️ Could not reach the server - your appeal was NOT submitted. Please reload the page and try again.", "danger");
+    };
+    window.__onDbSaveError = function(e) {
+      showAlert("⚠️ " + (e && e.message ? e.message : "Your appeal could not be saved. Please try again."), "danger");
+    };
+    window.__onDbLoadFail = function() {
+      setTimeout(function() {
+        showAlert("⚠️ Could not reach the server. Showing temporary data. Please reload the page.", "warning");
+      }, 300);
+    };
+
     // Populate team selection list
     function populateTeams() {
       const select = document.getElementById("app-team");

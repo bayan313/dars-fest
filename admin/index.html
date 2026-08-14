@@ -674,6 +674,25 @@
     let isEditingStudentPhoto = "";
     let resultPublishProgId = "";
 
+    // DATABASE SAFETY HOOKS
+    // If the API fails to load, warn clearly so the admin never edits seed data
+    // (the old seed-fallback silently overwrote the live database).
+    window.__onDbLoadFail = function(e) {
+      console.error("Load failed", e);
+      setTimeout(function() {
+        showAlert("⚠️ Could not reach the server. Showing temporary demo data. DO NOT edit anything until the page is reloaded - changes will be blocked to protect your data.", "danger");
+      }, 300);
+    };
+    window.__onDbSaveBlocked = function() {
+      showAlert("⚠️ Save blocked: the live database could not be loaded, so this page is showing demo data. Reload this page (Ctrl+Shift+R) and retry. Your real data was NOT overwritten.", "danger");
+    };
+    window.__onDbSaveError = function(e) {
+      showAlert("⚠️ " + (e && e.message ? e.message : "Save failed. Reloading the page to re-sync your data."), "danger");
+      if (e && e.isStale) {
+        setTimeout(function() { location.reload(); }, 2500);
+      }
+    };
+
     // AUTHENTICATION
     function handleAdminLogin(event) {
       event.preventDefault();

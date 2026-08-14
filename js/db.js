@@ -67,6 +67,9 @@ const DEFAULT_DB = {
 
 class Database {
   constructor() {
+    this.loadedFromServer = false;
+    this._saving = false;
+    this._dirty = false;
     this.load();
     this.calculateLeaderboard();
   }
@@ -78,30 +81,95 @@ class Database {
       xhr.send(null);
       if (xhr.status === 200) {
         this.db = JSON.parse(xhr.responseText);
+        if (typeof this.db.revision !== 'number') this.db.revision = 0;
+        this.loadedFromServer = true;
       } else {
         throw new Error('Failed to load data from API');
       }
     } catch (e) {
-      // No local fallback: data lives only on the server (MongoDB).
+      // Fallback to demo seed data for DISPLAY ONLY.
+      // loadedFromServer stays false so save() never overwrites the live database
+      // with this seed data (that was the cause of the data loss).
       console.error("Database loading from API failed", e);
+      this.loadedFromServer = false;
       this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
+      if (typeof window !== 'undefined' && window.__onDbLoadFail) {
+        window.__onDbLoadFail(e);
+      }
     }
   }
 
   save(isReset) {
+    if (!this.loadedFromServer && !isReset) {
+      console.warn('Save blocked: server data could not be loaded. Refusing to overwrite the live database with local seed data.');
+      if (typeof window !== 'undefined' && window.__onDbSaveBlocked) window.__onDbSaveBlocked();
+      return;
+    }
+    if (isReset) this._pendingReset = true;
+    this._dirty = true;
+    this._flushSave();
+  }
+
+  // Serializes saves so out-of-order responses can never reorder writes.
+  // Always sends the latest in-memory snapshot and adopts the new server revision.
+  _flushSave() {
+    if (this._saving) return;
+    if (!this._dirty) return;
+    this._dirty = false;
+    this._saving = true;
     const payload = Object.assign({}, this.db);
-    if (isReset) payload.reset = true;
+    if (this._pendingReset) { payload.reset = true; this._pendingReset = false; }
     fetch('/api/all', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
-      .then(res => res.json())
-      .then(data => {
-        this.db = data;
-        console.log('Database synchronized with server');
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(err => {
+            const e = new Error(err.error || ('Server rejected the save (HTTP ' + res.status + ')'));
+            e.isStale = (res.status === 409);
+            throw e;
+          });
+        }
+        return res.json();
       })
-      .catch(e => console.error('Failed to save to API', e));
+      .then(data => {
+        this._retries = 0;
+        if (this._dirty) {
+          // New edits arrived while this save was in flight; keep them local
+          // as the source of truth and only adopt the new revision number.
+          if (data && typeof data.revision === 'number') this.db.revision = data.revision;
+        } else {
+          this.db = data;
+        }
+        this.loadedFromServer = true;
+        console.log('Database synchronized with server');
+        this._saving = false;
+        this._flushSave();
+      })
+      .catch(e => {
+        this._saving = false;
+        console.error('Failed to save to API', e);
+        if (e && e.isStale) {
+          // Stale page or data-loss protection: never auto-retry, surface to the admin.
+          this._dirty = false;
+          this._retries = 0;
+          if (typeof window !== 'undefined' && window.__onDbSaveError) window.__onDbSaveError(e);
+          return;
+        }
+        // Transient failure: keep the change queued and retry shortly.
+        this._dirty = true;
+        if (this._retries === undefined) this._retries = 0;
+        this._retries++;
+        if (this._retries <= 3) {
+          setTimeout(() => { if (this._dirty) this._flushSave(); }, 2000);
+        } else {
+          this._retries = 0;
+          this._dirty = false;
+          if (typeof window !== 'undefined' && window.__onDbSaveError) window.__onDbSaveError(e);
+        }
+      });
   }
 
   reset() {

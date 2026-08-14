@@ -63,6 +63,8 @@ app.get('/slide', (req, res) => {
 app.get('/api/all', async (req, res) => {
   await syncAdminPassword();
   const data = await getAllData();
+  const settings = await Settings.findOne();
+  data.revision = (settings && typeof settings.revision === 'number') ? settings.revision : 0;
   res.json(data);
 });
 
@@ -93,6 +95,22 @@ app.post('/api/all', async (req, res) => {
   } catch (e) {
     // If the check itself fails, proceed with the write
   }
+
+  // Revision lock: a client must save based on the exact server revision it loaded.
+  // Prevents an old tab / stale page from overwriting newer marks.
+  try {
+    const settings = await Settings.findOne();
+    const currentRevision = (settings && typeof settings.revision === 'number') ? settings.revision : 0;
+    const incomingRevision = (db && typeof db.revision === 'number') ? db.revision : null;
+    if (!db.reset && incomingRevision !== null && incomingRevision !== currentRevision) {
+      return res.status(409).json({
+        error: 'Stale page detected (server revision ' + currentRevision + ', page revision ' + incomingRevision + '). Hard refresh (Ctrl+Shift+R) and retry - your changes were NOT saved to avoid overwriting newer data.'
+      });
+    }
+  } catch (e) {
+    // If revision check fails, proceed with the write
+  }
+
   // Strip MongoDB _id fields sent by the client to avoid duplicate key errors
   const stripIds = (docs) => (docs || []).map(d => { const { _id, ...rest } = d; return rest; });
   // Deduplicate docs by their string id so repeated saves never accumulate copies
@@ -127,8 +145,26 @@ app.post('/api/all', async (req, res) => {
   if (db.appeals) { await syncCollection(Appeal, db.appeals); }
   if (db.gallery) { await syncCollection(Gallery, db.gallery); }
   if (db.contact) { await Contact.deleteMany({}); await Contact.create(stripIds([db.contact])[0] || {}); }
-  if (db.settings) { await Settings.deleteMany({}); await Settings.create(stripIds([db.settings])[0] || {}); await syncAdminPassword(); }
+  if (db.settings) {
+    // Preserve the server-side revision counter when settings are synced
+    const s = stripIds([db.settings])[0] || {};
+    const existing = await Settings.findOne();
+    if (existing && existing.revision) s.revision = existing.revision;
+    await Settings.deleteMany({});
+    await Settings.create(s);
+    await syncAdminPassword();
+  }
+  // Bump the revision so any other stale tabs get rejected on their next save
+  try {
+    const settings = await Settings.findOne();
+    if (settings) {
+      settings.revision = (settings.revision || 0) + 1;
+      await settings.save();
+    }
+  } catch (e) { /* non-fatal */ }
   const updatedData = await getAllData();
+  const settings = await Settings.findOne();
+  updatedData.revision = (settings && typeof settings.revision === 'number') ? settings.revision : 0;
   res.json(updatedData);
 });
 
