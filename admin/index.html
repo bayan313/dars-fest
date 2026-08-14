@@ -356,6 +356,10 @@
           <h2><i class="fa-solid fa-list-check"></i> Participant Appeals Dashboard</h2>
           <p style="color:var(--text-gray); margin-bottom: 20px;">View and respond to submitted appeals from students regarding evaluation outcomes.</p>
 
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom:16px;">
+            <button class="btn btn-outline btn-sm" onclick="printAllAppeals()"><i class="fa-solid fa-print"></i> Print All Appeals</button>
+          </div>
+
           <div class="admin-section-content">
             <div class="table-wrapper">
               <table>
@@ -365,6 +369,7 @@
                     <th>Student</th>
                     <th>Team</th>
                     <th>Programme</th>
+                    <th>Fee</th>
                     <th>Description</th>
                     <th>Status</th>
                     <th>Response Action</th>
@@ -629,6 +634,10 @@
       <button class="modal-close-btn" onclick="closeAppealModal()">&times;</button>
       <h3 style="color: var(--primary-emerald); margin-bottom: 20px;">Resolve Appeal Form</h3>
       
+      <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+        <button class="btn btn-outline btn-sm" onclick="printAppeal(document.getElementById('appeal-id').value)"><i class="fa-solid fa-print"></i> Print Appeal</button>
+      </div>
+
       <div id="appeal-meta-info" style="font-size:0.9rem; background:#f8fafc; padding:15px; border-radius:8px; margin-bottom:20px;">
         <!-- Filled by JS -->
       </div>
@@ -1372,13 +1381,13 @@
         
         if (a.status === 'Pending') {
           statusBadge = `<span class="prog-meta-badge" style="background:#fffbeb; color:#d97706;"><i class="fa-regular fa-clock"></i> Pending</span>`;
-          actionBtn = `<button class="btn btn-primary btn-sm" onclick="openAppealResolveModal('${a.id}')"><i class="fa-solid fa-gavel"></i> Resolve</button>`;
+          actionBtn = `<div class="action-cell"><button class="btn btn-primary btn-sm" onclick="openAppealResolveModal('${a.id}')"><i class="fa-solid fa-gavel"></i> Resolve</button> <button class="btn btn-outline btn-sm" onclick="printAppeal('${a.id}')"><i class="fa-solid fa-print"></i> Print</button></div>`;
         } else if (a.status === 'Approved') {
           statusBadge = `<span class="prog-meta-badge" style="background:#e2fdf2; color:#10b981;"><i class="fa-solid fa-check"></i> Approved</span>`;
-          actionBtn = `<span style="font-size:0.85rem; color:var(--text-gray);">Resolved</span>`;
+          actionBtn = `<div class="action-cell"><button class="btn btn-outline btn-sm" onclick="printAppeal('${a.id}')"><i class="fa-solid fa-print"></i> Print</button></div>`;
         } else {
           statusBadge = `<span class="prog-meta-badge" style="background:#fef2f2; color:#ef4444;"><i class="fa-solid fa-xmark"></i> Rejected</span>`;
-          actionBtn = `<span style="font-size:0.85rem; color:var(--text-gray);">Resolved</span>`;
+          actionBtn = `<div class="action-cell"><button class="btn btn-outline btn-sm" onclick="printAppeal('${a.id}')"><i class="fa-solid fa-print"></i> Print</button></div>`;
         }
 
         tbody.innerHTML += `
@@ -1387,12 +1396,102 @@
             <td data-label="Student"><strong>${a.studentName}</strong></td>
             <td data-label="Team">${a.team}</td>
             <td data-label="Programme">${a.programme} <span style="font-size:0.75rem;color:var(--text-gray);">(${a.category})</span></td>
+            <td data-label="Fee"><strong style="color:#d97706;">Rs. ${a.fee || 50}</strong></td>
             <td data-label="Description" style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${a.description}">${a.description}</td>
             <td data-label="Status">${statusBadge}</td>
-            <td data-label="Action" class="action-cell">${actionBtn}</td>
+            <td data-label="Action">${actionBtn}</td>
           </tr>
         `;
       });
+    }
+
+    // Print a single appeal as a formatted receipt
+    function printAppeal(id) {
+      const appeal = ThanafusDB.db.appeals.find(a => a.id === id);
+      if (!appeal) return;
+      const w = window.open("", "_blank", "width=600,height=700");
+      w.document.write(`
+        <!DOCTYPE html>
+        <html><head><title>Appeal #${appeal.id}</title>
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; color: #111; }
+          .head { text-align: center; border-bottom: 3px double #111; padding-bottom: 12px; margin-bottom: 18px; }
+          .head h1 { margin: 0; font-size: 22px; letter-spacing: 1px; }
+          .head p { margin: 4px 0 0; color: #555; font-size: 13px; }
+          .meta { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+          .meta td { padding: 8px 10px; border: 1px solid #999; font-size: 14px; }
+          .meta td:first-child { background: #f1f5f9; font-weight: 700; width: 40%; }
+          .desc { border: 1px solid #999; padding: 12px; font-size: 14px; border-radius: 6px; margin-bottom: 18px; }
+          .desc h4 { margin: 0 0 6px; font-size: 14px; }
+          .fee { display: inline-block; padding: 8px 16px; border: 2px solid #d97706; color: #d97706; font-weight: 800; border-radius: 6px; font-size: 16px; }
+          .foot { margin-top: 30px; display: flex; justify-content: space-between; font-size: 12px; color: #555; }
+        </style></head>
+        <body onload="window.print()">
+          <div class="head">
+            <h1>THANAFUS Dars Fest 2026</h1>
+            <p>Official Appeal Form</p>
+          </div>
+          <table class="meta">
+            <tr><td>Appeal ID</td><td>${appeal.id}</td></tr>
+            <tr><td>Date Submitted</td><td>${formatDate(appeal.date)}</td></tr>
+            <tr><td>Student Name</td><td>${appeal.studentName}</td></tr>
+            <tr><td>Team</td><td>${appeal.team}</td></tr>
+            <tr><td>Category</td><td>${appeal.category}</td></tr>
+            <tr><td>Programme / Event</td><td>${appeal.programme}</td></tr>
+            <tr><td>Phone Number</td><td>${appeal.phoneNumber}</td></tr>
+            <tr><td>Status</td><td>${appeal.status}</td></tr>
+          </table>
+          <div class="desc">
+            <h4>Reason of Appeal</h4>
+            ${appeal.description}
+          </div>
+          <div class="fee">Appeal Fee: Rs. ${appeal.fee || 50} (Paid at Dars Fest counter)</div>
+          <div class="foot">
+            <span>Submitted by: ______________________</span>
+            <span>Authorised by: ______________________</span>
+          </div>
+        </body></html>
+      `);
+      w.document.close();
+    }
+
+    // Print all appeals in a clean summary sheet
+    function printAllAppeals() {
+      const appeals = ThanafusDB.db.appeals;
+      const rows = appeals.map(a => `
+        <tr>
+          <td>${formatDate(a.date)}</td>
+          <td>${a.studentName}</td>
+          <td>${a.team}</td>
+          <td>${a.programme} (${a.category})</td>
+          <td>Rs. ${a.fee || 50}</td>
+          <td>${a.status}</td>
+        </tr>`).join("");
+      const w = window.open("", "_blank", "width=700,height=600");
+      w.document.write(`
+        <!DOCTYPE html>
+        <html><head><title>All Appeals</title>
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; color: #111; }
+          .head { text-align: center; border-bottom: 3px double #111; padding-bottom: 12px; margin-bottom: 18px; }
+          .head h1 { margin: 0; font-size: 22px; }
+          .head p { margin: 4px 0 0; color: #555; font-size: 13px; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid #999; padding: 8px 10px; font-size: 13px; text-align: left; }
+          th { background: #f1f5f9; }
+        </style></head>
+        <body onload="window.print()">
+          <div class="head">
+            <h1>THANAFUS Dars Fest 2026</h1>
+            <p>Appeals Summary Sheet — ${appeals.length} appeal(s)</p>
+          </div>
+          <table>
+            <thead><tr><th>Date</th><th>Student</th><th>Team</th><th>Programme</th><th>Fee</th><th>Status</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </body></html>
+      `);
+      w.document.close();
     }
 
     function openAppealResolveModal(id) {
@@ -1405,6 +1504,7 @@
         <p><strong>Programme:</strong> ${appeal.programme} (${appeal.category})</p>
         <p><strong>Appeal Reason:</strong> "${appeal.description}"</p>
         <p><strong>Phone Number:</strong> ${appeal.phoneNumber}</p>
+        <p><strong>Appeal Fee:</strong> <span style="color:#d97706; font-weight:700;">Rs. ${appeal.fee || 50}</span> (paid)</p>
       `;
 
       document.getElementById("appealResolveForm").reset();

@@ -611,6 +611,7 @@ class Database {
       programme,
       phoneNumber,
       description,
+      fee: 50,
       status: "Pending",
       response: "",
       date: new Date().toISOString()
