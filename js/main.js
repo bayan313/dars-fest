@@ -79,13 +79,14 @@ function showAlert(message, type = "success") {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-sizing: border-box;
     background-color: ${type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : type === 'danger' ? '#ef4444' : '#3b82f6'};
     animation: slideUp 0.3s ease;
   `;
   
   alert.innerHTML = `
-    <span>${message}</span>
-    <span class="close-alert" style="cursor:pointer;font-weight:bold;margin-left:15px;">&times;</span>
+    <span style="flex:1;min-width:0;overflow-wrap:break-word;word-break:break-word;white-space:normal;">${message}</span>
+    <span class="close-alert" style="cursor:pointer;font-weight:bold;margin-left:15px;flex-shrink:0;">&times;</span>
   `;
   
   alertContainer.appendChild(alert);
@@ -108,8 +109,11 @@ function createAlertContainer() {
     position: fixed;
     bottom: 20px;
     right: 20px;
+    left: 20px;
     z-index: 9999;
     max-width: 350px;
+    margin-left: auto;
+    box-sizing: border-box;
   `;
   document.body.appendChild(container);
   return container;
