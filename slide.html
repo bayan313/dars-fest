@@ -125,20 +125,44 @@
     .cat-group-col .team-rank-box { width: 50px; height: 50px; font-size: 1.4rem; }
     .cat-group-col .team-score { font-size: clamp(1.1rem, 2.2vw, 1.5rem); }
 
-    /* LATEST 10 RESULTS LIST */
-    .latest-list { width: min(1250px, 94vw); }
-    .latest-item {
-      display: flex; align-items: center; gap: 16px; padding: 12px 20px; border-radius: 12px; margin-bottom: 10px;
-      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    /* LATEST 10 PROGRAMME CARDS (top-3 winners each) */
+    .latest-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: min(1350px, 96vw);
     }
-    .latest-rank { font-size: 1.3rem; flex-shrink: 0; width: 40px; text-align: center; }
-    .latest-prog { flex: 1; min-width: 0; }
-    .latest-prog-name { font-size: clamp(0.85rem, 1.6vw, 1.05rem); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .latest-prog-cat { font-size: clamp(0.65rem, 1.2vw, 0.8rem); color: #a5b4fc; }
-    .latest-winner { flex: 1; min-width: 0; text-align: center; }
-    .latest-winner-name { font-size: clamp(0.9rem, 1.8vw, 1.2rem); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .latest-winner-team { font-size: clamp(0.65rem, 1.2vw, 0.8rem); color: #a5b4fc; }
-    .latest-points { color: #fbbf24; font-weight: 800; font-size: clamp(0.8rem, 1.6vw, 1rem); }
+    .latest-prog-card {
+      border-radius: 14px; padding: 12px 16px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); backdrop-filter: blur(6px);
+    }
+    .latest-prog-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .latest-prog-num {
+      flex-shrink: 0; font-weight: 800; font-size: clamp(0.65rem, 1.2vw, 0.78rem); letter-spacing: 1px;
+      color: #fbbf24; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3);
+      padding: 3px 9px; border-radius: 20px;
+    }
+    .latest-prog-name {
+      font-size: clamp(0.85rem, 1.6vw, 1.05rem); font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .latest-prog-cat { margin-left: auto; font-size: clamp(0.6rem, 1.1vw, 0.75rem); color: #a5b4fc; flex-shrink: 0; }
+    .latest-rank-row {
+      display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 8px; margin-top: 4px;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+    }
+    .latest-rank-row.rank-1 { background: rgba(245,158,11,0.08); border-color: rgba(251,191,36,0.25); }
+    .latest-rank-row.rank-2 { background: rgba(148,163,184,0.08); border-color: rgba(148,163,184,0.25); }
+    .latest-rank-row.rank-3 { background: rgba(180,83,9,0.08); border-color: rgba(180,83,9,0.25); }
+    .latest-place { flex-shrink: 0; width: 26px; text-align: center; font-size: clamp(0.9rem, 1.6vw, 1.05rem); }
+    .latest-winner { flex: 1; min-width: 0; }
+    .latest-winner-name {
+      font-size: clamp(0.8rem, 1.5vw, 0.95rem); font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .latest-winner-team { font-size: clamp(0.6rem, 1.1vw, 0.72rem); color: #a5b4fc; }
+    .latest-points { flex-shrink: 0; color: #fbbf24; font-weight: 800; font-size: clamp(0.75rem, 1.4vw, 0.9rem); }
+    .latest-bar {
+      height: 4px; border-radius: 3px; margin-top: 3px;
+      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    }
 
     /* KALAPRATHIBHA */
     .kala-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: min(1100px, 94vw); }
@@ -225,7 +249,7 @@
       .podium { flex-direction: column; align-items: center; }
       .podium-team { width: min(90vw, 300px); }
       .cat-group { grid-template-columns: 1fr; }
-      .latest-item { flex-wrap: wrap; }
+      .latest-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -334,7 +358,7 @@
         <div class="slide-logo">Latest Published Results</div>
         <h2 class="slide-heading">Latest Results</h2>
         <p class="slide-sub">Most recent 10 published results</p>
-        <div class="latest-list" id="latest-winners"></div>
+        <div class="latest-grid" id="latest-winners"></div>
       `;
       stage.insertBefore(secC, document.querySelector(".slide-footer"));
 
@@ -380,41 +404,52 @@
 
       const items = [];
       published.slice(0, 10).forEach(prog => {
-        const top = [...prog.results].filter(r => r.rank === 1).sort((a, b) => a.rank - b.rank);
-        const w = top[0];
-        if (!w) return;
-        let name = "—", teamName = "—", pts = 0;
-        if (prog.category === "General") {
-          const t = ThanafusDB.db.teams.find(tm => tm.id === (w.teamId || prog.teamId));
-          name = t ? t.name : "Team";
-          teamName = t ? "General Event" : "";
-          pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
-        } else {
-          const s = ThanafusDB.db.students.find(st => st.id === w.studentId);
-          const t = s ? ThanafusDB.db.teams.find(tm => tm.id === s.teamId) : null;
-          name = s ? s.name : "—";
-          teamName = t ? t.name : "";
-          pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
-        }
-        items.push({ prog: prog.name, cat: prog.category, name, teamName, pts });
+        const top = [...prog.results].sort((a, b) => a.rank - b.rank).slice(0, 3);
+        if (top.length === 0) return;
+        const rows = top.map(w => {
+          let name = "—", teamName = "—", pts = 0;
+          if (prog.category === "General") {
+            const t = ThanafusDB.db.teams.find(tm => tm.id === (w.teamId || prog.teamId));
+            name = t ? t.name : "Team";
+            teamName = t ? "General Event" : "";
+            pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
+          } else {
+            const s = ThanafusDB.db.students.find(st => st.id === w.studentId);
+            const t = s ? ThanafusDB.db.teams.find(tm => tm.id === s.teamId) : null;
+            name = s ? s.name : "—";
+            teamName = t ? t.name : "";
+            pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
+          }
+          return { rank: w.rank, name, teamName, pts };
+        });
+        items.push({ prog: prog.name, cat: prog.category, rows });
       });
+
+      // Relative bar width: 100% for highest points across all shown
+      const maxPts = Math.max(1, ...items.flatMap(it => it.rows.map(r => r.pts)));
+      const medal = ["🥇", "🥈", "🥉"];
 
       let html;
       if (items.length === 0) {
         html = `<div style="text-align:center;color:#a5b4fc;padding:40px;">No results published yet.</div>`;
       } else {
-        html = items.map(it => `
-          <div class="latest-item">
-            <div class="latest-rank">🥇</div>
-            <div class="latest-prog">
-              <div class="latest-prog-name">${it.prog}</div>
-              <div class="latest-prog-cat">${it.cat}</div>
+        html = items.map((it, idx) => `
+          <div class="latest-prog-card">
+            <div class="latest-prog-head">
+              <span class="latest-prog-num">PROGRAMME ${String(idx + 1).padStart(2, "0")}</span>
+              <span class="latest-prog-name">${it.prog}</span>
+              <span class="latest-prog-cat">${it.cat}</span>
             </div>
-            <div class="latest-winner">
-              <div class="latest-winner-name">${it.name}</div>
-              <div class="latest-winner-team">${it.teamName}</div>
-            </div>
-            <div class="latest-points">${it.pts} pts</div>
+            ${it.rows.map(r => `
+              <div class="latest-rank-row rank-${r.rank}">
+                <div class="latest-place">${medal[r.rank - 1] || r.rank}</div>
+                <div class="latest-winner">
+                  <div class="latest-winner-name">${r.name}</div>
+                  <div class="latest-winner-team">${r.teamName}</div>
+                </div>
+                <div class="latest-points">${r.pts} pts</div>
+              </div>
+            `).join("")}
           </div>
         `).join("");
       }
