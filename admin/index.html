@@ -1435,25 +1435,25 @@
         <!DOCTYPE html>
         <html><head><title>Appeal Letter — ${appeal.id}</title>
         <style>
-          * { box-sizing: border-box; margin: 0; padding: 0; }
+          * { box-sizing: border-box; margin: 0; padding: 0;  white-space: normal;  overflow-wrap: break-word;  word-break: break-word; }
           html, body { background: #fff; }
           body {
             font-family: 'Georgia', 'Times New Roman', serif;
             color: #111; font-size: 13px; line-height: 1.6;
             width: 100%;
           }
-          .sheet {
-            width: 210mm; min-height: 297mm; margin: 0 auto;
-            padding: 18mm 20mm; position: relative;
-            page-break-after: always;
-          }
-          /* Watermark */
-          .sheet::before {
+          /* Print page setup — A4 with printable margins */
+          @page { size: A4; margin: 18mm 20mm; }
+          /* Watermark as body background */
+          body::before {
             content: "THANAFUS DARS FEST 2026";
-            position: absolute; top: 45%; left: 0; right: 0;
+            position: fixed; top: 45%; left: 0; right: 0;
             text-align: center; font-size: 42px; letter-spacing: 3px;
             color: rgba(6, 78, 59, 0.05); transform: rotate(-28deg);
-            font-weight: 800; pointer-events: none;
+            font-weight: 800; pointer-events: none; z-index: -1;
+          }
+          .letter {
+            page-break-inside: avoid;
           }
           /* Letterhead */
           .letterhead {
@@ -1516,16 +1516,18 @@
             font-size: 11.5px; font-weight: 700; font-family: 'Segoe UI', Arial, sans-serif;
           }
           .sign-role { font-size: 10px; color: #64748b; margin-top: 2px; font-family: 'Segoe UI', Arial, sans-serif; }
+          /* Footer — normal flow, not absolute */
           .foot {
-            position: absolute; bottom: 12mm; left: 20mm; right: 20mm;
+            margin-top: 40px;
             padding-top: 8px; border-top: 1px dashed #94a3b8;
             display: flex; justify-content: space-between;
             font-size: 9px; color: #94a3b8; font-family: 'Segoe UI', Arial, sans-serif;
           }
-          @page { size: A4; margin: 0; }
+          /* Ensure description wraps and doesn't overflow */
+          .body p i { overflow-wrap: break-word; word-break: break-word; display: inline; }
         </style></head>
         <body onload="window.print()">
-          <div class="sheet">
+          <div class="letter">
             <div class="letterhead">
               <div class="brand">
                 <div class="brand-logo">DF</div>
