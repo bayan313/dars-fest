@@ -85,27 +85,29 @@
     .team-score { font-size: clamp(1.5rem, 3.6vw, 2.4rem); font-weight: 800; color: #fbbf24; text-align: right; }
     .team-score small { font-size: 0.55em; font-weight: 500; color: #a5b4fc; display: block; }
 
-    /* PODIUM STANDINGS: 1st tallest, 2nd slightly shorter, etc. */
+    /* PODIUM STANDINGS: classic layout (SECOND | FIRST | THIRD | FOURTH) */
     .podium {
-      display: flex; align-items: flex-end; justify-content: center; gap: 22px;
+      display: flex; align-items: flex-end; justify-content: center; gap: 18px;
       width: min(1150px, 94vw);
     }
-    .podium-team { text-align: center; width: 260px; }
+    .podium-team { text-align: center; width: 250px; }
     .podium-team .podium-name { font-size: clamp(1rem, 2.2vw, 1.5rem); font-weight: 800; }
     .podium-team .podium-captain { color: #a5b4fc; font-size: clamp(0.7rem, 1.4vw, 0.9rem); margin-top: 4px; }
     .podium-team .podium-score { font-size: clamp(1rem, 2vw, 1.4rem); font-weight: 800; color: #fbbf24; margin: 6px 0; }
     .podium-block {
       width: 100%; border-radius: 14px 14px 0 0; position: relative;
-      display: flex; align-items: flex-start; justify-content: center;
+      display: flex; align-items: flex-start; justify-content: center; padding-top: 12px;
       color: #0f172a; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900;
       box-shadow: 0 -8px 30px rgba(0,0,0,0.3);
     }
+    /* Layout order: SECOND(1) | FIRST(2) | THIRD(3) | FOURTH(4+) */
     .podium-team:nth-child(1) { order: 2; }
     .podium-team:nth-child(2) { order: 1; }
     .podium-team:nth-child(3) { order: 3; }
-    .podium-team:nth-child(1) .podium-block { height: 190px; background: linear-gradient(180deg, #fbbf24, #f59e0b); font-size: 2.2rem; }
-    .podium-team:nth-child(2) .podium-block { height: 150px; background: linear-gradient(180deg, #e2e8f0, #94a3b8); }
-    .podium-team:nth-child(3) .podium-block { height: 110px; background: linear-gradient(180deg, #d97706, #b45309); }
+    .podium-team:nth-child(n+4) { order: 4; }
+    .podium-team:nth-child(1) .podium-block { height: 210px; background: linear-gradient(180deg, #fbbf24, #f59e0b); font-size: 2.4rem; }
+    .podium-team:nth-child(2) .podium-block { height: 155px; background: linear-gradient(180deg, #e2e8f0, #94a3b8); }
+    .podium-team:nth-child(3) .podium-block { height: 115px; background: linear-gradient(180deg, #d97706, #b45309); }
     .podium-team:nth-child(n+4) .podium-block { height: 80px; background: rgba(99,102,241,0.35); color: #e0e7ff; }
 
     /* GROUPED CATEGORY STANDINGS (two categories per slide) */
