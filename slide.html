@@ -175,9 +175,9 @@
     }
     .medal { font-size: clamp(1.2rem, 2.4vw, 1.6rem); flex-shrink: 0; width: 42px; text-align: center; }
     .medal-half { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
-    .medal-name { flex: 1; font-size: clamp(0.9rem, 1.8vw, 1.15rem); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .medal-sub { font-size: clamp(0.6rem, 1.1vw, 0.75rem); color: #a5b4fc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .medal-bar { flex: 1.4; height: 13px; border-radius: 8px; background: rgba(255,255,255,0.08); overflow: hidden; min-width: 60px; }
+    .medal-name { flex: 1; font-size: clamp(0.9rem, 1.8vw, 1.15rem); font-weight: 800; line-height: 1.25; white-space: normal; overflow-wrap: anywhere; }
+    .medal-sub { font-size: clamp(0.6rem, 1.1vw, 0.75rem); color: #a5b4fc; white-space: normal; overflow-wrap: anywhere; }
+    .medal-bar { flex: 0 0 26%; height: 13px; border-radius: 8px; background: rgba(255,255,255,0.08); overflow: hidden; min-width: 40px; }
     .bar-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, #fbbf24, #f59e0b); }
     .medal-row.rank-1 .bar-fill { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
     .medal-row.rank-2 .bar-fill { background: linear-gradient(90deg, #e2e8f0, #94a3b8); }
