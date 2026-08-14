@@ -227,11 +227,19 @@ class Database {
       });
     });
 
-    // Calculate Ranks (highest score gets rank 1)
+    // Calculate Ranks (highest score gets rank 1; ties share the same rank, next rank skips)
     const sortedTeams = [...this.db.teams].sort((a, b) => b.totalScore - a.totalScore);
+    let lastScore = null;
+    let lastRank = 0;
     sortedTeams.forEach((t, idx) => {
       const team = this.db.teams.find(orig => orig.id === t.id);
-      team.rank = idx + 1;
+      if (lastScore !== null && team.totalScore === lastScore) {
+        team.rank = lastRank;
+      } else {
+        team.rank = idx + 1;
+        lastRank = team.rank;
+        lastScore = team.totalScore;
+      }
     });
   }
 
@@ -261,7 +269,17 @@ class Database {
 
     const list = Object.values(teamPoints);
     list.sort((a, b) => b.points - a.points);
-    list.forEach((item, idx) => { item.rank = idx + 1; });
+    let lastPts = null;
+    let lastRank = 0;
+    list.forEach((item, idx) => {
+      if (lastPts !== null && item.points === lastPts) {
+        item.rank = lastRank;
+      } else {
+        item.rank = idx + 1;
+        lastRank = item.rank;
+        lastPts = item.points;
+      }
+    });
     return list;
   }
 
