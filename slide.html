@@ -100,16 +100,20 @@
       color: #0f172a; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 900;
       box-shadow: 0 -8px 30px rgba(0,0,0,0.3);
     }
-    /* Layout order: SECOND(1) | FIRST(2) | THIRD(3) | FOURTH(4+) */
-    .podium-team:nth-child(1) { order: 2; }
-    .podium-team:nth-child(2) { order: 1; }
-    .podium-team:nth-child(3) { order: 3; }
-    .podium-team:nth-child(n+4) { order: 4; }
+    /* Podium layout order: SECOND | FIRST | THIRD | FOURTH */
+    .podium-team.ord-1 { order: 2; }
+    .podium-team.ord-2 { order: 1; }
+    .podium-team.ord-3 { order: 3; }
+    .podium-team.ord-4 { order: 4; }
     /* Block styling follows RANK (so tied teams look identical) */
     .podium-block.rank-1 { height: 210px; background: linear-gradient(180deg, #fbbf24, #f59e0b); font-size: 2.4rem; }
     .podium-block.rank-2 { height: 155px; background: linear-gradient(180deg, #e2e8f0, #94a3b8); }
     .podium-block.rank-3 { height: 115px; background: linear-gradient(180deg, #d97706, #b45309); }
     .podium-block.rank-n { height: 80px; background: rgba(99,102,241,0.35); color: #e0e7ff; }
+    /* Tied rank: split the podium bar into halves */
+    .podium-tie { display: flex; align-items: flex-end; justify-content: center; gap: 10px; width: 510px; }
+    .podium-tie-half { flex: 1; text-align: center; min-width: 0; }
+    .podium-tie .podium-block { width: 100%; }
 
     /* GROUPED CATEGORY STANDINGS (two categories per slide) */
     .cat-group {
@@ -251,6 +255,8 @@
       .kala-grid { grid-template-columns: 1fr; }
       .podium { flex-direction: column; align-items: center; }
       .podium-team { width: min(90vw, 300px); }
+      .podium-tie { width: min(92vw, 320px); flex-direction: column; align-items: stretch; }
+      .podium-tie .podium-block { width: 100%; }
       .cat-group { grid-template-columns: 1fr; }
       .latest-grid { grid-template-columns: 1fr; }
     }
@@ -476,17 +482,43 @@
     function renderStandings() {
       const container = document.getElementById("slide-standings");
       const teams = [...ThanafusDB.db.teams].sort((a, b) => a.rank - b.rank);
-      let html = "";
+
+      // Group teams by rank so ties share one podium bar (split into halves)
+      const groups = [];
       teams.forEach(t => {
-        const rankCls = t.rank === 1 ? "rank-1" : t.rank === 2 ? "rank-2" : t.rank === 3 ? "rank-3" : "rank-n";
-        html += `
-          <div class="podium-team">
-            <div class="podium-name">${t.name}</div>
-            <div class="podium-captain">${t.captain || ""}</div>
-            <div class="podium-score">${t.totalScore} pts</div>
-            <div class="podium-block ${rankCls}">${t.rank}</div>
-          </div>
-        `;
+        const g = groups.find(x => x.rank === t.rank);
+        if (g) g.teams.push(t); else groups.push({ rank: t.rank, teams: [t] });
+      });
+
+      let html = "";
+      groups.forEach(g => {
+        const rankCls = g.rank === 1 ? "rank-1" : g.rank === 2 ? "rank-2" : g.rank === 3 ? "rank-3" : "rank-n";
+        const orderCls = g.rank === 1 ? "ord-1" : g.rank === 2 ? "ord-2" : g.rank === 3 ? "ord-3" : "ord-4";
+        if (g.teams.length === 1) {
+          const t = g.teams[0];
+          html += `
+            <div class="podium-team ${orderCls}">
+              <div class="podium-name">${t.name}</div>
+              <div class="podium-captain">${t.captain || ""}</div>
+              <div class="podium-score">${t.totalScore} pts</div>
+              <div class="podium-block ${rankCls}">${g.rank}</div>
+            </div>
+          `;
+        } else {
+          // Tied rank: split the bar into halves, one team each side
+          html += `
+            <div class="podium-team podium-tie ${orderCls}">
+              ${g.teams.map(t => `
+                <div class="podium-tie-half">
+                  <div class="podium-name">${t.name}</div>
+                  <div class="podium-captain">${t.captain || ""}</div>
+                  <div class="podium-score">${t.totalScore} pts</div>
+                  <div class="podium-block ${rankCls}">${g.rank}</div>
+                </div>
+              `).join("")}
+            </div>
+          `;
+        }
       });
       container.innerHTML = html;
     }
