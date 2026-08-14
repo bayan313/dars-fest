@@ -293,6 +293,7 @@
 
     <div class="slide-footer">
       <span>THANAFUS DARS FEST 2026</span>
+      <span id="slide-updated" style="color:#fbbf24;"></span>
       <span class="dot-nav" id="dot-nav"></span>
       <span id="slide-clock"></span>
     </div>
@@ -586,6 +587,8 @@
         // Update generated slide content WITHOUT resetting the rotation
         renderCategorySlides();
         renderLatestResult();
+        const u = document.getElementById("slide-updated");
+        if (u) u.textContent = "Updated " + new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
       } catch (e) {
         console.error("Refresh failed", e);
       }
@@ -600,6 +603,7 @@
       renderKalaprathibha();
       buildSlides();
       updateClock();
+      refreshData();
       setInterval(updateClock, 1000);
       setInterval(refreshData, REFRESH_INTERVAL);
     }
