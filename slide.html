@@ -125,10 +125,8 @@
       font-size: clamp(0.85rem, 1.6vw, 1.05rem); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
       background: rgba(168,85,247,0.2); border: 1px solid rgba(168,85,247,0.5); color: #f0abfc;
     }
-    .cat-group-col .team-grid { grid-template-columns: 1fr; width: 100%; gap: 14px; }
-    .cat-group-col .team-tile { padding: 14px 18px; }
-    .cat-group-col .team-rank-box { width: 50px; height: 50px; font-size: 1.4rem; }
-    .cat-group-col .team-score { font-size: clamp(1.1rem, 2.2vw, 1.5rem); }
+    .cat-group-col .team-grid { grid-template-columns: 1fr; width: 100%; gap: 8px; }
+    .cat-group-col .medal-row { margin-bottom: 6px; }
 
     /* LATEST 10 PROGRAMME CARDS (top-3 winners each) */
     .latest-grid {
@@ -169,10 +167,31 @@
       background: linear-gradient(90deg, #fbbf24, #f59e0b);
     }
 
+    /* SHARED MEDAL BAR ROWS (Category / Latest / Kalaprathibha) */
+    .medal-list { width: 100%; }
+    .medal-row {
+      display: flex; align-items: center; gap: 14px; padding: 9px 14px; border-radius: 12px; margin-bottom: 8px;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    }
+    .medal { font-size: clamp(1.2rem, 2.4vw, 1.6rem); flex-shrink: 0; width: 42px; text-align: center; }
+    .medal-half { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
+    .medal-name { flex: 1; font-size: clamp(0.9rem, 1.8vw, 1.15rem); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .medal-sub { font-size: clamp(0.6rem, 1.1vw, 0.75rem); color: #a5b4fc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .medal-bar { flex: 1.4; height: 13px; border-radius: 8px; background: rgba(255,255,255,0.08); overflow: hidden; min-width: 60px; }
+    .bar-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+    .medal-row.rank-1 .bar-fill { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+    .medal-row.rank-2 .bar-fill { background: linear-gradient(90deg, #e2e8f0, #94a3b8); }
+    .medal-row.rank-3 .bar-fill { background: linear-gradient(90deg, #d97706, #b45309); }
+    .medal-row.rank-n .bar-fill { background: linear-gradient(90deg, #818cf8, #6366f1); }
+    .medal-pts { flex-shrink: 0; color: #fbbf24; font-weight: 800; font-size: clamp(0.8rem, 1.6vw, 1rem); text-align: right; }
+    .medal-row.medal-tie { gap: 8px; }
+    .medal-tie .medal-half { padding: 0 8px; border-right: 1px solid rgba(255,255,255,0.12); }
+    .medal-tie .medal-half:last-child { border-right: none; }
+
     /* KALAPRATHIBHA */
-    .kala-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: min(1100px, 94vw); }
+    .kala-grid { display: flex; flex-direction: column; gap: 20px; width: min(1150px, 94vw); }
     .kala-card {
-      text-align: center; padding: 30px 22px; border-radius: 20px;
+      text-align: left; padding: 22px 26px; border-radius: 20px;
       background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); backdrop-filter: blur(6px);
     }
     .kala-cat { font-size: clamp(0.8rem,1.6vw,1rem); color: #f0abfc; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
@@ -399,21 +418,76 @@
         const items = ThanafusDB.getCategoryTeamPoints(cat);
         let body;
         if (items.length > 0) {
-          body = items.map(item => `
-            <div class="team-tile">
-              <div class="team-rank-box">${item.points > 0 ? item.rank : "—"}</div>
-              <div class="team-info">
-                <div class="team-name">${item.team.name}</div>
-                <div class="team-captain">${item.team.captain || ""}</div>
-              </div>
-              <div class="team-score">${item.points}<small>pts</small></div>
-            </div>
-          `).join("");
+          const maxPts = Math.max(1, ...items.map(i => i.points));
+          body = items.map(item => {
+            const r = { rank: item.points > 0 ? item.rank : "—", name: item.team.name, sub: item.team.captain || "", pts: item.points };
+            return medalRowHTML(r, maxPts);
+          }).join("");
         } else {
           body = `<div style="grid-column:1/-1;text-align:center;color:#a5b4fc;padding:20px;">No teams</div>`;
         }
         grid.innerHTML = body;
       });
+    }
+
+    // One medal bar row: 🥇 name [bar] pts  (tied ranks share one row, split into halves)
+    function medalRowHTML(r, maxPts) {
+      const medal = r.rank === 1 ? "🥇" : r.rank === 2 ? "🥈" : r.rank === 3 ? "🥉" : r.rank;
+      const rankCls = r.rank === 1 ? "rank-1" : r.rank === 2 ? "rank-2" : r.rank === 3 ? "rank-3" : "rank-n";
+      const pct = Math.max(3, Math.round((r.pts / maxPts) * 100));
+      return `
+        <div class="medal-row ${rankCls}">
+          <div class="medal">${medal}</div>
+          <div class="medal-half">
+            <div class="medal-name">${r.name}</div>
+            ${r.sub ? `<div class="medal-sub">${r.sub}</div>` : ""}
+            <div class="medal-bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+            <div class="medal-pts">${r.pts} pts</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Group results by rank so ties render inside ONE row split into halves
+    function medalRowsHTML(rows, maxPts) {
+      const groups = [];
+      rows.forEach(r => {
+        const g = groups.find(x => x.rank === r.rank);
+        if (g) g.items.push(r); else groups.push({ rank: r.rank, items: [r] });
+      });
+      const medal = ["🥇", "🥈", "🥉"];
+      return groups.map(g => {
+        const rankCls = g.rank === 1 ? "rank-1" : g.rank === 2 ? "rank-2" : g.rank === 3 ? "rank-3" : "rank-n";
+        const m = g.rank <= 3 ? medal[g.rank - 1] : g.rank;
+        const pct = r => Math.max(3, Math.round((r.pts / maxPts) * 100));
+        if (g.items.length === 1) {
+          const r = g.items[0];
+          return `
+            <div class="medal-row ${rankCls}">
+              <div class="medal">${m}</div>
+              <div class="medal-half">
+                <div class="medal-name">${r.name}</div>
+                ${r.sub ? `<div class="medal-sub">${r.sub}</div>` : ""}
+                <div class="medal-bar"><div class="bar-fill" style="width:${pct(r)}%"></div></div>
+                <div class="medal-pts">${r.pts} pts</div>
+              </div>
+            </div>
+          `;
+        }
+        return `
+          <div class="medal-row medal-tie ${rankCls}">
+            <div class="medal">${m}</div>
+            ${g.items.map(r => `
+              <div class="medal-half">
+                <div class="medal-name">${r.name}</div>
+                ${r.sub ? `<div class="medal-sub">${r.sub}</div>` : ""}
+                <div class="medal-bar"><div class="bar-fill" style="width:${pct(r)}%"></div></div>
+                <div class="medal-pts">${r.pts} pts</div>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      }).join("");
     }
 
     // Fill the latest-results slides (2 panels of 4) WITHOUT resetting rotation
@@ -457,7 +531,6 @@
         }
         // Relative bar width: 100% for highest points in this chunk
         const maxPts = Math.max(1, ...chunk.flatMap(it => it.rows.map(r => r.pts)));
-        const medal = ["🥇", "🥈", "🥉"];
         box.innerHTML = chunk.map((it, idx) => `
           <div class="latest-prog-card">
             <div class="latest-prog-head">
@@ -465,16 +538,7 @@
               <span class="latest-prog-name">${it.prog}</span>
               <span class="latest-prog-cat">${it.cat}</span>
             </div>
-            ${it.rows.map(r => `
-              <div class="latest-rank-row rank-${r.rank}">
-                <div class="latest-place">${medal[r.rank - 1] || r.rank}</div>
-                <div class="latest-winner">
-                  <div class="latest-winner-name">${r.name}</div>
-                  <div class="latest-winner-team">${r.teamName}</div>
-                </div>
-                <div class="latest-points">${r.pts} pts</div>
-              </div>
-            `).join("")}
+            ${medalRowsHTML(it.rows.map(r => ({ rank: r.rank, name: r.name, sub: r.teamName, pts: r.pts })), maxPts)}
           </div>
         `).join("");
       });
@@ -529,20 +593,19 @@
       let html = "";
       ["Sub Junior", "Junior", "Senior"].forEach(cat => {
         const top3 = ThanafusDB.getKalaprathibhaTop3(cat);
-        const medal = ["🥇", "🥈", "🥉"];
-        const rows = top3.length > 0
-          ? top3.map((c, i) => `
-              <div class="kala-row">
-                <div class="kala-place">${medal[i]}</div>
-                ${c.student.photo ? `<img src="${c.student.photo}" class="kala-avatar" alt="${c.student.name}">` : `<div class="kala-avatar">${medal[i]}</div>`}
-                <div class="kala-info">
-                  <div class="kala-name">${c.student.name}</div>
-                  <div class="kala-team">${c.teamName}</div>
-                </div>
-                <div class="kala-points">${c.points} pts</div>
-              </div>
-            `).join("")
-          : `<div style="grid-column:1/-1;text-align:center;color:#a5b4fc;padding:20px;">No results yet</div>`;
+        let rows = "";
+        if (top3.length > 0) {
+          // Assign ranks with tie-sharing (same points => same rank)
+          const maxPts = Math.max(1, ...top3.map(c => c.points));
+          let lastPts = null, lastRank = 0;
+          const ranked = top3.map((c, i) => {
+            const rank = (lastPts !== null && c.points === lastPts) ? lastRank : (lastRank = i + 1, lastPts = c.points, lastRank);
+            return { rank, name: c.student.name, sub: c.teamName, pts: c.points };
+          });
+          rows = medalRowsHTML(ranked, maxPts);
+        } else {
+          rows = `<div style="grid-column:1/-1;text-align:center;color:#a5b4fc;padding:20px;">No results yet</div>`;
+        }
         html += `
           <div class="kala-card">
             <div class="kala-cat">${cat}</div>
