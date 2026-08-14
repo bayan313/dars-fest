@@ -188,12 +188,14 @@
     .medal-tie .medal-half { padding: 0 8px; border-right: 1px solid rgba(255,255,255,0.12); }
     .medal-tie .medal-half:last-child { border-right: none; }
 
-    /* KALAPRATHIBHA */
-    .kala-grid { display: flex; flex-direction: column; gap: 20px; width: min(1150px, 94vw); }
+    /* KALAPRATHIBHA: 3 columns (left Sub Junior, center Junior, right Senior) */
+    .kala-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; width: min(1400px, 96vw); align-items: stretch; }
     .kala-card {
-      text-align: left; padding: 22px 26px; border-radius: 20px;
+      text-align: left; padding: 22px 24px; border-radius: 20px;
       background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); backdrop-filter: blur(6px);
+      display: flex; flex-direction: column; height: 100%;
     }
+    .kala-card .medal-row { flex-shrink: 0; }
     .kala-cat { font-size: clamp(0.8rem,1.6vw,1rem); color: #f0abfc; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
     .kala-row {
       display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; margin-top: 10px;
