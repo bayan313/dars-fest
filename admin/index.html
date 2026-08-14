@@ -1409,86 +1409,227 @@
     function printAppeal(id) {
       const appeal = ThanafusDB.db.appeals.find(a => a.id === id);
       if (!appeal) return;
-      const w = window.open("", "_blank", "width=600,height=700");
+      const statusColor = appeal.status === 'Approved' ? '#059669' : appeal.status === 'Rejected' ? '#dc2626' : '#b45309';
+      const amountWords = numberToWords(appeal.fee || 50);
+      const w = window.open("", "_blank", "width=600,height=760");
       w.document.write(`
         <!DOCTYPE html>
-        <html><head><title>Appeal #${appeal.id}</title>
+        <html><head><title>Appeal Form — ${appeal.id}</title>
         <style>
-          body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; color: #111; }
-          .head { text-align: center; border-bottom: 3px double #111; padding-bottom: 12px; margin-bottom: 18px; }
-          .head h1 { margin: 0; font-size: 22px; letter-spacing: 1px; }
-          .head p { margin: 4px 0 0; color: #555; font-size: 13px; }
-          .meta { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
-          .meta td { padding: 8px 10px; border: 1px solid #999; font-size: 14px; }
-          .meta td:first-child { background: #f1f5f9; font-weight: 700; width: 40%; }
-          .desc { border: 1px solid #999; padding: 12px; font-size: 14px; border-radius: 6px; margin-bottom: 18px; }
-          .desc h4 { margin: 0 0 6px; font-size: 14px; }
-          .fee { display: inline-block; padding: 8px 16px; border: 2px solid #d97706; color: #d97706; font-weight: 800; border-radius: 6px; font-size: 16px; }
-          .foot { margin-top: 30px; display: flex; justify-content: space-between; font-size: 12px; color: #555; }
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            color: #1a1a1a; font-size: 13px; line-height: 1.5;
+            width: 100%; min-height: 100vh;
+            padding: 0;
+          }
+          .sheet {
+            max-width: 210mm; margin: 0 auto; padding: 14mm 12mm;
+            position: relative;
+          }
+          /* Watermark */
+          .sheet::before {
+            content: "THANAFUS DARS FEST 2026";
+            position: absolute; top: 45%; left: 0; right: 0;
+            text-align: center; font-size: 42px; letter-spacing: 3px;
+            color: rgba(6, 78, 59, 0.05); transform: rotate(-28deg);
+            font-weight: 800; pointer-events: none; z-index: 0;
+          }
+          /* Letterhead */
+          .letterhead {
+            border-bottom: 3px solid #064e3b;
+            padding-bottom: 12px; margin-bottom: 18px;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            position: relative; z-index: 1;
+          }
+          .brand { display: flex; align-items: center; gap: 12px; }
+          .brand-logo {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: #064e3b; color: #fbbf24;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 900; flex-shrink: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+          }
+          .brand h1 { font-size: 20px; letter-spacing: 1.5px; color: #064e3b; font-weight: 800; }
+          .brand p { font-size: 10px; color: #64748b; letter-spacing: 2px; text-transform: uppercase; }
+          .receipt-no {
+            text-align: right; font-size: 11px; color: #475569;
+            font-family: 'Segoe UI', Arial, sans-serif;
+          }
+          .receipt-no b { display: block; font-size: 13px; color: #064e3b; letter-spacing: 1px; }
+          .title-band {
+            background: #064e3b; color: #fff; text-align: center;
+            padding: 8px 0; letter-spacing: 3px; font-size: 12px;
+            font-family: 'Segoe UI', Arial, sans-serif; font-weight: 700;
+            border-radius: 4px; margin-bottom: 16px; position: relative; z-index: 1;
+          }
+          .status-pill {
+            display: inline-block; padding: 3px 14px; border-radius: 20px;
+            font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+            color: #fff; background: ${statusColor}; font-family: 'Segoe UI', Arial, sans-serif;
+          }
+          .grid { width: 100%; border-collapse: collapse; margin-bottom: 14px; position: relative; z-index: 1; }
+          .grid td {
+            border: 1px solid #cbd5e1; padding: 9px 12px; font-size: 12.5px; vertical-align: top;
+          }
+          .grid td:first-child {
+            background: #f1f5f9; font-weight: 700; width: 34%;
+            font-family: 'Segoe UI', Arial, sans-serif; color: #334155; font-size: 11px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+          }
+          .desc { border: 1px solid #cbd5e1; border-left: 5px solid #b45309; padding: 14px; margin-bottom: 14px; position: relative; z-index: 1; }
+          .desc h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #b45309; margin-bottom: 8px; font-family: 'Segoe UI', Arial, sans-serif; }
+          .desc p { font-size: 12.5px; line-height: 1.6; color: #1f2937; }
+          .fee-strip { display: flex; justify-content: space-between; align-items: center; border: 1.5px solid #b45309; border-radius: 6px; padding: 12px 16px; margin-bottom: 18px; position: relative; z-index: 1; background: #fffbeb; }
+          .fee-amount { font-size: 22px; font-weight: 800; color: #b45309; font-family: 'Segoe UI', Arial, sans-serif; }
+          .fee-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #92400e; font-family: 'Segoe UI', Arial, sans-serif; font-weight: 700; }
+          .fee-words { font-size: 10.5px; color: #92400e; font-style: italic; margin-top: 2px; }
+          .sign { display: flex; justify-content: space-between; margin-top: 44px; position: relative; z-index: 1; }
+          .sign-block { width: 45%; text-align: center; }
+          .sign-line { border-top: 1px solid #1a1a1a; padding-top: 6px; font-size: 11px; color: #334155; font-family: 'Segoe UI', Arial, sans-serif; }
+          .sign-role { font-size: 9.5px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; font-family: 'Segoe UI', Arial, sans-serif; }
+          .foot {
+            margin-top: 20px; padding-top: 10px; border-top: 1px dashed #cbd5e1;
+            font-size: 9px; color: #94a3b8; text-align: center;
+            display: flex; justify-content: space-between; position: relative; z-index: 1;
+            font-family: 'Segoe UI', Arial, sans-serif;
+          }
+          .foot span { display: inline-block; }
+          .serial { font-size: 10px; color: #94a3b8; text-align: right; margin-top: 8px; font-family: 'Segoe UI', Arial, sans-serif; letter-spacing: 1px; }
         </style></head>
         <body onload="window.print()">
-          <div class="head">
-            <h1>THANAFUS Dars Fest 2026</h1>
-            <p>Official Appeal Form</p>
-          </div>
-          <table class="meta">
-            <tr><td>Appeal ID</td><td>${appeal.id}</td></tr>
-            <tr><td>Date Submitted</td><td>${formatDate(appeal.date)}</td></tr>
-            <tr><td>Student Name</td><td>${appeal.studentName}</td></tr>
-            <tr><td>Team</td><td>${appeal.team}</td></tr>
-            <tr><td>Category</td><td>${appeal.category}</td></tr>
-            <tr><td>Programme / Event</td><td>${appeal.programme}</td></tr>
-            <tr><td>Phone Number</td><td>${appeal.phoneNumber}</td></tr>
-            <tr><td>Status</td><td>${appeal.status}</td></tr>
-          </table>
-          <div class="desc">
-            <h4>Reason of Appeal</h4>
-            ${appeal.description}
-          </div>
-          <div class="fee">Appeal Fee: Rs. ${appeal.fee || 50} (Paid at Dars Fest counter)</div>
-          <div class="foot">
-            <span>Submitted by: ______________________</span>
-            <span>Authorised by: ______________________</span>
+          <div class="sheet">
+            <div class="letterhead">
+              <div class="brand">
+                <div class="brand-logo">DF</div>
+                <div>
+                  <h1>THANAFUS</h1>
+                  <p>Dars Fest 2026 &bull; Official Appeal Form</p>
+                </div>
+              </div>
+              <div class="receipt-no">
+                <b>APPEAL NO.</b>
+                ${appeal.id}
+              </div>
+            </div>
+
+            <div class="title-band">APPLICATION FOR REVIEW &amp; RECTIFICATION</div>
+
+            <table class="grid">
+              <tr><td>Date Submitted</td><td>${formatDate(appeal.date)} <span class="status-pill">${appeal.status}</span></td></tr>
+              <tr><td>Student Name</td><td><b>${appeal.studentName}</b></td></tr>
+              <tr><td>Team</td><td>${appeal.team}</td></tr>
+              <tr><td>Category</td><td>${appeal.category}</td></tr>
+              <tr><td>Programme / Event</td><td>${appeal.programme}</td></tr>
+              <tr><td>Contact Number</td><td>${appeal.phoneNumber}</td></tr>
+            </table>
+
+            <div class="desc">
+              <h4>Reason of Appeal / Remarks</h4>
+              <p>${appeal.description}</p>
+            </div>
+
+            <div class="fee-strip">
+              <div>
+                <div class="fee-label">Appeal Processing Fee</div>
+                <div class="fee-words">Rupees ${amountWords} Only &bull; Paid at Dars Fest counter</div>
+              </div>
+              <div class="fee-amount">Rs. ${appeal.fee || 50}</div>
+            </div>
+
+            <div class="sign">
+              <div class="sign-block">
+                <div class="sign-line">Signature of Student</div>
+                <div class="sign-role">Applicant</div>
+              </div>
+              <div class="sign-block">
+                <div class="sign-line">Signature of Authorised Officer</div>
+                <div class="sign-role">Jury Coordinator</div>
+              </div>
+            </div>
+
+            <div class="foot">
+              <span>THANAFUS IT Team</span>
+              <span>decision of the Grand Jury is final &amp; binding</span>
+              <span>${new Date().getFullYear()} &copy; THANAFUS</span>
+            </div>
+            <div class="serial">Generated ${new Date().toLocaleString()} &bull; Verify via Dars Fest results desk</div>
           </div>
         </body></html>
       `);
       w.document.close();
     }
 
+    // Convert number to words (Indian format) for professional amount display
+    function numberToWords(num) {
+      const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+      const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+      const two = n => n < 20 ? ones[n] : tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
+      let words = '';
+      if (num >= 100) words += ones[Math.floor(num / 100)] + ' Hundred ';
+      words += two(num % 100);
+      return words.trim();
+    }
+
     // Print all appeals in a clean summary sheet
     function printAllAppeals() {
       const appeals = ThanafusDB.db.appeals;
-      const rows = appeals.map(a => `
+      const pending = appeals.filter(a => a.status === 'Pending').length;
+      const approved = appeals.filter(a => a.status === 'Approved').length;
+      const rejected = appeals.filter(a => a.status === 'Rejected').length;
+      const rows = appeals.map(a => {
+        const sColor = a.status === 'Approved' ? '#059669' : a.status === 'Rejected' ? '#dc2626' : '#b45309';
+        return `
         <tr>
           <td>${formatDate(a.date)}</td>
-          <td>${a.studentName}</td>
+          <td><b>${a.studentName}</b></td>
           <td>${a.team}</td>
-          <td>${a.programme} (${a.category})</td>
-          <td>Rs. ${a.fee || 50}</td>
-          <td>${a.status}</td>
-        </tr>`).join("");
-      const w = window.open("", "_blank", "width=700,height=600");
+          <td>${a.programme}<br><span class="cat">${a.category}</span></td>
+          <td>${a.phoneNumber}</td>
+          <td class="amt">Rs. ${a.fee || 50}</td>
+          <td><span class="pill" style="background:${sColor};">${a.status}</span></td>
+        </tr>`;
+      }).join("");
+      const w = window.open("", "_blank", "width=720,height=640");
       w.document.write(`
         <!DOCTYPE html>
-        <html><head><title>All Appeals</title>
+        <html><head><title>Appeals Summary Sheet</title>
         <style>
-          body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; color: #111; }
-          .head { text-align: center; border-bottom: 3px double #111; padding-bottom: 12px; margin-bottom: 18px; }
-          .head h1 { margin: 0; font-size: 22px; }
-          .head p { margin: 4px 0 0; color: #555; font-size: 13px; }
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: 'Segoe UI', Arial, sans-serif; padding: 24px; color: #111; }
+          .head { text-align: center; border-bottom: 3px solid #064e3b; padding-bottom: 12px; margin-bottom: 6px; }
+          .head h1 { margin: 0; font-size: 22px; letter-spacing: 2px; color: #064e3b; }
+          .head p { margin: 4px 0 0; color: #64748b; font-size: 12px; letter-spacing: 1px; }
+          .stats { display: flex; justify-content: center; gap: 26px; margin: 14px 0 18px; font-size: 12px; }
+          .stats span { padding: 6px 16px; border-radius: 20px; font-weight: 700; }
           table { width: 100%; border-collapse: collapse; }
-          th, td { border: 1px solid #999; padding: 8px 10px; font-size: 13px; text-align: left; }
-          th { background: #f1f5f9; }
+          th { background: #064e3b; color: #fff; text-align: left; padding: 9px 10px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+          td { border: 1px solid #cbd5e1; padding: 9px 10px; font-size: 12px; vertical-align: middle; }
+          tr:nth-child(even) td { background: #f8fafc; }
+          .cat { font-size: 10px; color: #64748b; }
+          .amt { font-weight: 700; color: #b45309; }
+          .pill { color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+          .foot { margin-top: 18px; display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; }
         </style></head>
         <body onload="window.print()">
           <div class="head">
-            <h1>THANAFUS Dars Fest 2026</h1>
-            <p>Appeals Summary Sheet — ${appeals.length} appeal(s)</p>
+            <h1>THANAFUS DARS FEST 2026</h1>
+            <p>APPEALS SUMMARY REGISTER</p>
+          </div>
+          <div class="stats">
+            <span style="background:#fffbeb;color:#b45309;">${pending} Pending</span>
+            <span style="background:#e2fdf2;color:#059669;">${approved} Approved</span>
+            <span style="background:#fef2f2;color:#dc2626;">${rejected} Rejected</span>
+            <span style="background:#f1f5f9;color:#334155;">${appeals.length} Total</span>
           </div>
           <table>
-            <thead><tr><th>Date</th><th>Student</th><th>Team</th><th>Programme</th><th>Fee</th><th>Status</th></tr></thead>
+            <thead><tr><th>Date</th><th>Student</th><th>Team</th><th>Programme</th><th>Phone</th><th>Fee</th><th>Status</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
+          <div class="foot">
+            <span>Generated ${new Date().toLocaleString()}</span>
+            <span>THANAFUS Jury Coordinator</span>
+          </div>
         </body></html>
       `);
       w.document.close();
