@@ -146,7 +146,8 @@
   <script src="../js/main.js"></script>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
+      await ThanafusDB.ready();
       populateTeams();
     });
 

@@ -70,26 +70,21 @@ class Database {
     this.loadedFromServer = false;
     this._saving = false;
     this._dirty = false;
-    this.load();
-    this.calculateLeaderboard();
+    this._loadPromise = this.load();
+    this._loadPromise.then(() => this.calculateLeaderboard());
   }
 
-  load() {
+  async load() {
     try {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', '/api/all', false); // Synchronous request to ensure data is loaded before rendering
-      xhr.send(null);
-      if (xhr.status === 200) {
-        this.db = JSON.parse(xhr.responseText);
+      const response = await fetch('/api/all', { cache: 'no-store' });
+      if (response.ok) {
+        this.db = await response.json();
         if (typeof this.db.revision !== 'number') this.db.revision = 0;
         this.loadedFromServer = true;
       } else {
-        throw new Error('Failed to load data from API');
+        throw new Error('Failed to load data from API: ' + response.status);
       }
     } catch (e) {
-      // Fallback to demo seed data for DISPLAY ONLY.
-      // loadedFromServer stays false so save() never overwrites the live database
-      // with this seed data (that was the cause of the data loss).
       console.error("Database loading from API failed", e);
       this.loadedFromServer = false;
       this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
@@ -97,6 +92,10 @@ class Database {
         window.__onDbLoadFail(e);
       }
     }
+  }
+
+  async ready() {
+    await this._loadPromise;
   }
 
   save(isReset) {

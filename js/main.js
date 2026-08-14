@@ -41,27 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Lightbox Functionality
-  const lightbox = document.getElementById("lightbox");
-  if (lightbox) {
-    const closeBtn = lightbox.querySelector(".lightbox-close");
-    if (closeBtn) {
-      closeBtn.addEventListener("click", () => {
-        lightbox.style.display = "none";
-        const content = lightbox.querySelector(".lightbox-content");
-        content.innerHTML = '<button class="lightbox-close">&times;</button>';
-      });
-    }
-
-    // Close on click outside content
-    lightbox.addEventListener("click", (e) => {
-      if (e.target === lightbox) {
-        lightbox.style.display = "none";
-        const content = lightbox.querySelector(".lightbox-content");
-        content.innerHTML = '<button class="lightbox-close">&times;</button>';
-      }
-    });
-  }
+  // Lightbox Functionality - handled per-page to avoid conflicts
+  // Each page (gallery.html, etc.) implements its own openLightbox/closeLightbox
 });
 
 // Global Alert Utility

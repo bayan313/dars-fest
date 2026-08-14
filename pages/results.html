@@ -153,13 +153,6 @@
     </section>
   </main>
 
-  <!-- Lightbox Modal -->
-  <div class="lightbox" id="lightbox">
-    <div class="lightbox-content">
-      <button class="lightbox-close">&times;</button>
-    </div>
-  </div>
-
   <!-- Footer -->
   <footer>
     <div class="footer-bottom">
@@ -174,6 +167,10 @@
   <script>
     let currentCategory = "";
     let activeTab = "program";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await ThanafusDB.ready();
+    });
 
     function selectCategory(category) {
       currentCategory = category;

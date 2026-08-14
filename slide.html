@@ -346,6 +346,11 @@
     const SLIDE_DURATION = 10000; // 10 seconds per slide
     const REFRESH_INTERVAL = 15000; // refresh data every 15s
 
+    async function initSlidePage() {
+      await ThanafusDB.ready();
+      buildSlides();
+    }
+
     function buildSlides() {
       const stage = document.getElementById("slide-stage");
 
@@ -676,7 +681,8 @@
       document.getElementById("slide-clock").textContent = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
 
-    function init() {
+    async function init() {
+      await ThanafusDB.ready();
       renderStandings();
       renderKalaprathibha();
       buildSlides();

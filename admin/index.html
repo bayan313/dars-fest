@@ -694,8 +694,9 @@
     };
 
     // AUTHENTICATION
-    function handleAdminLogin(event) {
+    async function handleAdminLogin(event) {
       event.preventDefault();
+      await ThanafusDB.ready();
       const pass = document.getElementById("admin-pass").value;
       const truePass = ThanafusDB.db.settings.adminPassword || "admin";
 
