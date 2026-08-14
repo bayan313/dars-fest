@@ -350,17 +350,29 @@
       `;
       stage.insertBefore(secB, document.querySelector(".slide-footer"));
 
-      // Slide C: Latest 10 results in one panel
+      // Slide C: Latest 8 results in one panel (first 4)
       const secC = document.createElement("section");
       secC.className = "slide";
       secC.setAttribute("data-generated", "1");
       secC.innerHTML = `
         <div class="slide-logo">Latest Published Results</div>
         <h2 class="slide-heading">Latest Results</h2>
-        <p class="slide-sub">Most recent 10 published results</p>
-        <div class="latest-grid" id="latest-winners"></div>
+        <p class="slide-sub">Most recent published results</p>
+        <div class="latest-grid" id="latest-winners-1"></div>
       `;
       stage.insertBefore(secC, document.querySelector(".slide-footer"));
+
+      // Slide D: Latest 8 results, second part (next 4)
+      const secD = document.createElement("section");
+      secD.className = "slide";
+      secD.setAttribute("data-generated", "1");
+      secD.innerHTML = `
+        <div class="slide-logo">Latest Published Results</div>
+        <h2 class="slide-heading">Latest Results</h2>
+        <p class="slide-sub">Most recent published results</p>
+        <div class="latest-grid" id="latest-winners-2"></div>
+      `;
+      stage.insertBefore(secD, document.querySelector(".slide-footer"));
 
       renderCategorySlides();
       renderLatestResult();
@@ -394,16 +406,16 @@
       });
     }
 
-    // Fill the latest-10-results slide WITHOUT resetting rotation
+    // Fill the latest-results slides (2 panels of 4) WITHOUT resetting rotation
     function renderLatestResult() {
-      const winners = document.getElementById("latest-winners");
-      if (!winners) return;
+      const boxes = [document.getElementById("latest-winners-1"), document.getElementById("latest-winners-2")];
+      if (!boxes[0] && !boxes[1]) return;
 
       const published = ThanafusDB.db.programmes.filter(p => p.resultsPublished)
         .sort((a, b) => new Date((b.resultsPublishedAt || 0)) - new Date((a.resultsPublishedAt || 0)));
 
       const items = [];
-      published.slice(0, 10).forEach(prog => {
+      published.slice(0, 8).forEach(prog => {
         const top = [...prog.results].sort((a, b) => a.rank - b.rank).slice(0, 3);
         if (top.length === 0) return;
         const rows = top.map(w => {
@@ -425,18 +437,21 @@
         items.push({ prog: prog.name, cat: prog.category, rows });
       });
 
-      // Relative bar width: 100% for highest points across all shown
-      const maxPts = Math.max(1, ...items.flatMap(it => it.rows.map(r => r.pts)));
-      const medal = ["🥇", "🥈", "🥉"];
-
-      let html;
-      if (items.length === 0) {
-        html = `<div style="text-align:center;color:#a5b4fc;padding:40px;">No results published yet.</div>`;
-      } else {
-        html = items.map((it, idx) => `
+      const empty = `<div style="text-align:center;color:#a5b4fc;padding:40px;">No results published yet.</div>`;
+      boxes.forEach((box, bi) => {
+        if (!box) return;
+        const chunk = items.slice(bi * 4, bi * 4 + 4);
+        if (chunk.length === 0) {
+          box.innerHTML = items.length === 0 ? empty : "";
+          return;
+        }
+        // Relative bar width: 100% for highest points in this chunk
+        const maxPts = Math.max(1, ...chunk.flatMap(it => it.rows.map(r => r.pts)));
+        const medal = ["🥇", "🥈", "🥉"];
+        box.innerHTML = chunk.map((it, idx) => `
           <div class="latest-prog-card">
             <div class="latest-prog-head">
-              <span class="latest-prog-num">PROGRAMME ${String(idx + 1).padStart(2, "0")}</span>
+              <span class="latest-prog-num">PROGRAMME ${String(bi * 4 + idx + 1).padStart(2, "0")}</span>
               <span class="latest-prog-name">${it.prog}</span>
               <span class="latest-prog-cat">${it.cat}</span>
             </div>
@@ -452,8 +467,7 @@
             `).join("")}
           </div>
         `).join("");
-      }
-      winners.innerHTML = html;
+      });
     }
 
     function renderStandings() {
