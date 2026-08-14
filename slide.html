@@ -105,10 +105,11 @@
     .podium-team:nth-child(2) { order: 1; }
     .podium-team:nth-child(3) { order: 3; }
     .podium-team:nth-child(n+4) { order: 4; }
-    .podium-team:nth-child(1) .podium-block { height: 210px; background: linear-gradient(180deg, #fbbf24, #f59e0b); font-size: 2.4rem; }
-    .podium-team:nth-child(2) .podium-block { height: 155px; background: linear-gradient(180deg, #e2e8f0, #94a3b8); }
-    .podium-team:nth-child(3) .podium-block { height: 115px; background: linear-gradient(180deg, #d97706, #b45309); }
-    .podium-team:nth-child(n+4) .podium-block { height: 80px; background: rgba(99,102,241,0.35); color: #e0e7ff; }
+    /* Block styling follows RANK (so tied teams look identical) */
+    .podium-block.rank-1 { height: 210px; background: linear-gradient(180deg, #fbbf24, #f59e0b); font-size: 2.4rem; }
+    .podium-block.rank-2 { height: 155px; background: linear-gradient(180deg, #e2e8f0, #94a3b8); }
+    .podium-block.rank-3 { height: 115px; background: linear-gradient(180deg, #d97706, #b45309); }
+    .podium-block.rank-n { height: 80px; background: rgba(99,102,241,0.35); color: #e0e7ff; }
 
     /* GROUPED CATEGORY STANDINGS (two categories per slide) */
     .cat-group {
@@ -475,12 +476,13 @@
       const teams = [...ThanafusDB.db.teams].sort((a, b) => a.rank - b.rank);
       let html = "";
       teams.forEach(t => {
+        const rankCls = t.rank === 1 ? "rank-1" : t.rank === 2 ? "rank-2" : t.rank === 3 ? "rank-3" : "rank-n";
         html += `
           <div class="podium-team">
             <div class="podium-name">${t.name}</div>
             <div class="podium-captain">${t.captain || ""}</div>
             <div class="podium-score">${t.totalScore} pts</div>
-            <div class="podium-block">${t.rank}</div>
+            <div class="podium-block ${rankCls}">${t.rank}</div>
           </div>
         `;
       });
