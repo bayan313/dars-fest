@@ -631,10 +631,10 @@
         let body;
         if (items.length > 0) {
           const maxPts = Math.max(1, ...items.map(i => i.points));
-          body = items.map(item => {
-            const r = { rank: item.points > 0 ? item.rank : "—", name: item.team.name, sub: item.team.captain || "", pts: item.points };
-            return medalRowHTML(r, maxPts);
-          }).join("");
+          const rows = items.filter(i => i.points > 0).map(item => ({
+            rank: item.rank, name: item.team.name, sub: item.team.captain || "", pts: item.points
+          }));
+          body = rows.length > 0 ? medalRowsHTML(rows, maxPts) : `<div style="grid-column:1/-1;text-align:center;color:#a5b4fc;padding:20px;">No points yet</div>`;
         } else {
           body = `<div style="grid-column:1/-1;text-align:center;color:#a5b4fc;padding:20px;">No teams</div>`;
         }
@@ -664,13 +664,14 @@
     function medalRowsHTML(rows, maxPts) {
       const groups = [];
       rows.forEach(r => {
-        const g = groups.find(x => x.rank === r.rank);
-        if (g) g.items.push(r); else groups.push({ rank: r.rank, items: [r] });
+        const rnk = Number(r.rank);
+        const g = groups.find(x => Number(x.rank) === rnk);
+        if (g) g.items.push(r); else groups.push({ rank: rnk, items: [r] });
       });
       const medal = ["🥇", "🥈", "🥉"];
       return groups.map(g => {
         const rankCls = g.rank === 1 ? "rank-1" : g.rank === 2 ? "rank-2" : g.rank === 3 ? "rank-3" : "rank-n";
-        const m = g.rank <= 3 ? medal[g.rank - 1] : g.rank;
+        const m = g.rank >= 1 && g.rank <= 3 ? medal[g.rank - 1] : g.rank;
         const pct = r => Math.max(3, Math.round((r.pts / maxPts) * 100));
         if (g.items.length === 1) {
           const r = g.items[0];
@@ -807,12 +808,12 @@
         const top3 = ThanafusDB.getKalaprathibhaTop3(cat);
         let rows = "";
         if (top3.length > 0) {
-          // Assign ranks with tie-sharing (same points => same rank)
-          const maxPts = Math.max(1, ...top3.map(c => c.points));
+          const maxPts = Math.max(1, ...top3.map(c => Number(c.points) || 0));
           let lastPts = null, lastRank = 0;
           const ranked = top3.map((c, i) => {
-            const rank = (lastPts !== null && c.points === lastPts) ? lastRank : (lastRank = i + 1, lastPts = c.points, lastRank);
-            return { rank, name: c.student.name, sub: c.teamName, pts: c.points };
+            const pts = Number(c.points) || 0;
+            const rank = (lastPts !== null && pts === lastPts) ? lastRank : (lastRank = i + 1, lastPts = pts, lastRank);
+            return { rank, name: c.student.name, sub: c.teamName, pts };
           });
           rows = medalRowsHTML(ranked, maxPts);
         } else {
