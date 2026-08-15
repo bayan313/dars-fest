@@ -173,21 +173,21 @@
     /* ============ MEDAL BAR ROWS ============ */
     .medal-row {
       display: flex; align-items: center; gap: 1vw; padding: 0.8vh 1.2vw; border-radius: 12px; margin-bottom: 0.6vh;
-      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); overflow: hidden; min-width: 0;
     }
     .medal { font-size: clamp(1rem, 2vw, 1.8rem); flex-shrink: 0; width: 3em; text-align: center; }
-    .medal-half { flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.8vw; }
-    .medal-name { flex: 1; font-size: clamp(0.8rem, 1.5vw, 1.25rem); font-weight: 800; line-height: 1.25; white-space: normal; overflow-wrap: anywhere; }
-    .medal-sub { font-size: clamp(0.5rem, 1vw, 0.8rem); color: #a5b4fc; white-space: normal; overflow-wrap: anywhere; }
-    .medal-bar { flex: 0 0 25%; height: clamp(8px, 1.2vh, 14px); border-radius: 8px; background: rgba(255,255,255,0.08); overflow: hidden; min-width: 30px; }
+    .medal-half { flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.8vw; overflow: hidden; }
+    .medal-name { flex: 1; min-width: 0; font-size: clamp(0.8rem, 1.5vw, 1.25rem); font-weight: 800; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .medal-sub { font-size: clamp(0.5rem, 1vw, 0.8rem); color: #a5b4fc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+    .medal-bar { flex: 0 0 auto; width: clamp(40px, 8vw, 120px); height: clamp(8px, 1.2vh, 14px); border-radius: 8px; background: rgba(255,255,255,0.08); overflow: hidden; }
     .bar-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, #fbbf24, #f59e0b); }
     .medal-row.rank-1 .bar-fill { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
     .medal-row.rank-2 .bar-fill { background: linear-gradient(90deg, #e2e8f0, #94a3b8); }
     .medal-row.rank-3 .bar-fill { background: linear-gradient(90deg, #d97706, #b45309); }
     .medal-row.rank-n .bar-fill { background: linear-gradient(90deg, #818cf8, #6366f1); }
     .medal-pts { flex-shrink: 0; color: #fbbf24; font-weight: 800; font-size: clamp(0.7rem, 1.3vw, 1.05rem); text-align: right; }
-    .medal-row.medal-tie { gap: 0.6vw; }
-    .medal-tie .medal-half { padding: 0 0.6vw; border-right: 1px solid rgba(255,255,255,0.12); }
+    .medal-row.medal-tie { gap: 0.6vw; flex-wrap: nowrap; }
+    .medal-tie .medal-half { padding: 0 0.6vw; border-right: 1px solid rgba(255,255,255,0.12); overflow: hidden; min-width: 0; flex: 1; }
     .medal-tie .medal-half:last-child { border-right: none; }
 
     /* ============ KALAPRATHIBHA ============ */
@@ -203,11 +203,12 @@
       display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden;
     }
     .kala-rows { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 0.6vh; }
-    .kala-card .medal-row { flex-shrink: 1; min-height: 0; padding: 1vh 1.2vw; gap: 1vw; margin-bottom: 0; }
+    .kala-card .medal-row { flex-shrink: 1; min-height: 0; padding: 1vh 1.2vw; gap: 1vw; margin-bottom: 0; overflow: hidden; min-width: 0; }
     .kala-card .medal { width: 2.5em; font-size: clamp(0.9rem, 1.6vw, 1.5rem); }
-    .kala-card .medal-name { font-size: clamp(0.8rem, 1.4vw, 1.25rem); }
-    .kala-card .medal-sub { font-size: clamp(0.5rem, 0.95vw, 0.85rem); }
-    .kala-card .medal-bar { flex: 0 0 22%; height: clamp(7px, 1vh, 12px); min-width: 24px; }
+    .kala-card .medal-half { overflow: hidden; min-width: 0; }
+    .kala-card .medal-name { font-size: clamp(0.8rem, 1.4vw, 1.25rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .kala-card .medal-sub { font-size: clamp(0.5rem, 0.95vw, 0.85rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .kala-card .medal-bar { flex: 0 0 auto; width: clamp(30px, 6vw, 80px); height: clamp(7px, 1vh, 12px); }
     .kala-card .medal-pts { font-size: clamp(0.65rem, 1.2vw, 1rem); }
     .kala-cat { font-size: clamp(0.7rem, 1.4vw, 1.1rem); color: #f0abfc; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-bottom: 1vh; flex-shrink: 0; }
 
@@ -714,11 +715,11 @@
         const top = [...prog.results].sort((a, b) => a.rank - b.rank).slice(0, 3);
         if (top.length === 0) return;
         const rows = top.map(w => {
-          let name = "—", teamName = "—", pts = 0;
+          let name = "—", teamName = "", pts = 0;
           if (prog.category === "General") {
             const t = ThanafusDB.db.teams.find(tm => tm.id === (w.teamId || prog.teamId));
             name = t ? t.name : "Team";
-            teamName = t ? "General Event" : "";
+            teamName = "";
             pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
           } else {
             const s = ThanafusDB.db.students.find(st => st.id === w.studentId);
@@ -727,9 +728,9 @@
             teamName = t ? t.name : "";
             pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
           }
-          return { rank: w.rank, name, teamName, pts };
+          return { rank: w.rank, name: name || "—", teamName: teamName || "", pts: pts || 0 };
         });
-        items.push({ prog: prog.name, cat: prog.category, rows });
+        items.push({ prog: prog.name || "Programme", cat: prog.category || "", rows });
       });
 
       const empty = `<div style="text-align:center;color:#a5b4fc;padding:40px;">No results published yet.</div>`;
