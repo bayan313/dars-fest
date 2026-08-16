@@ -62,6 +62,7 @@
           <li id="nav-media"><a href="#" onclick="switchAdminTab('media')"><i class="fa-solid fa-photo-film"></i> Upload Media</a></li>
           <li id="nav-notifs"><a href="#" onclick="switchAdminTab('notifs')"><i class="fa-solid fa-bullhorn"></i> Notifications</a></li>
           <li id="nav-appeals"><a href="#" onclick="switchAdminTab('appeals')"><i class="fa-solid fa-list-check"></i> Appeals Board</a></li>
+          <li id="nav-messages"><a href="#" onclick="switchAdminTab('messages')"><i class="fa-solid fa-envelope-open-text"></i> Contact Messages <span id="nav-badge-messages" class="badge" style="display:none; background:#ef4444; color:white; font-size:0.7rem; padding:2px 6px; border-radius:10px; margin-left:6px;"></span></a></li>
           <li id="nav-settings"><a href="#" onclick="switchAdminTab('settings')"><i class="fa-solid fa-sliders"></i> Portal Settings</a></li>
         </ul>
       </aside>
@@ -105,6 +106,14 @@
               </div>
               <i class="fa-solid fa-circle-exclamation" style="font-size: 2.5rem; color: #ef4444; opacity: 0.3;"></i>
             </div>
+
+            <div class="admin-stat-card" style="cursor: pointer;" onclick="switchAdminTab('messages')">
+              <div>
+                <span class="admin-stat-label">Contact Messages</span>
+                <div class="admin-stat-number" id="stat-messages" style="color: #6366f1; font-size: 1.5rem;">0</div>
+              </div>
+              <i class="fa-solid fa-envelope-open-text" style="font-size: 2.5rem; color: #6366f1; opacity: 0.3;"></i>
+            </div>
           </div>
 
           <div class="admin-section-content" style="margin-top: 30px;">
@@ -112,7 +121,8 @@
             <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
               <button class="btn btn-primary" onclick="switchAdminTab('progs')"><i class="fa-solid fa-square-plus"></i> Publish a New Result</button>
               <button class="btn btn-gold" onclick="openStudentModal()"><i class="fa-solid fa-user-plus"></i> Register Student</button>
-              <button class="btn btn-outline" onclick="switchAdminTab('appeals')"><i class="fa-solid fa-envelope-open-text"></i> Review Pending Appeals</button>
+              <button class="btn btn-outline" onclick="switchAdminTab('appeals')"><i class="fa-solid fa-list-check"></i> Review Appeals</button>
+              <button class="btn btn-outline" onclick="switchAdminTab('messages')"><i class="fa-solid fa-inbox"></i> View Contact Messages</button>
             </div>
           </div>
         </div>
@@ -386,7 +396,47 @@
           </div>
         </div>
 
-        <!-- SECTION 8: PORTAL SETTINGS & RESET -->
+        <!-- SECTION 8: CONTACT MESSAGES & INQUIRIES -->
+        <div id="sec-messages" class="admin-section-container" style="display: none;">
+          <div class="flex-between" style="flex-wrap:wrap; gap:15px;">
+            <h2><i class="fa-solid fa-envelope-open-text"></i> Contact Messages & Inquiries</h2>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span id="messages-unread-badge" class="badge" style="display:none; background:#ef4444; color:white; padding:6px 14px; border-radius:20px; font-weight:700; font-size:0.85rem;">0 Unread</span>
+              <button class="btn btn-outline btn-sm" onclick="renderMessagesTable()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+            </div>
+          </div>
+
+          <div class="admin-section-content">
+            <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
+              <input type="text" id="msg-search" class="form-control" placeholder="Search by name, email or message content..." oninput="renderMessagesTable()" style="max-width: 380px;">
+              <select id="msg-filter-status" class="form-control" onchange="renderMessagesTable()" style="max-width: 180px;">
+                <option value="all">All Messages</option>
+                <option value="unread">Unread Only</option>
+                <option value="read">Read Only</option>
+              </select>
+            </div>
+
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date & Time</th>
+                    <th>Sender Name</th>
+                    <th>Email Address</th>
+                    <th>Message Snippet</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-messages-table">
+                  <!-- Dynamic rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 9: PORTAL SETTINGS & RESET -->
         <div id="sec-settings" class="admin-section-container" style="display: none;">
           <h2><i class="fa-solid fa-sliders"></i> Portal Settings & Contacts</h2>
           
@@ -667,6 +717,19 @@
     </div>
   </div>
 
+  <!-- MODAL 6: VIEW CONTACT MESSAGE -->
+  <div class="modal-overlay" id="message-view-modal" style="display: none;">
+    <div class="modal-card" style="max-width: 620px;">
+      <button class="modal-close-btn" onclick="closeMessageModal()">&times;</button>
+      <h3 style="color: var(--primary-emerald); margin-bottom: 15px;">
+        <i class="fa-solid fa-envelope-open"></i> Contact Message Details
+      </h3>
+      <div id="message-modal-content">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
   <!-- Shared Javascript Files -->
   <script src="../js/db.js"></script>
   <script src="../js/main.js"></script>
@@ -751,6 +814,7 @@
       else if (tab === "media") renderMediaTable();
       else if (tab === "notifs") renderNotifsTable();
       else if (tab === "appeals") renderAppealsTable();
+      else if (tab === "messages") renderMessagesTable();
       else if (tab === "settings") loadSettingsForm();
     }
 
@@ -760,6 +824,17 @@
       document.getElementById("stat-teams").innerText = ThanafusDB.db.teams.length;
       document.getElementById("stat-progs").innerText = ThanafusDB.db.programmes.length;
       document.getElementById("stat-appeals").innerText = ThanafusDB.db.appeals.filter(a => a.status === 'Pending').length;
+
+      const messages = Array.isArray(ThanafusDB.db.messages) ? ThanafusDB.db.messages : [];
+      const unreadCount = messages.filter(m => !m.read).length;
+      const statMsg = document.getElementById("stat-messages");
+      if (statMsg) statMsg.innerText = `${unreadCount} unread (${messages.length} total)`;
+
+      const navBadge = document.getElementById("nav-badge-messages");
+      if (navBadge) {
+        navBadge.textContent = unreadCount;
+        navBadge.style.display = unreadCount > 0 ? "inline-block" : "none";
+      }
     }
 
     // 2. STUDENTS
@@ -1734,7 +1809,139 @@
       renderAppealsTable();
     }
 
-    // 8. SETTINGS & CONTACTS
+    // 8. CONTACT MESSAGES
+    function renderMessagesTable() {
+      const tbody = document.getElementById("admin-messages-table");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const messages = Array.isArray(ThanafusDB.db.messages) ? ThanafusDB.db.messages : [];
+      const unreadCount = messages.filter(m => !m.read).length;
+
+      const unreadBadge = document.getElementById("messages-unread-badge");
+      if (unreadBadge) {
+        unreadBadge.textContent = `${unreadCount} Unread`;
+        unreadBadge.style.display = unreadCount > 0 ? "inline-block" : "none";
+      }
+      const navBadge = document.getElementById("nav-badge-messages");
+      if (navBadge) {
+        navBadge.textContent = unreadCount;
+        navBadge.style.display = unreadCount > 0 ? "inline-block" : "none";
+      }
+
+      const q = (document.getElementById("msg-search") ? document.getElementById("msg-search").value : "").trim().toLowerCase();
+      const statusFilter = document.getElementById("msg-filter-status") ? document.getElementById("msg-filter-status").value : "all";
+
+      const filtered = messages.filter(m => {
+        if (statusFilter === "unread" && m.read) return false;
+        if (statusFilter === "read" && !m.read) return false;
+        if (!q) return true;
+        return (m.name || "").toLowerCase().includes(q) ||
+               (m.email || "").toLowerCase().includes(q) ||
+               (m.message || "").toLowerCase().includes(q);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-gray);">No contact messages found.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(msg => {
+        const dateStr = msg.date ? new Date(msg.date).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A';
+        const isUnread = !msg.read;
+        const snippet = (msg.message || "").length > 60 ? (msg.message || "").substring(0, 60) + '...' : (msg.message || "");
+
+        tbody.innerHTML += `
+          <tr style="${isUnread ? 'background: rgba(16, 185, 129, 0.05); font-weight: 600;' : ''}">
+            <td data-label="Date" style="white-space: nowrap; font-size: 0.85rem;">${dateStr}</td>
+            <td data-label="Sender Name">
+              ${isUnread ? '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981; margin-right:6px;" title="Unread Message"></span>' : ''}
+              <strong>${msg.name || 'Anonymous'}</strong>
+            </td>
+            <td data-label="Email">
+              <a href="mailto:${msg.email}" style="color: var(--primary-emerald); text-decoration: underline;">${msg.email || 'N/A'}</a>
+            </td>
+            <td data-label="Message" style="max-width: 260px;">
+              <span style="color: var(--text-dark); cursor: pointer;" onclick="openMessageModal('${msg.id}')" title="Click to view full message">${snippet}</span>
+            </td>
+            <td data-label="Status">
+              <span class="prog-meta-badge" style="background:${isUnread ? '#fee2e2' : '#e2fdf2'}; color:${isUnread ? '#ef4444' : '#10b981'}; font-weight: 700;">
+                ${isUnread ? 'Unread' : 'Read'}
+              </span>
+            </td>
+            <td class="action-cell">
+              <button class="btn btn-sm btn-primary" onclick="openMessageModal('${msg.id}')" title="View Full Message"><i class="fa-solid fa-eye"></i></button>
+              <a href="mailto:${msg.email}?subject=${encodeURIComponent('Re: THANAFUS Dars Fest Inquiry')}&body=${encodeURIComponent('\n\n--- Original Message from ' + (msg.name || '') + ' ---\n' + (msg.message || ''))}" class="btn btn-sm btn-gold" title="Reply via Email"><i class="fa-solid fa-reply"></i></a>
+              <button class="btn btn-sm btn-outline" onclick="toggleMessageRead('${msg.id}')" title="${isUnread ? 'Mark as Read' : 'Mark as Unread'}"><i class="fa-solid ${isUnread ? 'fa-check' : 'fa-envelope'}"></i></button>
+              <button class="btn btn-sm btn-danger" onclick="handleDeleteMessage('${msg.id}')" title="Delete Message"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function openMessageModal(id) {
+      const messages = Array.isArray(ThanafusDB.db.messages) ? ThanafusDB.db.messages : [];
+      const msg = messages.find(m => m.id === id);
+      if (!msg) return;
+
+      // Mark as read automatically when viewed
+      if (!msg.read) {
+        ThanafusDB.markMessageAsRead(id, true);
+        renderMessagesTable();
+        initDashboard();
+      }
+
+      const dateStr = msg.date ? new Date(msg.date).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' }) : 'N/A';
+
+      const content = document.getElementById("message-modal-content");
+      content.innerHTML = `
+        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
+          <p style="margin-bottom: 6px;"><strong>From:</strong> ${msg.name || 'N/A'}</p>
+          <p style="margin-bottom: 6px;"><strong>Email:</strong> <a href="mailto:${msg.email}" style="color:var(--primary-emerald); font-weight:600;">${msg.email || 'N/A'}</a></p>
+          <p style="margin-bottom: 0; font-size: 0.85rem; color: var(--text-gray);"><strong>Received:</strong> ${dateStr}</p>
+        </div>
+        <div style="margin-bottom: 25px;">
+          <label style="font-weight: 600; color: var(--text-dark); display: block; margin-bottom: 8px;">Message:</label>
+          <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; min-height: 120px; white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem; color: var(--text-dark);">
+            ${msg.message || 'No content'}
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap;">
+          <a href="mailto:${msg.email}?subject=${encodeURIComponent('Re: THANAFUS Dars Fest Inquiry')}&body=${encodeURIComponent('\n\n--- Original Message from ' + (msg.name || '') + ' ---\n' + (msg.message || ''))}" class="btn btn-primary">
+            <i class="fa-solid fa-reply"></i> Reply via Email
+          </a>
+          <button class="btn btn-outline" onclick="closeMessageModal()">Close</button>
+        </div>
+      `;
+
+      document.getElementById("message-view-modal").style.display = "flex";
+    }
+
+    function closeMessageModal() {
+      document.getElementById("message-view-modal").style.display = "none";
+    }
+
+    function toggleMessageRead(id) {
+      const messages = Array.isArray(ThanafusDB.db.messages) ? ThanafusDB.db.messages : [];
+      const msg = messages.find(m => m.id === id);
+      if (!msg) return;
+      ThanafusDB.markMessageAsRead(id, !msg.read);
+      renderMessagesTable();
+      initDashboard();
+      showAlert(`Message marked as ${!msg.read ? 'read' : 'unread'}`, "info");
+    }
+
+    function handleDeleteMessage(id) {
+      if (confirm("Are you sure you want to delete this contact message?")) {
+        ThanafusDB.deleteMessage(id);
+        renderMessagesTable();
+        initDashboard();
+        showAlert("Message deleted successfully", "success");
+      }
+    }
+
+    // 9. SETTINGS & CONTACTS
     function loadSettingsForm() {
       const c = ThanafusDB.db.contact;
       document.getElementById("c-coord").value = c.coordinatorName;

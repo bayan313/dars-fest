@@ -59,6 +59,7 @@ const DEFAULT_DB = {
     email: "info@thanafusfest.com",
     address: "THANAFUS Dars Fest Committee Office, Markaz Campus, Calicut, Kerala, 673573"
   },
+  messages: [],
   settings: {
     prospectusUrl: "", // Base64 or standard URL
     adminPassword: "admin@9526"
@@ -789,6 +790,38 @@ class Database {
 
   updateContact(details) {
     this.db.contact = { ...this.db.contact, ...details };
+    this.save();
+  }
+
+  // Contact Messages from public users
+  addContactMessage(name, email, message, phone = "") {
+    if (!Array.isArray(this.db.messages)) this.db.messages = [];
+    const id = "msg-" + Date.now();
+    this.db.messages.unshift({
+      id,
+      name,
+      email,
+      phone,
+      message,
+      read: false,
+      date: new Date().toISOString()
+    });
+    this.save();
+    return id;
+  }
+
+  markMessageAsRead(id, readStatus = true) {
+    if (!Array.isArray(this.db.messages)) return;
+    const msg = this.db.messages.find(m => m.id === id);
+    if (msg) {
+      msg.read = readStatus;
+      this.save();
+    }
+  }
+
+  deleteMessage(id) {
+    if (!Array.isArray(this.db.messages)) return;
+    this.db.messages = this.db.messages.filter(m => m.id !== id);
     this.save();
   }
 

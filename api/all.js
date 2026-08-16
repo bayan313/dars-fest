@@ -1,4 +1,4 @@
-const { connectDB, syncAdminPassword, getAllData, Team, Student, Programme, Notification, Appeal, Gallery, Contact, Settings } = require('./lib/db');
+const { connectDB, syncAdminPassword, getAllData, Team, Student, Programme, Notification, Appeal, Gallery, Contact, Message, Settings } = require('./lib/db');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -56,6 +56,7 @@ module.exports = async function handler(req, res) {
     if (db.notifications) { await syncCollection(Notification, db.notifications); }
     if (db.appeals)       { await syncCollection(Appeal, db.appeals); }
     if (db.gallery)       { await syncCollection(Gallery, db.gallery); }
+    if (db.messages)      { await syncCollection(Message, db.messages); }
     if (db.contact)       { await Contact.deleteMany({});      await Contact.create(stripIds([db.contact])[0] || {}); }
     if (db.settings)      { await Settings.deleteMany({});     await Settings.create(stripIds([db.settings])[0] || {}); await syncAdminPassword(); }
     const updated = await getAllData();

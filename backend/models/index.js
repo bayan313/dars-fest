@@ -85,20 +85,31 @@ const contactSchema = new mongoose.Schema({
   address: String
 });
 
+const messageSchema = new mongoose.Schema({
+  id: String,
+  name: String,
+  email: String,
+  phone: String,
+  message: String,
+  read: { type: Boolean, default: false },
+  date: String
+});
+
 const settingsSchema = new mongoose.Schema({
   prospectusUrl: String,
   adminPassword: String,
   revision: { type: Number, default: 0 }
 });
 
-const Team = mongoose.model('Team', teamSchema);
-const Student = mongoose.model('Student', studentSchema);
-const Programme = mongoose.model('Programme', programmeSchema);
-const Notification = mongoose.model('Notification', notificationSchema);
-const Appeal = mongoose.model('Appeal', appealSchema);
-const Gallery = mongoose.model('Gallery', gallerySchema);
-const Contact = mongoose.model('Contact', contactSchema);
-const Settings = mongoose.model('Settings', settingsSchema);
+const Team = mongoose.models.Team || mongoose.model('Team', teamSchema);
+const Student = mongoose.models.Student || mongoose.model('Student', studentSchema);
+const Programme = mongoose.models.Programme || mongoose.model('Programme', programmeSchema);
+const Notification = mongoose.models.Notification || mongoose.model('Notification', notificationSchema);
+const Appeal = mongoose.models.Appeal || mongoose.model('Appeal', appealSchema);
+const Gallery = mongoose.models.Gallery || mongoose.model('Gallery', gallerySchema);
+const Contact = mongoose.models.Contact || mongoose.model('Contact', contactSchema);
+const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
+const Settings = mongoose.models.Settings || mongoose.model('Settings', settingsSchema);
 
 module.exports = {
   Team,
@@ -108,5 +119,6 @@ module.exports = {
   Appeal,
   Gallery,
   Contact,
+  Message,
   Settings
 };

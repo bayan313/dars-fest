@@ -156,9 +156,21 @@
       `;
     }
 
-    function handleContactSubmit(event) {
+    async function handleContactSubmit(event) {
       event.preventDefault();
-      showAlert("Message sent successfully! Our helpline desk will contact you soon.", "success");
+      const name = document.getElementById("c-name").value.trim();
+      const email = document.getElementById("c-email").value.trim();
+      const msg = document.getElementById("c-msg").value.trim();
+
+      if (!name || !email || !msg) {
+        showAlert("Please fill in all required fields.", "danger");
+        return;
+      }
+
+      await ThanafusDB.ready();
+      ThanafusDB.addContactMessage(name, email, msg);
+
+      showAlert("Message sent successfully to Admin! Our helpdesk will contact you soon.", "success");
       event.target.reset();
     }
   </script>

@@ -3,7 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-const { Team, Student, Programme, Notification, Appeal, Gallery, Contact, Settings } = require('./models');
+const { Team, Student, Programme, Notification, Appeal, Gallery, Contact, Message, Settings } = require('./models');
 
 const app = express();
 // Ensure admin password in Settings matches environment variable
@@ -70,10 +70,10 @@ app.get('/api/all', async (req, res) => {
 
 // Helper to fetch all collections
 async function getAllData() {
-  const [teams, students, programmes, notifications, appeals, gallery, contact, settings] = await Promise.all([
-    Team.find(), Student.find(), Programme.find(), Notification.find(), Appeal.find(), Gallery.find(), Contact.findOne(), Settings.findOne()
+  const [teams, students, programmes, notifications, appeals, gallery, contact, messages, settings] = await Promise.all([
+    Team.find(), Student.find(), Programme.find(), Notification.find(), Appeal.find(), Gallery.find(), Contact.findOne(), Message.find(), Settings.findOne()
   ]);
-  return { teams, students, programmes, notifications, appeals, gallery, contact, settings };
+  return { teams, students, programmes, notifications, appeals, gallery, contact, messages: messages || [], settings };
 }
 
 // Update all data
@@ -144,6 +144,7 @@ app.post('/api/all', async (req, res) => {
   if (db.notifications) { await syncCollection(Notification, db.notifications); }
   if (db.appeals) { await syncCollection(Appeal, db.appeals); }
   if (db.gallery) { await syncCollection(Gallery, db.gallery); }
+  if (db.messages) { await syncCollection(Message, db.messages); }
   if (db.contact) { await Contact.deleteMany({}); await Contact.create(stripIds([db.contact])[0] || {}); }
   if (db.settings) {
     // Preserve the server-side revision counter when settings are synced

@@ -22,6 +22,7 @@ const notificationSchema = new mongoose.Schema({ id: String, title: String, cont
 const appealSchema = new mongoose.Schema({ id: String, studentName: String, team: String, category: String, programme: String, phoneNumber: String, description: String, status: String, response: String, date: String });
 const gallerySchema = new mongoose.Schema({ id: String, type: String, title: String, url: String, day: String, category: String, event: String });
 const contactSchema = new mongoose.Schema({ coordinatorName: String, coordinatorPhone: String, techSupportName: String, techSupportPhone: String, email: String, address: String });
+const messageSchema = new mongoose.Schema({ id: String, name: String, email: String, phone: String, message: String, read: { type: Boolean, default: false }, date: String });
 const settingsSchema = new mongoose.Schema({ prospectusUrl: String, adminPassword: String });
 
 const Team       = mongoose.models.Team       || mongoose.model('Team', teamSchema);
@@ -31,6 +32,7 @@ const Notification = mongoose.models.Notification || mongoose.model('Notificatio
 const Appeal     = mongoose.models.Appeal     || mongoose.model('Appeal', appealSchema);
 const Gallery    = mongoose.models.Gallery    || mongoose.model('Gallery', gallerySchema);
 const Contact    = mongoose.models.Contact    || mongoose.model('Contact', contactSchema);
+const Message    = mongoose.models.Message    || mongoose.model('Message', messageSchema);
 const Settings   = mongoose.models.Settings   || mongoose.model('Settings', settingsSchema);
 
 async function syncAdminPassword() {
@@ -47,11 +49,11 @@ async function syncAdminPassword() {
 }
 
 async function getAllData() {
-  const [teams, students, programmes, notifications, appeals, gallery, contact, settings] = await Promise.all([
+  const [teams, students, programmes, notifications, appeals, gallery, contact, messages, settings] = await Promise.all([
     Team.find(), Student.find(), Programme.find(), Notification.find(),
-    Appeal.find(), Gallery.find(), Contact.findOne(), Settings.findOne()
+    Appeal.find(), Gallery.find(), Contact.findOne(), Message.find(), Settings.findOne()
   ]);
-  return { teams, students, programmes, notifications, appeals, gallery, contact, settings };
+  return { teams, students, programmes, notifications, appeals, gallery, contact, messages: messages || [], settings };
 }
 
-module.exports = { connectDB, syncAdminPassword, getAllData, Team, Student, Programme, Notification, Appeal, Gallery, Contact, Settings };
+module.exports = { connectDB, syncAdminPassword, getAllData, Team, Student, Programme, Notification, Appeal, Gallery, Contact, Message, Settings };
