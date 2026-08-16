@@ -310,39 +310,80 @@
         return;
       }
 
-      // Find top 3 winners
-      const place1 = prog.results.find(r => r.rank === 1);
-      const place2 = prog.results.find(r => r.rank === 2);
-      const place3 = prog.results.find(r => r.rank === 3);
+      // Group winners by rank for multi-winner / shared-rank support
+      const rank1Winners = prog.results.filter(r => Number(r.rank) === 1);
+      const rank2Winners = prog.results.filter(r => Number(r.rank) === 2);
+      const rank3Winners = prog.results.filter(r => Number(r.rank) === 3);
 
-      const getStudentData = (resItem) => {
-        if (!resItem) return { name: "No Placement", teamName: "", photo: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop" };
-        if (prog.category === 'General') {
-          const team = ThanafusDB.db.teams.find(t => t.id === (resItem.teamId || prog.teamId));
-          return {
-            name: team ? team.name : "Team",
-            teamName: team ? "General Event" : "N/A",
-            photo: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop",
-            grade: resItem.grade || "No Grade"
-          };
-        }
-        const student = ThanafusDB.db.students.find(s => s.id === resItem.studentId);
-        const team = student ? ThanafusDB.db.teams.find(t => t.id === student.teamId) : null;
-        return {
-          name: student ? student.name : "Unknown Student",
-          teamName: team ? team.name : "N/A",
-          photo: student && student.photo ? student.photo : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop",
-          grade: resItem.grade || "No Grade"
-        };
+      const renderRankCard = (rankNum, winners, rankClass, medalIconClass, fillClass, medalEmoji, rankTitle) => {
+        if (!winners || winners.length === 0) return "";
+
+        let rows = "";
+        winners.forEach(res => {
+          let name = "Unknown";
+          let teamName = "N/A";
+          
+          if (prog.category === 'General') {
+            const team = ThanafusDB.db.teams.find(t => t.id === (res.teamId || prog.teamId));
+            name = team ? team.name : "Team";
+            teamName = "General Team Event";
+          } else {
+            const stud = ThanafusDB.db.students.find(s => s.id === res.studentId);
+            const team = stud ? ThanafusDB.db.teams.find(t => t.id === stud.teamId) : null;
+            name = stud ? stud.name : "Unknown Student";
+            teamName = team ? team.name : "N/A";
+          }
+
+          const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
+          const maxPts = (prog.category === 'General' || prog.type === 'group') ? 15 : 10;
+          const barPct = Math.min(100, Math.max(25, (pts / maxPts) * 100));
+          const gradeClass = res.grade === 'A' ? 'grade-pill-a' : res.grade === 'B' ? 'grade-pill-b' : 'grade-pill-c';
+          const gradeHtml = res.grade ? `<span class="grade-pill-tag ${gradeClass}">Grade ${res.grade}</span>` : '';
+
+          rows += `
+            <div class="rank-participant-row">
+              <div class="participant-info">
+                <h4 class="participant-name">
+                  <i class="fa-solid fa-user-graduate" style="font-size:0.9rem; color:var(--primary-emerald); opacity:0.85;"></i>
+                  ${name}
+                </h4>
+                <span class="participant-team"><i class="fa-solid fa-people-group" style="font-size:0.8rem;"></i> ${teamName}</span>
+              </div>
+              <div class="participant-score-box">
+                ${gradeHtml}
+                <div class="score-bar-track">
+                  <div class="score-bar-fill ${fillClass}" style="width: ${barPct}%;"></div>
+                </div>
+                <span class="participant-pts">${pts} pts</span>
+              </div>
+            </div>
+          `;
+        });
+
+        return `
+          <div class="rank-winner-card ${rankClass}">
+            <div class="rank-badge-col" data-rank-title="${rankTitle}">
+              <div class="rank-medal-icon ${medalIconClass}">
+                ${medalEmoji}
+              </div>
+            </div>
+            <div class="rank-participants-group">
+              ${rows}
+            </div>
+          </div>
+        `;
       };
 
-      const s1 = getStudentData(place1);
-      const s2 = getStudentData(place2);
-      const s3 = getStudentData(place3);
+      const winnersHtml = `
+        <div class="rank-winners-list">
+          ${renderRankCard(1, rank1Winners, 'rank-card-1', 'rank-medal-1', 'fill-rank-1', '🥇', '1st Place')}
+          ${renderRankCard(2, rank2Winners, 'rank-card-2', 'rank-medal-2', 'fill-rank-2', '🥈', '2nd Place')}
+          ${renderRankCard(3, rank3Winners, 'rank-card-3', 'rank-medal-3', 'fill-rank-3', '🥉', '3rd Place')}
+        </div>
+      `;
 
       // Create participants table list
       let rowsHtml = "";
-      // Order participants by rank (1,2,3 first, then rest)
       const sortedParticipants = [...prog.results].sort((a, b) => {
         if (a.rank && b.rank) return a.rank - b.rank;
         if (a.rank) return -1;
@@ -366,7 +407,7 @@
         
         rowsHtml += `
           <tr>
-            <td data-label="Rank"><strong>${res.rank ? res.rank + ' Place' : 'Participation'}</strong></td>
+            <td data-label="Rank"><strong>${res.rank ? res.rank + (res.rank === 1 ? 'st' : res.rank === 2 ? 'nd' : res.rank === 3 ? 'rd' : 'th') + ' Place' : 'Participation'}</strong></td>
             <td data-label="Student">${studName}</td>
             <td data-label="Team">${teamName}</td>
             <td data-label="Grade"><span class="prog-meta-badge" style="background-color:${res.grade === 'A' ? '#e2fdf2' : res.grade === 'B' ? '#fffbeb' : '#f1f5f9'}; color:${res.grade === 'A' ? '#10b981' : res.grade === 'B' ? '#d97706' : '#64748b'};">${res.grade || 'N/A'}</span></td>
@@ -389,43 +430,18 @@
             <span class="prog-meta-badge" style="background:#10b981; color:white;"><i class="fa-solid fa-circle-check"></i> Published</span>
           </div>
 
-          <!-- Podium Standings -->
-          <h3 class="text-center" style="color:var(--primary-emerald); margin-bottom:10px;">Podium Winners</h3>
-          <div class="podium-container">
-            <!-- 2nd Place -->
-            <div class="podium-step place-2">
-              <img src="${s2.photo}" class="podium-avatar" alt="2nd Place">
-              <div class="podium-place-box">2nd</div>
-              <div class="podium-name">${s2.name}</div>
-              <div class="podium-team">${s2.teamName}</div>
-              ${place2 ? `<div style="font-size:0.8rem;color:var(--accent-gold-dark);font-weight:bold;">Grade: ${s2.grade}</div>` : ''}
-            </div>
-            <!-- 1st Place -->
-            <div class="podium-step place-1">
-              <img src="${s1.photo}" class="podium-avatar" alt="1st Place">
-              <div class="podium-place-box">1st</div>
-              <div class="podium-name">${s1.name}</div>
-              <div class="podium-team">${s1.teamName}</div>
-              ${place1 ? `<div style="font-size:0.8rem;color:var(--accent-gold-dark);font-weight:bold;">Grade: ${s1.grade}</div>` : ''}
-            </div>
-            <!-- 3rd Place -->
-            <div class="podium-step place-3">
-              <img src="${s3.photo}" class="podium-avatar" alt="3rd Place">
-              <div class="podium-place-box">3rd</div>
-              <div class="podium-name">${s3.name}</div>
-              <div class="podium-team">${s3.teamName}</div>
-              ${place3 ? `<div style="font-size:0.8rem;color:var(--accent-gold-dark);font-weight:bold;">Grade: ${s3.grade}</div>` : ''}
-            </div>
-          </div>
+          <!-- Top Placements (Supports Multiple Winners / Ties per Rank) -->
+          <h3 style="color:var(--primary-emerald); margin-bottom:12px;"><i class="fa-solid fa-trophy" style="color:var(--accent-gold);"></i> Official Winners & Placements</h3>
+          ${winnersHtml}
 
           <!-- Table of participants -->
-          <h3 style="color:var(--primary-emerald); margin-bottom:15px; margin-top:40px;">Detailed Leaderboard</h3>
+          <h3 style="color:var(--primary-emerald); margin-bottom:15px; margin-top:35px;"><i class="fa-solid fa-list-ol"></i> Complete Result Evaluation</h3>
           <div class="table-wrapper">
             <table>
               <thead>
                 <tr>
                   <th>Rank</th>
-                  <th>Student Name</th>
+                  <th>Student / Team</th>
                   <th>Team</th>
                   <th>Grade</th>
                   <th>Points</th>

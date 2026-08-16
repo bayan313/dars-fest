@@ -877,7 +877,180 @@ footer {
   color: var(--text-gray);
 }
 
-/* Podium Layout for top 3 */
+/* ==========================================================
+   SHARED RANK & PODIUM WINNERS LIST (Multi-Winner Cards)
+========================================================== */
+.rank-winners-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 25px 0 35px 0;
+  width: 100%;
+}
+
+.rank-winner-card {
+  background: var(--card-bg);
+  border-radius: 14px;
+  border: 1px solid rgba(79, 70, 229, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rank-winner-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Rank-specific themes */
+.rank-card-1 {
+  border-left: 6px solid #f59e0b;
+  background: linear-gradient(to right, rgba(245, 158, 11, 0.05), var(--card-bg) 35%);
+}
+.rank-card-2 {
+  border-left: 6px solid #38bdf8;
+  background: linear-gradient(to right, rgba(56, 189, 248, 0.05), var(--card-bg) 35%);
+}
+.rank-card-3 {
+  border-left: 6px solid #f97316;
+  background: linear-gradient(to right, rgba(249, 115, 22, 0.05), var(--card-bg) 35%);
+}
+
+/* Medal Badge Column */
+.rank-badge-col {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(79, 70, 229, 0.03);
+  border-right: 1px solid rgba(79, 70, 229, 0.08);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.rank-medal-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 800;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+.rank-medal-1 {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #78350f;
+}
+.rank-medal-2 {
+  background: linear-gradient(135deg, #94a3b8, #e2e8f0);
+  color: #0f172a;
+}
+.rank-medal-3 {
+  background: linear-gradient(135deg, #d97706, #fdba74);
+  color: #7c2d12;
+}
+
+/* Participants Group inside Rank Card */
+.rank-participants-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.rank-participant-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  gap: 16px;
+}
+
+.rank-participant-row + .rank-participant-row {
+  border-top: 1px dashed rgba(79, 70, 229, 0.12);
+}
+
+.participant-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.participant-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.participant-team {
+  font-size: 0.85rem;
+  color: var(--text-gray);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.participant-score-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.score-bar-track {
+  width: 90px;
+  height: 8px;
+  background: rgba(79, 70, 229, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.score-bar-fill {
+  height: 100%;
+  border-radius: 10px;
+}
+
+.fill-rank-1 { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.fill-rank-2 { background: linear-gradient(90deg, #38bdf8, #818cf8); }
+.fill-rank-3 { background: linear-gradient(90deg, #f97316, #fb923c); }
+
+.participant-pts {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  min-width: 65px;
+  text-align: right;
+}
+
+.grade-pill-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.grade-pill-a { background: #dcfce7; color: #15803d; }
+.grade-pill-b { background: #fef3c7; color: #b45309; }
+.grade-pill-c { background: #f1f5f9; color: #475569; }
+
+/* Podium Layout for top 3 (legacy fallback) */
 .podium-container {
   display: flex;
   justify-content: center;
