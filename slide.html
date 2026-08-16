@@ -43,12 +43,12 @@
     .slide.active { display: flex; }
     @keyframes slideFade { from { opacity: 0; } to { opacity: 1; } }
 
-    /* Decorative orbs - scale with viewport */
+    /* Decorative orbs - smooth radial gradients without GPU-heavy blur filters */
     .slide::before, .slide::after {
-      content: ''; position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.35; z-index: 0; pointer-events: none;
+      content: ''; position: absolute; border-radius: 50%; opacity: 0.25; z-index: 0; pointer-events: none;
     }
-    .slide::before { width: 30vmin; height: 30vmin; background: #6366f1; top: -8vmin; left: -8vmin; }
-    .slide::after { width: 28vmin; height: 28vmin; background: #a855f7; bottom: -8vmin; right: -8vmin; }
+    .slide::before { width: 40vmin; height: 40vmin; background: radial-gradient(circle, #6366f1 0%, transparent 70%); top: -10vmin; left: -10vmin; }
+    .slide::after { width: 38vmin; height: 38vmin; background: radial-gradient(circle, #a855f7 0%, transparent 70%); bottom: -10vmin; right: -10vmin; }
     .slide > * { position: relative; z-index: 1; }
 
     /* ---- COMMON TYPOGRAPHY ---- */

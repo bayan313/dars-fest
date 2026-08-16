@@ -25,22 +25,22 @@ const DEFAULT_DB = {
     { id: "stud-12", name: "Hisham P.", teamId: "team-4", category: "Senior", photo: "" }
   ],
   programmes: [
-    { id: "prog-1", name: "Quran Recitation", category: "Sub Junior", venue: "Imam Bukhari Stage", judge: "Usthad Hamza Musliyar", resultsPublished: true, results: [{ rank: 1, studentId: "stud-1", grade: "A" }, { rank: 2, studentId: "stud-2", grade: "A" }, { rank: 3, studentId: "stud-3", grade: "B" }] },
-    { id: "prog-2", name: "Speech", category: "Sub Junior", venue: "Imam Bukhari Stage", judge: "Usthad Faisal Ahsani", resultsPublished: true, results: [{ rank: 1, studentId: "stud-4", grade: "A" }, { rank: 2, studentId: "stud-1", grade: "B" }, { rank: 3, studentId: "stud-2", grade: "B" }] },
-    { id: "prog-3", name: "Mappilappattu", category: "Sub Junior", venue: "Imam Malik Stage", judge: "Usthad Salim Darimi", resultsPublished: false, results: [] },
+    { id: "prog-1", name: "Quran Recitation", category: "Sub Junior", type: "individual", venue: "Imam Bukhari Stage", judge: "Usthad Hamza Musliyar", resultsPublished: false, results: [] },
+    { id: "prog-2", name: "Speech", category: "Sub Junior", type: "individual", venue: "Imam Bukhari Stage", judge: "Usthad Faisal Ahsani", resultsPublished: false, results: [] },
+    { id: "prog-3", name: "Mappilappattu", category: "Sub Junior", type: "individual", venue: "Imam Malik Stage", judge: "Usthad Salim Darimi", resultsPublished: false, results: [] },
     
-    { id: "prog-4", name: "Quran Recitation", category: "Junior", venue: "Imam Bukhari Stage", judge: "Usthad Hamza Musliyar", resultsPublished: true, results: [{ rank: 1, studentId: "stud-5", grade: "A" }, { rank: 2, studentId: "stud-6", grade: "A" }, { rank: 3, studentId: "stud-7", grade: "B" }] },
-    { id: "prog-5", name: "Quiz", category: "Junior", venue: "Imam Malik Stage", judge: "Usthad Shareef Hudawi", resultsPublished: true, results: [{ rank: 1, studentId: "stud-8", grade: "A" }, { rank: 2, studentId: "stud-5", grade: "A" }, { rank: 3, studentId: "stud-6", grade: "B" }] },
-    { id: "prog-6", name: "Essay Writing", category: "Junior", venue: "Class Room 4", judge: "Usthad Abdul Rasheed", resultsPublished: false, results: [] },
+    { id: "prog-4", name: "Quran Recitation", category: "Junior", type: "individual", venue: "Imam Bukhari Stage", judge: "Usthad Hamza Musliyar", resultsPublished: false, results: [] },
+    { id: "prog-5", name: "Quiz", category: "Junior", type: "individual", venue: "Imam Malik Stage", judge: "Usthad Shareef Hudawi", resultsPublished: false, results: [] },
+    { id: "prog-6", name: "Essay Writing", category: "Junior", type: "individual", venue: "Class Room 4", judge: "Usthad Abdul Rasheed", resultsPublished: false, results: [] },
 
-    { id: "prog-7", name: "Speech", category: "Senior", venue: "Imam Malik Stage", judge: "Usthad Faisal Ahsani", resultsPublished: true, results: [{ rank: 1, studentId: "stud-9", grade: "A" }, { rank: 2, studentId: "stud-10", grade: "B" }, { rank: 3, studentId: "stud-11", grade: "B" }] },
-    { id: "prog-8", name: "Quiz", category: "Senior", venue: "Imam Malik Stage", judge: "Usthad Shareef Hudawi", resultsPublished: true, results: [{ rank: 1, studentId: "stud-12", grade: "A" }, { rank: 2, studentId: "stud-9", grade: "A" }, { rank: 3, studentId: "stud-10", grade: "B" }] },
-    { id: "prog-9", name: "Story Writing", category: "Senior", venue: "Class Room 5", judge: "Usthad Najeeb Hudawi", resultsPublished: false, results: [] }
+    { id: "prog-7", name: "Speech", category: "Senior", type: "individual", venue: "Imam Malik Stage", judge: "Usthad Faisal Ahsani", resultsPublished: false, results: [] },
+    { id: "prog-8", name: "Quiz", category: "Senior", type: "individual", venue: "Imam Malik Stage", judge: "Usthad Shareef Hudawi", resultsPublished: false, results: [] },
+    { id: "prog-9", name: "Story Writing", category: "Senior", type: "individual", venue: "Class Room 5", judge: "Usthad Najeeb Hudawi", resultsPublished: false, results: [] }
   ],
   notifications: [
-    { id: "notif-1", title: "Quran Recitation Results Published", content: "Quran Recitation results for Sub Junior, Junior, and Senior categories are now available online.", type: "success", date: "2026-07-03T10:00:00Z" },
+    { id: "notif-1", title: "THANAFUS Dars Fest 2026 Live", content: "Welcome to THANAFUS Dars Fest 2026. Live stage evaluations and event announcements will appear here in real time.", type: "info", date: "2026-07-03T09:00:00Z" },
     { id: "notif-2", title: "Appeal Panel Active", content: "All appeals regarding published results must be submitted within 1 hour of the official announcement.", type: "warning", date: "2026-07-03T11:30:00Z" },
-    { id: "notif-3", title: "Venue Change for Senior Quiz", content: "Senior Quiz will be held at Imam Malik Stage instead of Stage B. Time remains 02:00 PM.", type: "info", date: "2026-07-03T13:00:00Z" }
+    { id: "notif-3", title: "Venue Schedule Announced", content: "Events are taking place across Imam Bukhari Stage, Imam Malik Stage, and designated classrooms.", type: "info", date: "2026-07-03T13:00:00Z" }
   ],
   appeals: [
     { id: "appl-1", studentName: "Shamil V.P.", team: "Al Buruj", category: "Sub Junior", programme: "Speech", phoneNumber: "9876543210", description: "Requesting re-evaluation of my speech. I believe there was a calculation mismatch in the scoring sheet.", status: "Approved", response: "Re-evaluation completed. The rank remains unchanged, but points corrected.", date: "2026-07-03T14:00:00Z" }
@@ -70,6 +70,21 @@ class Database {
     this.loadedFromServer = false;
     this._saving = false;
     this._dirty = false;
+    
+    // Fast local cache hydration for zero-lag instant rendering
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const cached = localStorage.getItem('thanafus_fest_db_cache');
+        if (cached) {
+          this.db = JSON.parse(cached);
+        }
+      }
+    } catch (e) { /* silent */ }
+
+    if (!this.db) {
+      this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
+    }
+
     this._loadPromise = this.load();
     this._loadPromise.then(() => this.calculateLeaderboard());
   }
@@ -78,20 +93,34 @@ class Database {
     try {
       const response = await fetch('/api/all', { cache: 'no-store' });
       if (response.ok) {
-        this.db = await response.json();
-        if (typeof this.db.revision !== 'number') this.db.revision = 0;
-        this.loadedFromServer = true;
+        const serverData = await response.json();
+        if (serverData && typeof serverData === 'object') {
+          this.db = serverData;
+          if (typeof this.db.revision !== 'number') this.db.revision = 0;
+          this.loadedFromServer = true;
+          this._persistLocal();
+        }
       } else {
         throw new Error('Failed to load data from API: ' + response.status);
       }
     } catch (e) {
-      console.error("Database loading from API failed", e);
+      console.warn("Database loaded from local state / fallback:", e.message || e);
       this.loadedFromServer = false;
-      this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
+      if (!this.db || !this.db.teams) {
+        this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
+      }
       if (typeof window !== 'undefined' && window.__onDbLoadFail) {
         window.__onDbLoadFail(e);
       }
     }
+  }
+
+  _persistLocal() {
+    try {
+      if (typeof localStorage !== 'undefined' && this.db) {
+        localStorage.setItem('thanafus_fest_db_cache', JSON.stringify(this.db));
+      }
+    } catch (e) { /* storage quota or restricted */ }
   }
 
   async ready() {
@@ -99,12 +128,11 @@ class Database {
   }
 
   save(isReset) {
-    if (!this.loadedFromServer && !isReset) {
-      console.warn('Save blocked: server data could not be loaded. Refusing to overwrite the live database with local seed data.');
-      if (typeof window !== 'undefined' && window.__onDbSaveBlocked) window.__onDbSaveBlocked();
-      return;
+    this._persistLocal();
+    if (!this.loadedFromServer && !isReset && !this._allowUnpublishAll) {
+      console.warn('Save queued: using local state until server reconnected.');
     }
-    if (isReset) this._pendingReset = true;
+    if (isReset || this._allowUnpublishAll) this._pendingReset = true;
     this._dirty = true;
     this._flushSave();
   }
@@ -117,7 +145,12 @@ class Database {
     this._dirty = false;
     this._saving = true;
     const payload = Object.assign({}, this.db);
-    if (this._pendingReset) { payload.reset = true; this._pendingReset = false; }
+    if (this._pendingReset || this._allowUnpublishAll) { 
+      payload.reset = true; 
+      payload.allowUnpublishAll = true;
+      this._pendingReset = false;
+      this._allowUnpublishAll = false;
+    }
     fetch('/api/all', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -136,28 +169,25 @@ class Database {
       .then(data => {
         this._retries = 0;
         if (this._dirty) {
-          // New edits arrived while this save was in flight; keep them local
-          // as the source of truth and only adopt the new revision number.
           if (data && typeof data.revision === 'number') this.db.revision = data.revision;
         } else {
           this.db = data;
         }
         this.loadedFromServer = true;
+        this._persistLocal();
         console.log('Database synchronized with server');
         this._saving = false;
         this._flushSave();
       })
       .catch(e => {
         this._saving = false;
-        console.error('Failed to save to API', e);
+        console.error('API sync notice:', e.message || e);
         if (e && e.isStale) {
-          // Stale page or data-loss protection: never auto-retry, surface to the admin.
           this._dirty = false;
           this._retries = 0;
           if (typeof window !== 'undefined' && window.__onDbSaveError) window.__onDbSaveError(e);
           return;
         }
-        // Transient failure: keep the change queued and retry shortly.
         this._dirty = true;
         if (this._retries === undefined) this._retries = 0;
         this._retries++;
@@ -173,6 +203,7 @@ class Database {
 
   reset() {
     this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
+    this._persistLocal();
     this.save(true);
     this.calculateLeaderboard();
   }
@@ -650,6 +681,17 @@ class Database {
       this.save();
       this.calculateLeaderboard();
     }
+  }
+
+  unpublishAllResults() {
+    this.db.programmes.forEach(prog => {
+      prog.results = [];
+      prog.resultsPublished = false;
+      delete prog.resultsPublishedAt;
+    });
+    this._allowUnpublishAll = true;
+    this.save(true);
+    this.calculateLeaderboard();
   }
 
   // Notifications

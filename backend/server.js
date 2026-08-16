@@ -7,7 +7,7 @@ const { Team, Student, Programme, Notification, Appeal, Gallery, Contact, Settin
 
 const app = express();
 // Ensure admin password in Settings matches environment variable
-const ADMIN_PASSWORD_FIXED = "admin@9526";
+const ADMIN_PASSWORD_FIXED = process.env.ADMIN_PASSWORD || "admin@9526";
 
 const syncAdminPassword = async () => {
   try {
@@ -16,7 +16,7 @@ const syncAdminPassword = async () => {
       // Create settings if missing
       await Settings.create({ adminPassword: ADMIN_PASSWORD_FIXED });
       console.log('Created Settings with admin password');
-    } else if (settings.adminPassword !== ADMIN_PASSWORD_FIXED) {
+    } else if (settings.adminPassword !== ADMIN_PASSWORD_FIXED && process.env.ADMIN_PASSWORD) {
       settings.adminPassword = ADMIN_PASSWORD_FIXED;
       await settings.save();
       console.log('Updated admin password in Settings');
@@ -87,7 +87,7 @@ app.post('/api/all', async (req, res) => {
     const incomingPublished = Array.isArray(db.programmes)
       ? db.programmes.filter(p => p.resultsPublished).length
       : -1;
-    if (!db.reset && existingPublished > 0 && incomingPublished === 0) {
+    if (!db.reset && !db.allowUnpublishAll && existingPublished > 0 && incomingPublished === 0) {
       return res.status(409).json({
         error: 'Data loss protection: the incoming data has no published results but the server has ' + existingPublished + '. Hard refresh the page (Ctrl+Shift+R) and retry.'
       });

@@ -35,11 +35,11 @@ const Settings   = mongoose.models.Settings   || mongoose.model('Settings', sett
 
 async function syncAdminPassword() {
   try {
-    const FIXED = 'admin@9526';
+    const FIXED = process.env.ADMIN_PASSWORD || 'admin@9526';
     const settings = await Settings.findOne();
     if (!settings) {
       await Settings.create({ adminPassword: FIXED });
-    } else if (settings.adminPassword !== FIXED) {
+    } else if (settings.adminPassword !== FIXED && process.env.ADMIN_PASSWORD) {
       settings.adminPassword = FIXED;
       await settings.save();
     }

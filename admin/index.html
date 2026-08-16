@@ -178,9 +178,12 @@
 
         <!-- SECTION 4: PROGRAMMES & RESULTS -->
         <div id="sec-progs" class="admin-section-container" style="display: none;">
-          <div class="flex-between">
+          <div class="flex-between" style="flex-wrap: wrap; gap: 10px;">
             <h2><i class="fa-solid fa-circle-nodes"></i> Program Evaluations</h2>
-            <button class="btn btn-gold btn-sm" onclick="openProgModal()"><i class="fa-solid fa-plus"></i> Add New Programme</button>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-outline btn-sm" onclick="handleUnpublishAllResults()" style="border-color: #ef4444; color: #ef4444;"><i class="fa-solid fa-rotate-left"></i> Unpublish All Results</button>
+              <button class="btn btn-gold btn-sm" onclick="openProgModal()"><i class="fa-solid fa-plus"></i> Add New Programme</button>
+            </div>
           </div>
 
           <div style="display: flex; gap: 15px; margin: 15px 0; flex-wrap: wrap; align-items: center;">
@@ -693,14 +696,24 @@
       }
     };
 
-    // AUTHENTICATION
+    // AUTHENTICATION & SESSION PERSISTENCE
+    document.addEventListener("DOMContentLoaded", async () => {
+      await ThanafusDB.ready();
+      if (sessionStorage.getItem('thanafus_admin_auth') === 'true') {
+        document.getElementById("login-overlay").style.display = "none";
+        document.getElementById("admin-layout").style.display = "grid";
+        initDashboard();
+      }
+    });
+
     async function handleAdminLogin(event) {
       event.preventDefault();
       await ThanafusDB.ready();
       const pass = document.getElementById("admin-pass").value;
-      const truePass = ThanafusDB.db.settings.adminPassword || "admin";
+      const truePass = (ThanafusDB.db.settings && ThanafusDB.db.settings.adminPassword) || "admin@9526";
 
       if (pass === truePass) {
+        sessionStorage.setItem('thanafus_admin_auth', 'true');
         document.getElementById("login-overlay").style.display = "none";
         document.getElementById("admin-layout").style.display = "grid";
         showAlert("Successfully authenticated as Administrator", "success");
@@ -711,6 +724,7 @@
     }
 
     function handleLogout() {
+      sessionStorage.removeItem('thanafus_admin_auth');
       document.getElementById("admin-layout").style.display = "none";
       document.getElementById("login-overlay").style.display = "flex";
       document.getElementById("admin-pass").value = "";
@@ -1257,6 +1271,18 @@
         ThanafusDB.unpublishResults(progId);
         showAlert("Results unpublished.", "info");
         renderProgsTable();
+      }
+    }
+
+    function handleUnpublishAllResults() {
+      const confirmText = prompt("⚠️ WARNING: This will unpublish all programme results and reset team total scores to 0.\n\nType UNPUBLISH to confirm:");
+      if (confirmText === "UNPUBLISH") {
+        ThanafusDB.unpublishAllResults();
+        showAlert("All programme results have been unpublished. Team standings reset to 0.", "success");
+        renderProgsTable();
+        initDashboard();
+      } else if (confirmText !== null) {
+        showAlert("Confirmation text did not match. Unpublish cancelled.", "info");
       }
     }
 

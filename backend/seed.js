@@ -24,20 +24,20 @@ const DEFAULT_DB = {
     { id: "stud-12", name: "Hisham P.", teamId: "team-4", category: "Senior", photo: "" }
   ],
   programmes: [
-    { id: "prog-1", name: "Quran Recitation", category: "Sub Junior", type: "individual", venue: "Imam Bukhari Stage", judge: "Usthad Hamza Musliyar", resultsPublished: true, results: [{ rank: 1, studentId: "stud-1", grade: "A" }, { rank: 2, studentId: "stud-2", grade: "A" }, { rank: 3, studentId: "stud-3", grade: "B" }] },
-    { id: "prog-2", name: "Speech", category: "Sub Junior", type: "individual", venue: "Imam Bukhari Stage", judge: "Usthad Faisal Ahsani", resultsPublished: true, results: [{ rank: 1, studentId: "stud-4", grade: "A" }, { rank: 2, studentId: "stud-1", grade: "B" }, { rank: 3, studentId: "stud-2", grade: "B" }] },
+    { id: "prog-1", name: "Quran Recitation", category: "Sub Junior", type: "individual", venue: "Imam Bukhari Stage", judge: "Usthad Hamza Musliyar", resultsPublished: false, results: [] },
+    { id: "prog-2", name: "Speech", category: "Sub Junior", type: "individual", venue: "Imam Bukhari Stage", judge: "Usthad Faisal Ahsani", resultsPublished: false, results: [] },
     { id: "prog-3", name: "Mappilappattu", category: "Sub Junior", type: "individual", venue: "Imam Malik Stage", judge: "Usthad Salim Darimi", resultsPublished: false, results: [] },
-    { id: "prog-4", name: "Quran Recitation", category: "Junior", type: "individual", venue: "Imam Bukhari Stage", judge: "Usthad Hamza Musliyar", resultsPublished: true, results: [{ rank: 1, studentId: "stud-5", grade: "A" }, { rank: 2, studentId: "stud-6", grade: "A" }, { rank: 3, studentId: "stud-7", grade: "B" }] },
-    { id: "prog-5", name: "Quiz", category: "Junior", type: "individual", venue: "Imam Malik Stage", judge: "Usthad Shareef Hudawi", resultsPublished: true, results: [{ rank: 1, studentId: "stud-8", grade: "A" }, { rank: 2, studentId: "stud-5", grade: "A" }, { rank: 3, studentId: "stud-6", grade: "B" }] },
+    { id: "prog-4", name: "Quran Recitation", category: "Junior", type: "individual", venue: "Imam Bukhari Stage", judge: "Usthad Hamza Musliyar", resultsPublished: false, results: [] },
+    { id: "prog-5", name: "Quiz", category: "Junior", type: "individual", venue: "Imam Malik Stage", judge: "Usthad Shareef Hudawi", resultsPublished: false, results: [] },
     { id: "prog-6", name: "Essay Writing", category: "Junior", type: "individual", venue: "Class Room 4", judge: "Usthad Abdul Rasheed", resultsPublished: false, results: [] },
-    { id: "prog-7", name: "Speech", category: "Senior", type: "individual", venue: "Imam Malik Stage", judge: "Usthad Faisal Ahsani", resultsPublished: true, results: [{ rank: 1, studentId: "stud-9", grade: "A" }, { rank: 2, studentId: "stud-10", grade: "B" }, { rank: 3, studentId: "stud-11", grade: "B" }] },
-    { id: "prog-8", name: "Quiz", category: "Senior", type: "individual", venue: "Imam Malik Stage", judge: "Usthad Shareef Hudawi", resultsPublished: true, results: [{ rank: 1, studentId: "stud-12", grade: "A" }, { rank: 2, studentId: "stud-9", grade: "A" }, { rank: 3, studentId: "stud-10", grade: "B" }] },
+    { id: "prog-7", name: "Speech", category: "Senior", type: "individual", venue: "Imam Malik Stage", judge: "Usthad Faisal Ahsani", resultsPublished: false, results: [] },
+    { id: "prog-8", name: "Quiz", category: "Senior", type: "individual", venue: "Imam Malik Stage", judge: "Usthad Shareef Hudawi", resultsPublished: false, results: [] },
     { id: "prog-9", name: "Story Writing", category: "Senior", type: "individual", venue: "Class Room 5", judge: "Usthad Najeeb Hudawi", resultsPublished: false, results: [] }
   ],
   notifications: [
-    { id: "notif-1", title: "Quran Recitation Results Published", content: "Quran Recitation results for Sub Junior, Junior, and Senior categories are now available online.", type: "success", date: "2026-07-03T10:00:00Z" },
+    { id: "notif-1", title: "THANAFUS Dars Fest 2026 Live", content: "Welcome to THANAFUS Dars Fest 2026. Live stage evaluations and event announcements will appear here in real time.", type: "info", date: "2026-07-03T09:00:00Z" },
     { id: "notif-2", title: "Appeal Panel Active", content: "All appeals regarding published results must be submitted within 1 hour of the official announcement.", type: "warning", date: "2026-07-03T11:30:00Z" },
-    { id: "notif-3", title: "Venue Change for Senior Quiz", content: "Senior Quiz will be held at Imam Malik Stage instead of Stage B. Time remains 02:00 PM.", type: "info", date: "2026-07-03T13:00:00Z" }
+    { id: "notif-3", title: "Venue Schedule Announced", content: "Events are taking place across Imam Bukhari Stage, Imam Malik Stage, and designated classrooms.", type: "info", date: "2026-07-03T13:00:00Z" }
   ],
   appeals: [
     { id: "appl-1", studentName: "Shamil V.P.", team: "Al Buruj", category: "Sub Junior", programme: "Speech", phoneNumber: "9876543210", description: "Requesting re-evaluation of my speech. I believe there was a calculation mismatch in the scoring sheet.", status: "Approved", response: "Re-evaluation completed. The rank remains unchanged, but points corrected.", date: "2026-07-03T14:00:00Z" }

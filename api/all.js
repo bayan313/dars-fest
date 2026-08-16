@@ -23,7 +23,7 @@ module.exports = async function handler(req, res) {
     const incomingPublished = Array.isArray(db.programmes)
       ? db.programmes.filter(p => p.resultsPublished).length
       : -1;
-    if (!db.reset && existingPublished > 0 && incomingPublished === 0) {
+    if (!db.reset && !db.allowUnpublishAll && existingPublished > 0 && incomingPublished === 0) {
       return res.status(409).json({
         error: 'Data loss protection: the incoming data has no published results but the server has ' + existingPublished + '. Hard refresh the page (Ctrl+Shift+R) and retry.'
       });

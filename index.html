@@ -235,7 +235,10 @@
 
       categories.forEach(cat => {
         const champ = ThanafusDB.getKalaprathibha(cat);
-        const photoUrl = champ.student.photo || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop";
+        const isAwaiting = champ.points === 0;
+        const photoUrl = (!isAwaiting && champ.student.photo) ? champ.student.photo : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop";
+        const displayName = isAwaiting ? "Awaiting Results" : champ.student.name;
+        const displayTeam = isAwaiting ? "Evaluations In Progress" : champ.teamName;
         const pointsLabel = champ.points === 1 ? "Point" : "Points";
         
         html += `
@@ -243,11 +246,11 @@
             <span class="cat-badge">${cat}</span>
             <div class="student-avatar-container">
               <span class="crown-icon">👑</span>
-              <img src="${photoUrl}" alt="${champ.student.name}" class="student-avatar">
+              <img src="${photoUrl}" alt="${displayName}" class="student-avatar">
             </div>
-            <h4>${champ.student.name}</h4>
-            <p class="team-name">${champ.teamName}</p>
-            <div class="points">${champ.points} <span style="font-size:0.85rem;font-weight:normal;color:var(--text-gray);">${pointsLabel}</span></div>
+            <h4>${displayName}</h4>
+            <p class="team-name">${displayTeam}</p>
+            <div class="score" style="font-size: 1.5rem; font-weight: 700; color: var(--accent-gold); margin-top: 10px;">${champ.points} <span style="font-size:0.85rem;font-weight:normal;color:var(--text-gray);">${pointsLabel}</span></div>
           </div>
         `;
       });
