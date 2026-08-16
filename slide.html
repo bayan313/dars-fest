@@ -536,7 +536,7 @@
     let currentSlide = 0;
     let slideTimer = null;
     const SLIDE_DURATION = 10000; // 10 seconds per slide
-    const REFRESH_INTERVAL = 15000; // refresh data every 15s
+    const REFRESH_INTERVAL = 5000; // auto-refresh data every 5 seconds for live event
 
     async function initSlidePage() {
       await ThanafusDB.ready();
@@ -854,24 +854,43 @@
       showSlide(currentSlide + 1);
     }
 
-    function refreshData() {
+    let lastPublishedSignature = "";
+
+    async function refreshData() {
       try {
-        ThanafusDB.load();
+        await ThanafusDB.load();
         ThanafusDB.calculateLeaderboard();
         renderStandings();
         renderKalaprathibha();
-        // Update generated slide content WITHOUT resetting the rotation
         renderCategorySlides();
         renderLatestResult();
+
+        // Check if published results signature changed to rebuild slides if necessary
+        const currentSig = ThanafusDB.db.programmes
+          .filter(p => p.resultsPublished)
+          .map(p => p.id + ':' + (p.results ? p.results.length : 0))
+          .join('|');
+        if (lastPublishedSignature !== "" && lastPublishedSignature !== currentSig) {
+          // New results published! Re-render all slides
+          renderCategorySlides();
+          renderLatestResult();
+        }
+        lastPublishedSignature = currentSig;
+
         const u = document.getElementById("slide-updated");
-        if (u) u.textContent = "Updated " + new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        if (u) {
+          u.innerHTML = `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#10b981;margin-right:5px;box-shadow:0 0 8px #10b981;"></span> Live Auto-Sync: ${new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+        }
       } catch (e) {
-        console.error("Refresh failed", e);
+        console.error("Auto-refresh failed:", e);
       }
     }
 
     function updateClock() {
-      document.getElementById("slide-clock").textContent = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const clock = document.getElementById("slide-clock");
+      if (clock) {
+        clock.textContent = new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      }
     }
 
     async function init() {
@@ -880,15 +899,23 @@
       renderKalaprathibha();
       buildSlides();
       updateClock();
-      refreshData();
+      await refreshData();
       setInterval(updateClock, 1000);
       setInterval(refreshData, REFRESH_INTERVAL);
     }
 
-    // Trigger refresh immediately on focus so admin edits show up fast
+    // Trigger instant refresh across tabs when admin saves new results
+    window.addEventListener("storage", (e) => {
+      if (e.key && (e.key.includes("thanafus") || e.key.includes("db"))) {
+        refreshData();
+      }
+    });
+
+    // Trigger refresh immediately when tab regains focus or comes back online
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) refreshData();
     });
+    window.addEventListener("online", refreshData);
 
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", init);
