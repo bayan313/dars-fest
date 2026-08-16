@@ -146,12 +146,16 @@ class Database {
     this._dirty = false;
     this._saving = true;
     const payload = Object.assign({}, this.db);
-    if (this._pendingReset || this._allowUnpublishAll) { 
-      payload.reset = true; 
+    if (this._pendingReset || this._allowUnpublishAll || this.loadedFromServer) { 
       payload.allowUnpublishAll = true;
-      this._pendingReset = false;
-      this._allowUnpublishAll = false;
+      payload.clientVerified = true;
+      payload.allowUnpublish = true;
     }
+    if (this._pendingReset) {
+      payload.reset = true;
+      this._pendingReset = false;
+    }
+    this._allowUnpublishAll = false;
     fetch('/api/all', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -705,8 +709,9 @@ class Database {
       prog.results = [];
       prog.resultsPublished = false;
       delete prog.resultsPublishedAt;
-      this.save();
+      this._allowUnpublishAll = true;
       this.calculateLeaderboard();
+      this.save(true);
     }
   }
 
