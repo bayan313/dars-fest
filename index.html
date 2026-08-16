@@ -181,6 +181,22 @@
     </div>
   </div>
 
+  <!-- MODAL: PROSPECTUS VIEWER (Mobile Optimized) -->
+  <div class="modal-overlay" id="prospectus-modal" style="display: none; z-index: 9999;">
+    <div class="modal-card" style="max-width: 850px; width: 95%; max-height: 90vh; padding: 20px; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px;">
+        <h3 style="color: var(--primary-emerald); margin: 0; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> THANAFUS 2026 Prospectus
+        </h3>
+        <button class="modal-close-btn" style="position: static; font-size: 1.6rem;" onclick="closeProspectusModal()">&times;</button>
+      </div>
+
+      <div id="prospectus-modal-body" style="flex: 1; overflow-y: auto; min-height: 250px;">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
   <!-- Shared JavaScript Files -->
   <script src="js/db.js"></script>
   <script src="js/main.js"></script>
@@ -325,35 +341,146 @@
       `;
     }
 
+    // Helper: Convert Base64 data URI to Blob for mobile PDF rendering
+    function base64ToBlob(dataUri) {
+      if (!dataUri) return null;
+      try {
+        if (dataUri.startsWith("data:")) {
+          const parts = dataUri.split(',');
+          const mimeMatch = parts[0].match(/:(.*?);/);
+          const mime = mimeMatch ? mimeMatch[1] : 'application/pdf';
+          const bstr = atob(parts[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+          }
+          return new Blob([u8arr], { type: mime });
+        }
+        return null;
+      } catch (e) {
+        console.error("Base64 conversion failed:", e);
+        return null;
+      }
+    }
+
+    function openProspectusModal() {
+      const modal = document.getElementById("prospectus-modal");
+      const body = document.getElementById("prospectus-modal-body");
+      const rawUrl = ThanafusDB.db.settings && ThanafusDB.db.settings.prospectusUrl;
+
+      if (rawUrl) {
+        const blob = base64ToBlob(rawUrl);
+        const pdfUrl = blob ? URL.createObjectURL(blob) : rawUrl;
+
+        body.innerHTML = `
+          <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+            <a href="${pdfUrl}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" style="flex: 1; justify-content: center; min-width: 140px;">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Full Screen
+            </a>
+            <a href="${pdfUrl}" download="THANAFUS_Dars_Fest_2026_Prospectus.pdf" class="btn btn-gold btn-sm" style="flex: 1; justify-content: center; min-width: 140px;">
+              <i class="fa-solid fa-download"></i> Download PDF
+            </a>
+          </div>
+          <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #525659; min-height: 55vh;">
+            <iframe src="${pdfUrl}#toolbar=0" style="width: 100%; height: 60vh; border: none; display: block;">
+              <div style="padding:30px 15px; color:white; text-align:center;">
+                <p style="margin-bottom:15px;">PDF Preview is not supported inside this browser window.</p>
+                <a href="${pdfUrl}" target="_blank" class="btn btn-gold"><i class="fa-solid fa-file-pdf"></i> Tap Here to Open / View PDF</a>
+              </div>
+            </iframe>
+          </div>
+        `;
+      } else {
+        // Fallback: Full official handbook and guidelines
+        body.innerHTML = `
+          <div style="line-height: 1.7; color: var(--text-dark); padding: 5px;">
+            <div style="background: rgba(16, 185, 129, 0.08); border-left: 4px solid var(--primary-emerald); padding: 12px 16px; border-radius: 6px; margin-bottom: 20px;">
+              <h4 style="color: var(--primary-emerald); margin-bottom: 4px;">THANAFUS Dars Fest 2026 — Official Handbook</h4>
+              <p style="font-size: 0.85rem; color: var(--text-gray); margin: 0;">Comprehensive Rules, Scoring System & General Regulations</p>
+            </div>
+
+            <h4 style="color: var(--primary-emerald); margin-top: 15px;"><i class="fa-solid fa-trophy" style="color:var(--accent-gold);"></i> 1. Scoring & Point System</h4>
+            <div class="table-wrapper" style="margin: 10px 0 20px 0;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Position / Rank</th>
+                    <th>Individual Events</th>
+                    <th>Group / General Events</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td><strong>1st Place + Grade A</strong></td><td><strong>10 Points</strong></td><td><strong>15 Points</strong></td></tr>
+                  <tr><td><strong>1st Place + Grade B</strong></td><td><strong>8 Points</strong></td><td><strong>13 Points</strong></td></tr>
+                  <tr><td><strong>1st Place + Grade C</strong></td><td><strong>6 Points</strong></td><td><strong>11 Points</strong></td></tr>
+                  <tr><td><strong>2nd Place + Grade A</strong></td><td><strong>8 Points</strong></td><td><strong>13 Points</strong></td></tr>
+                  <tr><td><strong>2nd Place + Grade B</strong></td><td><strong>6 Points</strong></td><td><strong>11 Points</strong></td></tr>
+                  <tr><td><strong>2nd Place + Grade C</strong></td><td><strong>4 Points</strong></td><td><strong>9 Points</strong></td></tr>
+                  <tr><td><strong>3rd Place + Grade A</strong></td><td><strong>6 Points</strong></td><td><strong>11 Points</strong></td></tr>
+                  <tr><td><strong>3rd Place + Grade B</strong></td><td><strong>4 Points</strong></td><td><strong>9 Points</strong></td></tr>
+                  <tr><td><strong>3rd Place + Grade C</strong></td><td><strong>2 Points</strong></td><td><strong>7 Points</strong></td></tr>
+                  <tr><td><strong>Grade A (No Rank)</strong></td><td><strong>5 Points</strong></td><td><strong>5 Points</strong></td></tr>
+                  <tr><td><strong>Grade B (No Rank)</strong></td><td><strong>3 Points</strong></td><td><strong>3 Points</strong></td></tr>
+                  <tr><td><strong>Grade C (No Rank)</strong></td><td><strong>1 Point</strong></td><td><strong>1 Point</strong></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h4 style="color: var(--primary-emerald); margin-top: 15px;"><i class="fa-solid fa-layer-group"></i> 2. Categories</h4>
+            <ul style="padding-left: 20px; margin-bottom: 20px; font-size: 0.95rem;">
+              <li><strong>Sub Junior</strong>: Foundation & Junior Primary dars students.</li>
+              <li><strong>Junior</strong>: Upper Primary & Preparatory students.</li>
+              <li><strong>Senior</strong>: Higher Secondary & Advanced Dars scholars.</li>
+              <li><strong>General</strong>: Common Group & Team Events (Whole team scoring).</li>
+            </ul>
+
+            <h4 style="color: var(--primary-emerald); margin-top: 15px;"><i class="fa-solid fa-scale-balanced"></i> 3. Appeals & Verdicts</h4>
+            <p style="font-size: 0.95rem; margin-bottom: 10px;">
+              Appeals must be submitted via the official online <strong>Appeal Panel</strong> within <strong>1 hour</strong> of publishing the results along with a fee of <strong>Rs. 50</strong>. The decision of the Grand Jury committee is final and binding.
+            </p>
+          </div>
+        `;
+      }
+
+      modal.style.display = "flex";
+    }
+
+    function closeProspectusModal() {
+      document.getElementById("prospectus-modal").style.display = "none";
+    }
+
     // Setup Prospectus Actions
     function setupProspectus() {
       const btnView = document.getElementById("btn-view-pdf");
       const btnDownload = document.getElementById("btn-download-pdf");
 
-      const handlePdf = (action) => {
-        const prospectusUrl = ThanafusDB.db.settings.prospectusUrl;
-        if (!prospectusUrl) {
-          showAlert("Prospectus has not been uploaded yet. Access the admin dashboard to upload.", "warning");
-          return;
-        }
+      if (btnView) btnView.addEventListener("click", openProspectusModal);
 
-        if (action === "view") {
-          // Open PDF in new tab
-          const newWindow = window.open();
-          newWindow.document.write(`<iframe src="${prospectusUrl}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
-        } else if (action === "download") {
-          // Trigger download
+      if (btnDownload) {
+        btnDownload.addEventListener("click", () => {
+          const rawUrl = ThanafusDB.db.settings && ThanafusDB.db.settings.prospectusUrl;
+          if (!rawUrl) {
+            openProspectusModal();
+            return;
+          }
+
+          const blob = base64ToBlob(rawUrl);
+          const downloadUrl = blob ? URL.createObjectURL(blob) : rawUrl;
+
           const link = document.createElement("a");
-          link.href = prospectusUrl;
+          link.href = downloadUrl;
           link.download = "THANAFUS_Dars_Fest_2026_Prospectus.pdf";
+          link.target = "_blank";
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-        }
-      };
 
-      btnView.addEventListener("click", () => handlePdf("view"));
-      btnDownload.addEventListener("click", () => handlePdf("download"));
+          if (blob) {
+            setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
+          }
+        });
+      }
     }
   </script>
 </body>
