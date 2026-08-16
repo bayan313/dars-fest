@@ -243,28 +243,31 @@
                 <div class="form-group">
                   <label for="media-type">Media Format</label>
                   <select class="form-control" id="media-type" onchange="toggleMediaFileInput(this.value)" required>
-                    <option value="image">Photo / Image</option>
-                    <option value="video">Video URL / File</option>
+                    <option value="image">Photo / Image (Upload File)</option>
+                    <option value="image_url">Photo / Image (Direct Web URL)</option>
+                    <option value="youtube">YouTube Video / Shorts (Link)</option>
+                    <option value="instagram">Instagram Reel / Post (Link)</option>
+                    <option value="video">Direct MP4 Video (Link)</option>
                   </select>
                 </div>
 
                 <div class="form-group">
-                  <label for="media-title">Title / Name</label>
-                  <input type="text" class="form-control" id="media-title" placeholder="E.g., Quran Recitation Ceremony" required>
+                  <label for="media-title">Title / Caption</label>
+                  <input type="text" class="form-control" id="media-title" placeholder="E.g., Quran Recitation Highlights / Speech Session" required>
                 </div>
 
                 <!-- Image upload file input -->
                 <div class="form-group" id="media-file-group">
-                  <label for="media-file">Choose Local File</label>
+                  <label for="media-file">Choose Image File</label>
                   <input type="file" class="form-control" id="media-file" accept="image/*" required>
-                  <span style="font-size:0.75rem; color:var(--text-gray);">Maximum file size: 1MB. Files are saved to the cloud database.</span>
+                  <span style="font-size:0.75rem; color:var(--text-gray);">Maximum file size: 1MB. (Supported: JPG, PNG, WebP).</span>
                 </div>
 
-                <!-- Video URL input (hidden initially) -->
+                <!-- Media URL input (YouTube / Instagram / Video / Web Image) -->
                 <div class="form-group" id="media-url-group" style="display: none;">
-                  <label for="media-url">Video MP4 File Link / Embed</label>
-                  <input type="url" class="form-control" id="media-url" placeholder="https://example.com/video.mp4">
-                  <span style="font-size:0.75rem; color:var(--text-gray);">Provide a direct link to an MP4 video or use our pre-seeded video URLs.</span>
+                  <label for="media-url" id="media-url-label">Media Link / URL</label>
+                  <input type="url" class="form-control" id="media-url" placeholder="Paste link here...">
+                  <span id="media-url-help" style="font-size:0.75rem; color:var(--text-gray);">Paste link to the media item.</span>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -1366,29 +1369,52 @@
       const fileGroup = document.getElementById("media-file-group");
       const urlGroup = document.getElementById("media-url-group");
       const fileInput = document.getElementById("media-file");
+      const urlLabel = document.getElementById("media-url-label");
+      const urlInput = document.getElementById("media-url");
+      const urlHelp = document.getElementById("media-url-help");
 
       if (type === 'image') {
         fileGroup.style.display = "block";
         urlGroup.style.display = "none";
         fileInput.required = true;
+        urlInput.required = false;
       } else {
         fileGroup.style.display = "none";
         urlGroup.style.display = "block";
         fileInput.required = false;
+        urlInput.required = true;
+
+        if (type === 'youtube') {
+          urlLabel.innerHTML = '<i class="fa-brands fa-youtube" style="color:#ef4444;"></i> YouTube Video / Shorts Link';
+          urlInput.placeholder = "https://www.youtube.com/watch?v=... or https://youtu.be/... or https://youtube.com/shorts/...";
+          urlHelp.innerText = "Paste any YouTube link. HD thumbnail and auto-play will be configured automatically!";
+        } else if (type === 'instagram') {
+          urlLabel.innerHTML = '<i class="fa-brands fa-instagram" style="color:#e1306c;"></i> Instagram Reel / Post Link';
+          urlInput.placeholder = "https://www.instagram.com/reel/... or https://www.instagram.com/p/...";
+          urlHelp.innerText = "Paste Instagram Reel or Post link. Embedded player will be generated automatically!";
+        } else if (type === 'image_url') {
+          urlLabel.innerHTML = '<i class="fa-solid fa-image"></i> Direct Image Web URL';
+          urlInput.placeholder = "https://example.com/photo.jpg";
+          urlHelp.innerText = "Paste a direct web link to an image (JPG, PNG, WebP).";
+        } else {
+          urlLabel.innerHTML = '<i class="fa-solid fa-video"></i> Direct MP4 Video URL';
+          urlInput.placeholder = "https://example.com/video.mp4";
+          urlHelp.innerText = "Provide a direct link to an MP4 video file.";
+        }
       }
     }
 
     function handleMediaUpload(event) {
       event.preventDefault();
       const type = document.getElementById("media-type").value;
-      const title = document.getElementById("media-title").value;
+      const title = document.getElementById("media-title").value.trim();
       const day = document.getElementById("media-day").value;
       const category = document.getElementById("media-cat").value;
-      const eventVal = document.getElementById("media-event").value;
+      const eventVal = document.getElementById("media-event").value.trim();
 
-      const upload = (url) => {
-        ThanafusDB.addMedia(type, title, url, day, category, eventVal);
-        showAlert("Media item added to gallery database.", "success");
+      const upload = (url, formatType) => {
+        ThanafusDB.addMedia(formatType || type, title, url, day, category, eventVal);
+        showAlert("Media item added to gallery database successfully.", "success");
         document.getElementById("mediaUploadForm").reset();
         toggleMediaFileInput('image');
         renderMediaTable();
@@ -1396,7 +1422,7 @@
 
       if (type === 'image') {
         const fileInput = document.getElementById("media-file");
-        if (fileInput.files.length > 0) {
+        if (fileInput.files && fileInput.files.length > 0) {
           const file = fileInput.files[0];
           if (file.size > 1024 * 1024) {
             showAlert("File is too large! Maximum limit is 1MB.", "warning");
@@ -1404,33 +1430,78 @@
           }
           const reader = new FileReader();
           reader.onload = function(e) {
-            upload(e.target.result);
+            upload(e.target.result, 'image');
           };
           reader.readAsDataURL(file);
+        } else {
+          showAlert("Please select an image file to upload.", "warning");
         }
       } else {
-        let url = document.getElementById("media-url").value;
-        if (!url) url = "https://www.w3schools.com/html/mov_bbb.mp4"; // standard default fallback
-        upload(url);
+        const url = document.getElementById("media-url").value.trim();
+        if (!url) {
+          showAlert("Please enter a valid URL.", "warning");
+          return;
+        }
+
+        let resolvedType = type;
+        if (type === 'image_url') resolvedType = 'image';
+        upload(url, resolvedType);
       }
     }
 
     function renderMediaTable() {
       const tbody = document.getElementById("admin-media-table");
+      if (!tbody) return;
       tbody.innerHTML = "";
 
-      ThanafusDB.db.gallery.forEach(item => {
-        const preview = item.type === 'image' 
-          ? `<img src="${item.url}" style="width:40px;height:30px;object-fit:cover;border-radius:4px;">` 
-          : `<div style="width:40px;height:30px;background:#000;display:flex;align-items:center;justify-content:center;color:white;font-size:0.8rem;border-radius:4px;"><i class="fa-solid fa-play"></i></div>`;
+      const gallery = Array.isArray(ThanafusDB.db.gallery) ? ThanafusDB.db.gallery : [];
+
+      if (gallery.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:25px; color:var(--text-gray);">No media items uploaded yet.</td></tr>`;
+        return;
+      }
+
+      gallery.forEach(item => {
+        const parsed = ThanafusDB.parseMedia(item.url, item.type);
+        let preview = "";
+        let badgeColor = "#10b981";
+        let badgeIcon = '<i class="fa-solid fa-camera"></i>';
+        let typeName = "PHOTO";
+
+        if (parsed.type === 'youtube' || item.type === 'youtube') {
+          badgeColor = "#ef4444";
+          badgeIcon = '<i class="fa-brands fa-youtube"></i>';
+          typeName = "YOUTUBE";
+          preview = `<img src="${parsed.thumbnailUrl || 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=80'}" style="width:48px;height:32px;object-fit:cover;border-radius:4px;">`;
+        } else if (parsed.type === 'instagram' || item.type === 'instagram') {
+          badgeColor = "#e1306c";
+          badgeIcon = '<i class="fa-brands fa-instagram"></i>';
+          typeName = "INSTAGRAM";
+          preview = `<div style="width:48px;height:32px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);display:flex;align-items:center;justify-content:center;color:white;font-size:0.9rem;border-radius:4px;"><i class="fa-brands fa-instagram"></i></div>`;
+        } else if (parsed.type === 'video' || item.type === 'video') {
+          badgeColor = "#f59e0b";
+          badgeIcon = '<i class="fa-solid fa-play"></i>';
+          typeName = "VIDEO";
+          preview = `<div style="width:48px;height:32px;background:#1e293b;display:flex;align-items:center;justify-content:center;color:white;font-size:0.8rem;border-radius:4px;"><i class="fa-solid fa-play"></i></div>`;
+        } else {
+          preview = `<img src="${item.url}" style="width:48px;height:32px;object-fit:cover;border-radius:4px;">`;
+        }
           
         tbody.innerHTML += `
           <tr>
             <td data-label="Preview">${preview}</td>
-            <td data-label="Title"><strong>${item.title}</strong></td>
-            <td data-label="Format"><span class="prog-meta-badge">${item.type.toUpperCase()}</span></td>
+            <td data-label="Title">
+              <strong>${item.title}</strong>
+              <div style="font-size:0.75rem; color:var(--text-gray);">${item.day} &bull; ${item.category} &bull; ${item.event}</div>
+            </td>
+            <td data-label="Format">
+              <span class="prog-meta-badge" style="background:${badgeColor}22; color:${badgeColor}; font-weight:700;">
+                ${badgeIcon} ${typeName}
+              </span>
+            </td>
             <td data-label="Action" class="action-cell">
-              <button class="btn btn-outline btn-sm" onclick="deleteMedia('${item.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
+              <a href="${item.url}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="padding:4px 8px; font-size:0.75rem;" title="Open Link"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+              <button class="btn btn-outline btn-sm" onclick="deleteMedia('${item.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;" title="Delete"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         `;
@@ -1438,7 +1509,7 @@
     }
 
     function deleteMedia(id) {
-      if (confirm("Delete this gallery item?")) {
+      if (confirm("Are you sure you want to delete this gallery item?")) {
         ThanafusDB.deleteMedia(id);
         showAlert("Gallery media item removed.", "info");
         renderMediaTable();

@@ -769,10 +769,75 @@ class Database {
     }
   }
 
-  // Media
+  // Media & Social Embeds (YouTube, Instagram, Video, Image)
+  parseMedia(url, explicitType = "") {
+    if (!url) return { type: 'image', url: '', embedUrl: '', thumbnailUrl: '', rawUrl: '' };
+
+    const cleanUrl = url.trim();
+
+    // YouTube detection (Standard, Shorts, youtu.be, embed)
+    const ytMatch = cleanUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+    if (ytMatch && ytMatch[1]) {
+      const videoId = ytMatch[1];
+      return {
+        type: 'youtube',
+        videoId: videoId,
+        url: cleanUrl,
+        embedUrl: `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&rel=0&enablejsapi=1&playsinline=1`,
+        thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+        rawUrl: cleanUrl
+      };
+    }
+
+    // Instagram detection (Reel, Post, TV)
+    const igMatch = cleanUrl.match(/(?:instagram\.com\/(?:p|reel|tv)\/)([^"&?\/\s]+)/i);
+    if (igMatch && igMatch[1]) {
+      const code = igMatch[1];
+      return {
+        type: 'instagram',
+        code: code,
+        url: cleanUrl,
+        embedUrl: `https://www.instagram.com/reel/${code}/embed/captioned/`,
+        thumbnailUrl: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&auto=format&fit=crop',
+        rawUrl: cleanUrl
+      };
+    }
+
+    // Direct Video (MP4 / WebM / OGG / MOV)
+    if (explicitType === 'video' || cleanUrl.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) || cleanUrl.includes('/mov_bbb.mp4')) {
+      return {
+        type: 'video',
+        url: cleanUrl,
+        embedUrl: cleanUrl,
+        thumbnailUrl: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=600&auto=format&fit=crop',
+        rawUrl: cleanUrl
+      };
+    }
+
+    // Image / Photo
+    return {
+      type: explicitType || 'image',
+      url: cleanUrl,
+      embedUrl: cleanUrl,
+      thumbnailUrl: cleanUrl,
+      rawUrl: cleanUrl
+    };
+  }
+
   addMedia(type, title, url, day, category, event) {
     const id = "gal-" + (Date.now());
-    this.db.gallery.unshift({ id, type, title, url, day, category, event });
+    const parsed = this.parseMedia(url, type);
+    const resolvedType = (type === 'image' && url.startsWith('data:image')) ? 'image' : (parsed.type || type);
+
+    this.db.gallery.unshift({ 
+      id, 
+      type: resolvedType, 
+      title, 
+      url, 
+      day, 
+      category, 
+      event 
+    });
     this.save();
     return id;
   }
