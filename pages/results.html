@@ -598,8 +598,8 @@
             <tr>
               <td data-label="Programme"><strong>${p.programmeName}</strong></td>
               <td data-label="Venue">${p.venue}</td>
-              <td data-label="Rank">${p.rank ? `<span style="color:var(--accent-gold-dark);font-weight:bold;">${p.rank} Place</span>` : 'Participation'}</td>
-              <td data-label="Grade"><span class="prog-meta-badge" style="background-color:${p.grade === 'A' ? '#e2fdf2' : p.grade === 'B' ? '#fffbeb' : '#f1f5f9'}; color:${p.grade === 'A' ? '#10b981' : p.grade === 'B' ? '#d97706' : '#64748b'};">${p.grade || 'N/A'}</span></td>
+              <td data-label="Rank">${p.rank ? `<span style="color:var(--accent-gold-dark);font-weight:bold;">${p.rank + (p.rank === 1 ? 'st' : p.rank === 2 ? 'nd' : p.rank === 3 ? 'rd' : 'th')} Place</span>` : 'Participation'}</td>
+              <td data-label="Grade"><span class="prog-meta-badge" style="background-color:${p.grade === 'A' ? '#e2fdf2' : p.grade === 'B' ? '#fffbeb' : '#f1f5f9'}; color:${p.grade === 'A' ? '#10b981' : p.grade === 'B' ? '#d97706' : '#64748b'};">${p.grade ? 'Grade ' + p.grade : 'N/A'}</span></td>
               <td data-label="Points"><strong>${p.points} pts</strong></td>
             </tr>
           `;
@@ -712,8 +712,8 @@
             <tr>
               <td data-label="Programme"><strong>${win.programmeName}</strong></td>
               <td data-label="Student">${win.studentName}</td>
-              <td data-label="Rank">${win.rank} Place</td>
-              <td data-label="Grade"><span class="prog-meta-badge" style="background-color:${win.grade === 'A' ? '#e2fdf2' : win.grade === 'B' ? '#fffbeb' : '#f1f5f9'};">${win.grade || 'N/A'}</span></td>
+              <td data-label="Rank">${win.rank ? win.rank + (win.rank === 1 ? 'st' : win.rank === 2 ? 'nd' : win.rank === 3 ? 'rd' : 'th') + ' Place' : 'Participation'}</td>
+              <td data-label="Grade"><span class="prog-meta-badge" style="background-color:${win.grade === 'A' ? '#e2fdf2' : win.grade === 'B' ? '#fffbeb' : '#f1f5f9'}; color:${win.grade === 'A' ? '#10b981' : win.grade === 'B' ? '#d97706' : '#64748b'};">${win.grade ? 'Grade ' + win.grade : 'N/A'}</span></td>
               <td data-label="Points"><strong>${win.points} pts</strong></td>
             </tr>
           `;
