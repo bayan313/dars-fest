@@ -508,18 +508,44 @@ class Database {
       }
     });
 
-    // Calculate Overall Rank among students in the same category
+    // Sort student's own participations: Rank 1 -> Rank 2 -> Rank 3 -> Grade A -> Grade B -> Grade C
+    participations.sort((a, b) => {
+      const aRank = a.rank ? Number(a.rank) : 999;
+      const bRank = b.rank ? Number(b.rank) : 999;
+      if (aRank !== bRank) return aRank - bRank;
+      const gw = g => g === 'A' ? 3 : g === 'B' ? 2 : g === 'C' ? 1 : 0;
+      const gDiff = gw(b.grade) - gw(a.grade);
+      if (gDiff !== 0) return gDiff;
+      return (b.points || 0) - (a.points || 0);
+    });
+
+    // Calculate Overall Rank among students in the same category (Rank first, then Grade)
     const catStudents = this.db.students.filter(s => s.category === student.category);
     const scores = catStudents.map(s => {
       let score = 0;
+      let r1 = 0, r2 = 0, r3 = 0, gA = 0, gB = 0;
       this.db.programmes.forEach(prog => {
-        if (prog.category === s.category) {
+        if (prog.category === s.category && prog.resultsPublished) {
           const res = prog.results.find(r => r.studentId === s.id);
-          if (res) score += this.calculatePoints(res.rank, res.grade);
+          if (res) {
+            score += this.programmePoints(prog, res.rank, res.grade);
+            if (res.rank === 1) r1++;
+            if (res.rank === 2) r2++;
+            if (res.rank === 3) r3++;
+            if (res.grade === 'A') gA++;
+            if (res.grade === 'B') gB++;
+          }
         }
       });
-      return { id: s.id, score };
-    }).sort((a, b) => b.score - a.score);
+      return { id: s.id, score, r1, r2, r3, gA, gB };
+    }).sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      if (b.r1 !== a.r1) return b.r1 - a.r1;
+      if (b.r2 !== a.r2) return b.r2 - a.r2;
+      if (b.r3 !== a.r3) return b.r3 - a.r3;
+      if (b.gA !== a.gA) return b.gA - a.gA;
+      return b.gB - a.gB;
+    });
 
     const pos = scores.findIndex(s => s.id === studentId) + 1;
 

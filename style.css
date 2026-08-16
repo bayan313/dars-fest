@@ -1050,6 +1050,23 @@ footer {
 .grade-pill-b { background: #fef3c7; color: #b45309; }
 .grade-pill-c { background: #f1f5f9; color: #475569; }
 
+/* Grade Achiever Cards (Secondary priority after Rank) */
+.grade-card-a {
+  border-left: 6px solid #10b981;
+  background: linear-gradient(to right, rgba(16, 185, 129, 0.05), var(--card-bg) 35%);
+}
+.grade-card-b {
+  border-left: 6px solid #f59e0b;
+  background: linear-gradient(to right, rgba(245, 158, 11, 0.05), var(--card-bg) 35%);
+}
+.grade-card-c {
+  border-left: 6px solid #64748b;
+  background: linear-gradient(to right, rgba(100, 116, 139, 0.05), var(--card-bg) 35%);
+}
+.fill-grade-a { background: linear-gradient(90deg, #10b981, #34d399); }
+.fill-grade-b { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.fill-grade-c { background: linear-gradient(90deg, #64748b, #94a3b8); }
+
 /* Podium Layout for top 3 (legacy fallback) */
 .podium-container {
   display: flex;
