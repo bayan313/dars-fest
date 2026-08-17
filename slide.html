@@ -945,13 +945,14 @@
       showSlide(currentSlide + 1);
     }
 
-    // Render Team Penalties/Minus Marks
+    // Render Team Penalties/Minus Marks (All 4 teams together)
     function renderPenalties() {
       const container = document.getElementById("slide-penalties");
       if (!container) return;
       container.innerHTML = "";
 
       ThanafusDB.db.penalties = ThanafusDB.db.penalties || [];
+      const teams = ThanafusDB.db.teams;
 
       if (ThanafusDB.db.penalties.length === 0) {
         container.innerHTML = `
@@ -967,26 +968,57 @@
         return;
       }
 
-      ThanafusDB.db.penalties.forEach(pen => {
-        const prog = ThanafusDB.db.programmes.find(p => p.id === pen.programmeId);
-        const team = ThanafusDB.db.teams.find(t => t.id === pen.teamId);
+      // Group/accumulate penalties per team
+      const teamPenaltiesMap = {};
+      teams.forEach(t => {
+        teamPenaltiesMap[t.id] = {
+          team: t,
+          totalMinus: 0,
+          reasons: []
+        };
+      });
 
-        const progName = prog ? `Programme: ${prog.name}` : "General Penalty";
-        const teamName = team ? team.name : "Unknown Team";
+      ThanafusDB.db.penalties.forEach(pen => {
+        if (teamPenaltiesMap[pen.teamId]) {
+          teamPenaltiesMap[pen.teamId].totalMinus += (parseInt(pen.points) || 0);
+          const prog = ThanafusDB.db.programmes.find(p => p.id === pen.programmeId);
+          const label = prog ? `${prog.name}: ${pen.reason}` : pen.reason;
+          teamPenaltiesMap[pen.teamId].reasons.push(`-${pen.points} pts (${label})`);
+        }
+      });
+
+      // Render 4 tiles (one for each of the 4 teams)
+      teams.forEach(t => {
+        const penData = teamPenaltiesMap[t.id];
+        const hasPenalties = penData.totalMinus > 0;
+        
+        const cardBg = hasPenalties ? "rgba(239, 68, 68, 0.05)" : "rgba(16, 185, 129, 0.04)";
+        const borderCls = hasPenalties ? "rgba(239, 68, 68, 0.4)" : "rgba(16, 185, 129, 0.25)";
+        const rankBoxBg = hasPenalties ? "linear-gradient(135deg, #ef4444, #991b1b)" : "linear-gradient(135deg, #10b981, #065f46)";
+        const iconCls = hasPenalties ? "fa-solid fa-triangle-exclamation" : "fa-solid fa-circle-check";
+        const scoreColor = hasPenalties ? "#ef4444" : "#10b981";
+        
+        let reasonsList = "";
+        if (hasPenalties) {
+          reasonsList = `<div style="font-size: clamp(0.7rem, 1.1vw, 0.95rem); color: #cbd5e1; margin-top: 6px; line-height: 1.4; text-align: left;">` + 
+                        penData.reasons.map(r => `• ${r}`).join("<br>") + 
+                        `</div>`;
+        } else {
+          reasonsList = `<div style="font-size: clamp(0.7rem, 1.1vw, 0.95rem); color: #a7f3d0; margin-top: 6px; font-weight: 600; text-align: left;"><i class="fa-solid fa-circle-check"></i> Operating within standard rules</div>`;
+        }
 
         container.innerHTML += `
-          <div class="team-tile" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05); box-shadow: 0 10px 30px rgba(239, 68, 68, 0.15);">
-            <div class="team-rank-box" style="background: linear-gradient(135deg, #ef4444, #991b1b); color: #fff;">
-              <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.4rem;"></i>
+          <div class="team-tile" style="border-color: ${borderCls}; background: ${cardBg}; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); min-height: 16vh; display: flex; align-items: flex-start; padding: 2.5vh 2.5vw; text-align: left;">
+            <div class="team-rank-box" style="background: ${rankBoxBg}; color: #fff; flex-shrink: 0; width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1.5vw;">
+              <i class="${iconCls}" style="font-size: 1.4rem;"></i>
             </div>
-            <div class="team-info">
-              <div class="team-name" style="color: #fca5a5; font-weight: 800;">${teamName}</div>
-              <div class="team-captain" style="color: #f87171; font-weight: 600;">${progName}</div>
-              <div style="font-size: clamp(0.7rem, 1.1vw, 0.95rem); color: #e2e8f0; margin-top: 4px; font-weight: 500;">Reason: ${pen.reason}</div>
+            <div class="team-info" style="flex: 1; min-width: 0; text-align: left;">
+              <div class="team-name" style="color: ${hasPenalties ? '#fca5a5' : '#a7f3d0'}; font-weight: 800; font-size: clamp(1.1rem, 2.2vw, 1.8rem); line-height: 1.2; text-align: left;">${t.name}</div>
+              ${reasonsList}
             </div>
-            <div class="team-score" style="color: #ef4444; font-weight: 900; font-size: clamp(1.4rem, 3.2vw, 2.8rem);">
-              -${pen.points}
-              <small style="color: #f87171; font-weight: 700; font-size: 0.5em; display: inline;">pts</small>
+            <div class="team-score" style="color: ${scoreColor}; font-weight: 900; font-size: clamp(1.6rem, 3.5vw, 3rem); line-height: 1; flex-shrink: 0; margin-left: 1.5vw; text-align: right;">
+              ${hasPenalties ? `-${penData.totalMinus}` : "0"}
+              <small style="color: ${hasPenalties ? '#f87171' : '#34d399'}; font-weight: 700; font-size: 0.5em; display: inline;">pts</small>
             </div>
           </div>
         `;
