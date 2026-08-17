@@ -1,6 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const { Team, Student, Programme, Notification, Appeal, Gallery, Contact, Settings } = require('./models');
+const { Team, Student, Programme, Notification, Appeal, Gallery, Contact, Settings, Penalty } = require('./models');
 
 const DEFAULT_DB = {
   teams: [
@@ -75,6 +75,7 @@ async function seed() {
     await Gallery.deleteMany({});
     await Contact.deleteMany({});
     await Settings.deleteMany({});
+    await Penalty.deleteMany({});
 
     await Team.insertMany(DEFAULT_DB.teams);
     await Student.insertMany(DEFAULT_DB.students);

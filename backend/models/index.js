@@ -101,6 +101,14 @@ const settingsSchema = new mongoose.Schema({
   revision: { type: Number, default: 0 }
 });
 
+const penaltySchema = new mongoose.Schema({
+  id: String,
+  programmeId: String,
+  teamId: String,
+  points: Number,
+  reason: String
+});
+
 const Team = mongoose.models.Team || mongoose.model('Team', teamSchema);
 const Student = mongoose.models.Student || mongoose.model('Student', studentSchema);
 const Programme = mongoose.models.Programme || mongoose.model('Programme', programmeSchema);
@@ -110,6 +118,7 @@ const Gallery = mongoose.models.Gallery || mongoose.model('Gallery', gallerySche
 const Contact = mongoose.models.Contact || mongoose.model('Contact', contactSchema);
 const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
 const Settings = mongoose.models.Settings || mongoose.model('Settings', settingsSchema);
+const Penalty = mongoose.models.Penalty || mongoose.model('Penalty', penaltySchema);
 
 module.exports = {
   Team,
@@ -120,5 +129,6 @@ module.exports = {
   Gallery,
   Contact,
   Message,
-  Settings
+  Settings,
+  Penalty
 };
