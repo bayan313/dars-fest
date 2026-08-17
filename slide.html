@@ -579,6 +579,16 @@
       <div class="kala-grid" id="slide-kalaprathibha"></div>
     </section>
 
+    <!-- SLIDE: TEAM PENALTIES (MINUS MARKS) -->
+    <section class="slide" id="penalties-slide">
+      <div class="slide-logo">Team Rules &amp; Discipline</div>
+      <h2 class="slide-heading">Minus Marks / Penalties</h2>
+      <p class="slide-sub">Deductions due to rules violations or penalties</p>
+      <div class="team-grid" id="slide-penalties" style="grid-template-columns: 1fr 1fr; width: min(85vw, 1300px); max-height: 60vh; overflow-y: auto; gap: 2vh 2vw;">
+        <!-- Dynamic loading of penalties -->
+      </div>
+    </section>
+
     <!-- SLIDE 4+: GENERATED (grouped category standings + latest results) -->
 
     <div class="slide-footer">
@@ -935,6 +945,50 @@
       showSlide(currentSlide + 1);
     }
 
+    // Render Team Penalties/Minus Marks
+    function renderPenalties() {
+      const container = document.getElementById("slide-penalties");
+      if (!container) return;
+      container.innerHTML = "";
+
+      ThanafusDB.db.penalties = ThanafusDB.db.penalties || [];
+
+      if (ThanafusDB.db.penalties.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; color: #cbd5e1; padding: 60px; font-size: 1.4rem;">
+            <i class="fa-solid fa-circle-check" style="color: #10b981; font-size: 3.5rem; margin-bottom: 18px; display: block; filter: drop-shadow(0 0 10px rgba(16,185,129,0.3));"></i>
+            No team penalties active. All teams are operating within standard guidelines.
+          </div>
+        `;
+        return;
+      }
+
+      ThanafusDB.db.penalties.forEach(pen => {
+        const prog = ThanafusDB.db.programmes.find(p => p.id === pen.programmeId);
+        const team = ThanafusDB.db.teams.find(t => t.id === pen.teamId);
+
+        const progName = prog ? prog.name : "Rules Violation";
+        const teamName = team ? team.name : "Unknown Team";
+
+        container.innerHTML += `
+          <div class="team-tile" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05); box-shadow: 0 10px 30px rgba(239, 68, 68, 0.15);">
+            <div class="team-rank-box" style="background: linear-gradient(135deg, #ef4444, #991b1b); color: #fff;">
+              <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.4rem;"></i>
+            </div>
+            <div class="team-info">
+              <div class="team-name" style="color: #fca5a5; font-weight: 800;">${teamName}</div>
+              <div class="team-captain" style="color: #f87171; font-weight: 600;">Programme: ${progName}</div>
+              <div style="font-size: clamp(0.7rem, 1.1vw, 0.95rem); color: #e2e8f0; margin-top: 4px; font-weight: 500;">Reason: ${pen.reason}</div>
+            </div>
+            <div class="team-score" style="color: #ef4444; font-weight: 900; font-size: clamp(1.4rem, 3.2vw, 2.8rem);">
+              -${pen.points}
+              <small style="color: #f87171; font-weight: 700; font-size: 0.5em; display: inline;">pts</small>
+            </div>
+          </div>
+        `;
+      });
+    }
+
     let lastPublishedSignature = "";
 
     async function refreshData() {
@@ -943,6 +997,7 @@
         ThanafusDB.calculateLeaderboard();
         renderStandings();
         renderKalaprathibha();
+        renderPenalties();
         renderCategorySlides();
         renderLatestResult();
 
@@ -978,6 +1033,7 @@
       await ThanafusDB.ready();
       renderStandings();
       renderKalaprathibha();
+      renderPenalties();
       buildSlides();
       updateClock();
       await refreshData();

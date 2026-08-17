@@ -63,6 +63,7 @@
           <li id="nav-notifs"><a href="#" onclick="switchAdminTab('notifs')"><i class="fa-solid fa-bullhorn"></i> Notifications</a></li>
           <li id="nav-appeals"><a href="#" onclick="switchAdminTab('appeals')"><i class="fa-solid fa-list-check"></i> Appeals Board</a></li>
           <li id="nav-messages"><a href="#" onclick="switchAdminTab('messages')"><i class="fa-solid fa-envelope-open-text"></i> Contact Messages <span id="nav-badge-messages" class="badge" style="display:none; background:#ef4444; color:white; font-size:0.7rem; padding:2px 6px; border-radius:10px; margin-left:6px;"></span></a></li>
+          <li id="nav-penalties"><a href="#" onclick="switchAdminTab('penalties')"><i class="fa-solid fa-square-minus"></i> Team Penalties (Minus)</a></li>
           <li id="nav-settings"><a href="#" onclick="switchAdminTab('settings')"><i class="fa-solid fa-sliders"></i> Portal Settings</a></li>
         </ul>
       </aside>
@@ -447,6 +448,32 @@
           </div>
         </div>
 
+        <!-- SECTION: TEAM PENALTIES (MINUS MARKS) -->
+        <div id="sec-penalties" class="admin-section-container" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <h2 style="color: var(--primary-emerald); margin: 0;"><i class="fa-solid fa-square-minus"></i> Team Penalties (Minus Marks)</h2>
+            <button class="btn btn-gold" onclick="openPenaltyModal()"><i class="fa-solid fa-plus"></i> Add Penalty</button>
+          </div>
+          <div class="card" style="padding: 25px;">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Programme</th>
+                    <th>Team</th>
+                    <th>Minus Score</th>
+                    <th>Reason</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="penalties-table-body">
+                  <!-- Dynamic rows injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <!-- SECTION 9: PORTAL SETTINGS & RESET -->
         <div id="sec-settings" class="admin-section-container" style="display: none;">
           <h2><i class="fa-solid fa-sliders"></i> Portal Settings & Contacts</h2>
@@ -528,6 +555,43 @@
       </section>
     </div>
   </main>
+
+  <!-- MODAL: ADD/EDIT PENALTY (MINUS MARKS) -->
+  <div class="modal-overlay" id="penalty-modal">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="closePenaltyModal()">&times;</button>
+      <h3 style="color: var(--primary-emerald); margin-bottom: 20px;" id="pen-modal-title">Deduct Penalty Mark</h3>
+      
+      <form id="penaltyForm" onsubmit="handlePenaltySave(event)">
+        <input type="hidden" id="pen-id">
+        <div class="form-group">
+          <label for="pen-prog">Select Programme</label>
+          <select class="form-control" id="pen-prog" required>
+            <!-- Injected dynamically -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="pen-team">Select Team (Group)</label>
+          <select class="form-control" id="pen-team" required>
+            <!-- Injected dynamically -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="pen-pts">Minus Points (Marks to deduct)</label>
+          <input type="number" class="form-control" id="pen-pts" min="1" placeholder="e.g. 5" required>
+        </div>
+
+        <div class="form-group">
+          <label for="pen-reason">Reason/Description</label>
+          <input type="text" class="form-control" id="pen-reason" placeholder="e.g. Stage rules violation" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Save Penalty</button>
+      </form>
+    </div>
+  </div>
 
   <!-- MODAL 1: ADD/EDIT STUDENT -->
   <div class="modal-overlay" id="student-modal">
@@ -854,6 +918,7 @@
       else if (tab === "notifs") renderNotifsTable();
       else if (tab === "appeals") renderAppealsTable();
       else if (tab === "messages") renderMessagesTable();
+      else if (tab === "penalties") renderPenaltiesTable();
       else if (tab === "settings") loadSettingsForm();
     }
 
@@ -2290,6 +2355,91 @@
           fileInput.value = "";
         };
         reader.readAsDataURL(file);
+      }
+    }
+    // PENALTY / MINUS MARKS CRUD
+    function renderPenaltiesTable() {
+      const tbody = document.getElementById("penalties-table-body");
+      tbody.innerHTML = "";
+
+      ThanafusDB.db.penalties = ThanafusDB.db.penalties || [];
+      
+      if (ThanafusDB.db.penalties.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center">No penalties recorded yet.</td></tr>`;
+        return;
+      }
+
+      ThanafusDB.db.penalties.forEach(p => {
+        const prog = ThanafusDB.db.programmes.find(pr => pr.id === p.programmeId);
+        const team = ThanafusDB.db.teams.find(t => t.id === p.teamId);
+        
+        const progName = prog ? `${prog.name} (${prog.category})` : "Unknown Program";
+        const teamName = team ? team.name : "Unknown Team";
+
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${progName}</strong></td>
+            <td><span class="badge" style="background:#4f46e5; color:white; padding:3px 8px; border-radius:5px; font-size:0.8rem;">${teamName}</span></td>
+            <td><span style="color:#ef4444; font-weight:700;">-${p.points} pts</span></td>
+            <td>${p.reason}</td>
+            <td>
+              <button class="btn btn-outline btn-sm" onclick="handlePenaltyDelete('${p.id}')" style="color:#ef4444; border-color:#ef4444; padding:4px 8px;"><i class="fa-solid fa-trash"></i> Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function openPenaltyModal() {
+      // Clear form
+      document.getElementById("pen-id").value = "";
+      document.getElementById("pen-pts").value = "";
+      document.getElementById("pen-reason").value = "";
+
+      // Populate program dropdown
+      const progSelect = document.getElementById("pen-prog");
+      progSelect.innerHTML = `<option value="">-- Select Programme --</option>`;
+      ThanafusDB.db.programmes.forEach(p => {
+        progSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.category})</option>`;
+      });
+
+      // Populate team dropdown
+      const teamSelect = document.getElementById("pen-team");
+      teamSelect.innerHTML = `<option value="">-- Select Team --</option>`;
+      ThanafusDB.db.teams.forEach(t => {
+        teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+      });
+
+      document.getElementById("penalty-modal").style.display = "flex";
+    }
+
+    function closePenaltyModal() {
+      document.getElementById("penalty-modal").style.display = "none";
+    }
+
+    function handlePenaltySave(event) {
+      event.preventDefault();
+      const progId = document.getElementById("pen-prog").value;
+      const teamId = document.getElementById("pen-team").value;
+      const pts = document.getElementById("pen-pts").value;
+      const reason = document.getElementById("pen-reason").value;
+
+      if (!progId || !teamId || !pts) {
+        showAlert("Please fill in all fields.", "warning");
+        return;
+      }
+
+      ThanafusDB.addPenalty(progId, teamId, pts, reason);
+      showAlert("Minus marks penalty recorded successfully.", "success");
+      closePenaltyModal();
+      renderPenaltiesTable();
+    }
+
+    function handlePenaltyDelete(id) {
+      if (confirm("Are you sure you want to remove this penalty deduction?")) {
+        ThanafusDB.deletePenalty(id);
+        showAlert("Penalty deduction removed successfully.", "info");
+        renderPenaltiesTable();
       }
     }
   </script>

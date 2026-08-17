@@ -330,6 +330,16 @@ class Database {
       });
     });
 
+    // Subtract penalties
+    if (this.db.penalties) {
+      this.db.penalties.forEach(pen => {
+        const team = this.db.teams.find(t => t.id === pen.teamId);
+        if (team) {
+          team.totalScore -= (parseInt(pen.points) || 0);
+        }
+      });
+    }
+
     // Calculate Ranks (highest score gets rank 1; ties share the same rank, next rank skips)
     const sortedTeams = [...this.db.teams].sort((a, b) => b.totalScore - a.totalScore);
     let lastScore = null;
@@ -370,6 +380,18 @@ class Database {
       });
     });
 
+    // Subtract category-specific penalties
+    if (this.db.penalties) {
+      this.db.penalties.forEach(pen => {
+        const prog = this.db.programmes.find(p => p.id === pen.programmeId);
+        if (prog && cats.includes(prog.category)) {
+          if (teamPoints[pen.teamId]) {
+            teamPoints[pen.teamId].points -= (parseInt(pen.points) || 0);
+          }
+        }
+      });
+    }
+
     const list = Object.values(teamPoints);
     list.sort((a, b) => b.points - a.points);
     let lastPts = null;
@@ -384,6 +406,24 @@ class Database {
       }
     });
     return list;
+  }
+
+  // CRUD Penalties / Minus Marks
+  addPenalty(programmeId, teamId, points, reason) {
+    const id = "pen-" + Date.now();
+    this.db.penalties = this.db.penalties || [];
+    this.db.penalties.push({ id, programmeId, teamId, points: parseInt(points) || 0, reason });
+    this.save();
+    this.calculateLeaderboard();
+    return id;
+  }
+
+  deletePenalty(id) {
+    if (this.db.penalties) {
+      this.db.penalties = this.db.penalties.filter(p => p.id !== id);
+      this.save();
+      this.calculateLeaderboard();
+    }
   }
 
   // Calculate Kalaprathibha (Arts Champion)
