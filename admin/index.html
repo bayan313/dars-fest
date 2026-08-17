@@ -565,11 +565,6 @@
       <form id="penaltyForm" onsubmit="handlePenaltySave(event)">
         <input type="hidden" id="pen-id">
         <div class="form-group">
-          <label for="pen-prog">Select Programme</label>
-          <select class="form-control" id="pen-prog" required>
-            <!-- Injected dynamically -->
-          </select>
-        </div>
 
         <div class="form-group">
           <label for="pen-team">Select Team (Group)</label>
@@ -869,6 +864,33 @@
         document.getElementById("login-overlay").style.display = "none";
         document.getElementById("admin-layout").style.display = "grid";
         initDashboard();
+      }
+
+      // Result publish keyboard enter key selection jumper
+      const resultsContainer = document.getElementById("results-rows-container");
+      if (resultsContainer) {
+        resultsContainer.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && e.target.classList.contains("res-student")) {
+            e.preventDefault();
+            const selects = Array.from(resultsContainer.querySelectorAll(".res-student"));
+            const currentIndex = selects.indexOf(e.target);
+            if (currentIndex !== -1) {
+              if (currentIndex < selects.length - 1) {
+                // Focus the next row's student dropdown
+                selects[currentIndex + 1].focus();
+              } else {
+                // Last row: dynamically create a new row and focus it
+                addResultRow();
+                setTimeout(() => {
+                  const updatedSelects = Array.from(resultsContainer.querySelectorAll(".res-student"));
+                  if (updatedSelects[currentIndex + 1]) {
+                    updatedSelects[currentIndex + 1].focus();
+                  }
+                }, 50);
+              }
+            }
+          }
+        });
       }
     });
 
@@ -2400,7 +2422,7 @@
         const prog = ThanafusDB.db.programmes.find(pr => pr.id === p.programmeId);
         const team = ThanafusDB.db.teams.find(t => t.id === p.teamId);
         
-        const progName = prog ? `${prog.name} (${prog.category})` : "Unknown Program";
+        const progName = prog ? `${prog.name} (${prog.category})` : "General Penalty";
         const teamName = team ? team.name : "Unknown Team";
 
         tbody.innerHTML += `
@@ -2423,13 +2445,6 @@
       document.getElementById("pen-pts").value = "";
       document.getElementById("pen-reason").value = "";
 
-      // Populate program dropdown
-      const progSelect = document.getElementById("pen-prog");
-      progSelect.innerHTML = `<option value="">-- Select Programme --</option>`;
-      ThanafusDB.db.programmes.forEach(p => {
-        progSelect.innerHTML += `<option value="${p.id}">${p.name} (${p.category})</option>`;
-      });
-
       // Populate team dropdown
       const teamSelect = document.getElementById("pen-team");
       teamSelect.innerHTML = `<option value="">-- Select Team --</option>`;
@@ -2446,17 +2461,17 @@
 
     function handlePenaltySave(event) {
       event.preventDefault();
-      const progId = document.getElementById("pen-prog").value;
       const teamId = document.getElementById("pen-team").value;
       const pts = document.getElementById("pen-pts").value;
       const reason = document.getElementById("pen-reason").value;
 
-      if (!progId || !teamId || !pts) {
+      if (!teamId || !pts) {
         showAlert("Please fill in all fields.", "warning");
         return;
       }
 
-      ThanafusDB.addPenalty(progId, teamId, pts, reason);
+      // No programmeId is required for general team penalties anymore
+      ThanafusDB.addPenalty(null, teamId, pts, reason);
       showAlert("Minus marks penalty recorded successfully.", "success");
       closePenaltyModal();
       renderPenaltiesTable();
