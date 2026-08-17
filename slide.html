@@ -144,55 +144,52 @@
     .cat-group-col .medal-row { margin-bottom: 0.6vh; }
 
     /* ============ LATEST RESULTS ============ */
-    .latest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5vh 2vw; width: min(92vw, 1400px); }
+    .latest-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5vh 2vw;
+      width: min(92vw, 1350px);
+      max-width: 100%;
+      box-sizing: border-box;
+    }
     .latest-prog-card {
-      border-radius: 14px; padding: 1.5vh 1.5vw;
+      border-radius: 14px; padding: 1.4vh 1.4vw;
       background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); backdrop-filter: blur(6px);
+      min-width: 0; max-width: 100%; overflow: hidden; box-sizing: border-box;
+      display: flex; flex-direction: column; justify-content: center;
     }
-    .latest-prog-head { display: flex; align-items: center; gap: 1vw; margin-bottom: 0.6vh; }
+    .latest-prog-head { display: flex; align-items: center; gap: 0.8vw; margin-bottom: 0.8vh; min-width: 0; }
     .latest-prog-num {
-      flex-shrink: 0; font-weight: 800; font-size: clamp(0.55rem, 1vw, 0.82rem); letter-spacing: 1px;
+      flex-shrink: 0; font-weight: 800; font-size: clamp(0.55rem, 0.9vw, 0.8rem); letter-spacing: 1px;
       color: #fbbf24; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3);
-      padding: 0.3vh 0.8vw; border-radius: 20px; white-space: nowrap;
+      padding: 0.3vh 0.7vw; border-radius: 20px; white-space: nowrap;
     }
-    .latest-prog-name { font-size: clamp(0.7rem, 1.3vw, 1.1rem); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .latest-prog-cat { margin-left: auto; font-size: clamp(0.5rem, 0.9vw, 0.78rem); color: #a5b4fc; flex-shrink: 0; white-space: nowrap; }
-    .latest-rank-row {
-      display: flex; align-items: center; gap: 0.8vw; padding: 0.5vh 0.8vw; border-radius: 8px; margin-top: 0.4vh;
-      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
-    }
-    .latest-rank-row.rank-1 { background: rgba(245,158,11,0.08); border-color: rgba(251,191,36,0.25); }
-    .latest-rank-row.rank-2 { background: rgba(148,163,184,0.08); border-color: rgba(148,163,184,0.25); }
-    .latest-rank-row.rank-3 { background: rgba(180,83,9,0.08); border-color: rgba(180,83,9,0.25); }
-    .latest-place { flex-shrink: 0; width: 2em; text-align: center; font-size: clamp(0.8rem, 1.4vw, 1.1rem); }
-    .latest-winner { flex: 1; min-width: 0; }
-    .latest-winner-name { font-size: clamp(0.65rem, 1.2vw, 1rem); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .latest-winner-team { font-size: clamp(0.5rem, 0.9vw, 0.75rem); color: #a5b4fc; }
-    .latest-points { flex-shrink: 0; color: #fbbf24; font-weight: 800; font-size: clamp(0.6rem, 1.2vw, 0.95rem); }
+    .latest-prog-name { font-size: clamp(0.75rem, 1.25vw, 1.1rem); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+    .latest-prog-cat { margin-left: auto; font-size: clamp(0.55rem, 0.85vw, 0.78rem); color: #a5b4fc; flex-shrink: 0; white-space: nowrap; background: rgba(99,102,241,0.18); padding: 0.2vh 0.6vw; border-radius: 12px; }
 
     /* ============ MEDAL BAR ROWS ============ */
     .medal-row {
-      display: flex; align-items: center; gap: 1vw; padding: 0.8vh 1.2vw; border-radius: 12px; margin-bottom: 0.6vh;
-      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); overflow: hidden; min-width: 0;
+      display: flex; align-items: center; gap: 0.8vw; padding: 0.6vh 1vw; border-radius: 10px; margin-bottom: 0.5vh;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); overflow: hidden; min-width: 0; max-width: 100%; box-sizing: border-box;
     }
-    .medal { font-size: clamp(1rem, 2vw, 1.8rem); flex-shrink: 0; width: 3em; text-align: center; }
-    .medal-half { flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.8vw; overflow: hidden; }
-    .medal-name { flex: 1; min-width: 0; font-size: clamp(0.8rem, 1.5vw, 1.25rem); font-weight: 800; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .medal-sub { font-size: clamp(0.5rem, 1vw, 0.8rem); color: #a5b4fc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
-    .medal-bar { flex: 0 0 auto; width: clamp(40px, 8vw, 120px); height: clamp(8px, 1.2vh, 14px); border-radius: 8px; background: rgba(255,255,255,0.08); overflow: hidden; }
+    .medal { font-size: clamp(0.9rem, 1.5vw, 1.4rem); flex-shrink: 0; width: 1.8em; text-align: center; }
+    .medal-half { flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.6vw; overflow: hidden; }
+    .medal-name { flex: 1; min-width: 0; font-size: clamp(0.75rem, 1.2vw, 1.05rem); font-weight: 800; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .medal-sub { font-size: clamp(0.55rem, 0.85vw, 0.8rem); color: #a5b4fc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; max-width: 30%; }
+    .medal-bar { flex: 0 0 auto; width: clamp(25px, 5vw, 60px); height: clamp(6px, 1vh, 10px); border-radius: 8px; background: rgba(255,255,255,0.08); overflow: hidden; }
     .bar-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, #fbbf24, #f59e0b); }
     .medal-row.rank-1 .bar-fill { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
     .medal-row.rank-2 .bar-fill { background: linear-gradient(90deg, #e2e8f0, #94a3b8); }
     .medal-row.rank-3 .bar-fill { background: linear-gradient(90deg, #d97706, #b45309); }
     .medal-row.rank-n .bar-fill { background: linear-gradient(90deg, #818cf8, #6366f1); }
-    .medal-pts { flex-shrink: 0; color: #fbbf24; font-weight: 800; font-size: clamp(0.7rem, 1.3vw, 1.05rem); text-align: right; }
-    .medal-row.medal-tie { gap: 0.6vw; flex-wrap: nowrap; }
-    .medal-tie .medal-half { padding: 0 0.6vw; border-right: 1px solid rgba(255,255,255,0.12); overflow: hidden; min-width: 0; flex: 1; }
+    .medal-pts { flex-shrink: 0; color: #fbbf24; font-weight: 800; font-size: clamp(0.65rem, 1.1vw, 0.95rem); text-align: right; }
+    .medal-row.medal-tie { gap: 0.5vw; }
+    .medal-tie .medal-half { padding: 0 0.5vw; border-right: 1px solid rgba(255,255,255,0.12); overflow: hidden; min-width: 0; flex: 1; }
     .medal-tie .medal-half:last-child { border-right: none; }
 
     /* ============ KALAPRATHIBHA ============ */
     .kala-grid {
-      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5vw;
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5vw;
       width: min(92vw, 1500px);
       height: calc(100vh - 22vh); max-height: 720px; min-height: 300px;
       align-items: stretch;
@@ -664,22 +661,22 @@
     function medalRowsHTML(rows, maxPts) {
       const groups = [];
       rows.forEach(r => {
-        const rnk = Number(r.rank);
+        const rnk = Number(r.rank) || 0;
         const g = groups.find(x => Number(x.rank) === rnk);
         if (g) g.items.push(r); else groups.push({ rank: rnk, items: [r] });
       });
       const medal = ["🥇", "🥈", "🥉"];
       return groups.map(g => {
         const rankCls = g.rank === 1 ? "rank-1" : g.rank === 2 ? "rank-2" : g.rank === 3 ? "rank-3" : "rank-n";
-        const m = g.rank >= 1 && g.rank <= 3 ? medal[g.rank - 1] : g.rank;
-        const pct = r => Math.max(3, Math.round((r.pts / maxPts) * 100));
+        const m = (g.rank >= 1 && g.rank <= 3) ? medal[g.rank - 1] : (g.rank > 0 ? `#${g.rank}` : "•");
+        const pct = r => Math.max(8, Math.round((r.pts / maxPts) * 100));
         if (g.items.length === 1) {
           const r = g.items[0];
           return `
             <div class="medal-row ${rankCls}">
               <div class="medal">${m}</div>
               <div class="medal-half">
-                <div class="medal-name">${r.name}</div>
+                <div class="medal-name" title="${r.name}">${r.name}</div>
                 ${r.sub ? `<div class="medal-sub">${r.sub}</div>` : ""}
                 <div class="medal-bar"><div class="bar-fill" style="width:${pct(r)}%"></div></div>
                 <div class="medal-pts">${r.pts} pts</div>
@@ -692,7 +689,7 @@
             <div class="medal">${m}</div>
             ${g.items.map(r => `
               <div class="medal-half">
-                <div class="medal-name">${r.name}</div>
+                <div class="medal-name" title="${r.name}">${r.name}</div>
                 ${r.sub ? `<div class="medal-sub">${r.sub}</div>` : ""}
                 <div class="medal-bar"><div class="bar-fill" style="width:${pct(r)}%"></div></div>
                 <div class="medal-pts">${r.pts} pts</div>
@@ -713,14 +710,19 @@
 
       const items = [];
       published.slice(0, 8).forEach(prog => {
-        const top = [...prog.results].sort((a, b) => a.rank - b.rank).slice(0, 3);
-        if (top.length === 0) return;
-        const rows = top.map(w => {
+        // STRICT: ONLY 1st, 2nd, 3rd Rank Winners! (1, 2, 3 ranks are mandatory and primary)
+        const rankWinners = (prog.results || [])
+          .filter(w => w.rank && Number(w.rank) >= 1 && Number(w.rank) <= 3)
+          .sort((a, b) => Number(a.rank) - Number(b.rank));
+
+        if (rankWinners.length === 0) return;
+
+        const rows = rankWinners.map(w => {
           let name = "—", teamName = "", pts = 0;
           if (prog.category === "General") {
             const t = ThanafusDB.db.teams.find(tm => tm.id === (w.teamId || prog.teamId));
             name = t ? t.name : "Team";
-            teamName = "";
+            teamName = "General";
             pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
           } else {
             const s = ThanafusDB.db.students.find(st => st.id === w.studentId);
@@ -729,12 +731,12 @@
             teamName = t ? t.name : "";
             pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
           }
-          return { rank: w.rank, name: name || "—", teamName: teamName || "", pts: pts || 0 };
+          return { rank: Number(w.rank), name: name || "—", teamName: teamName || "", pts: pts || 0 };
         });
         items.push({ prog: prog.name || "Programme", cat: prog.category || "", rows });
       });
 
-      const empty = `<div style="text-align:center;color:#a5b4fc;padding:40px;">No results published yet.</div>`;
+      const empty = `<div style="grid-column:1/-1; text-align:center; color:#a5b4fc; padding:40px; font-size:1.2rem;">No published rank results yet.</div>`;
       boxes.forEach((box, bi) => {
         if (!box) return;
         const chunk = items.slice(bi * 4, bi * 4 + 4);
@@ -748,7 +750,7 @@
           <div class="latest-prog-card">
             <div class="latest-prog-head">
               <span class="latest-prog-num">PROGRAMME ${String(bi * 4 + idx + 1).padStart(2, "0")}</span>
-              <span class="latest-prog-name">${it.prog}</span>
+              <span class="latest-prog-name" title="${it.prog}">${it.prog}</span>
               <span class="latest-prog-cat">${it.cat}</span>
             </div>
             ${medalRowsHTML(it.rows.map(r => ({ rank: r.rank, name: r.name, sub: r.teamName, pts: r.pts })), maxPts)}

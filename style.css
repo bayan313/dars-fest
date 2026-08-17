@@ -1685,10 +1685,19 @@ textarea.form-control {
 /* Result assigner specifics */
 .result-row {
   display: grid;
-  grid-template-columns: 100px 1fr 150px;
-  gap: 15px;
-  margin-bottom: 12px;
+  grid-template-columns: 130px 1fr 125px 40px;
+  gap: 10px;
+  margin-bottom: 10px;
   align-items: center;
+}
+
+@media (max-width: 600px) {
+  .result-row {
+    grid-template-columns: 1fr 1fr 40px;
+  }
+  .result-row > div:nth-child(2) {
+    grid-column: 1 / -1;
+  }
 }
 
 /* Responsive Overrides */
