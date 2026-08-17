@@ -270,10 +270,10 @@
           ? champ.student.photo
           : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop";
 
-        // Show only initials, or 'Awaiting' if no data
-        let initials = "?";
+        // Show full name, or 'Awaiting Results' if no data
+        let displayName = "Awaiting Results";
         if (!isAwaiting && champ.student && champ.student.name) {
-          initials = champ.student.name.split(" ").map(w => w[0]).join(". ") + ".";
+          displayName = champ.student.name;
         }
         const displayTeam = isAwaiting ? "Evaluations In Progress" : (champ.teamName || "");
         const pct = Math.round((champ.points / maxPoints) * 100);
@@ -287,9 +287,9 @@
               <span class="cat-badge">${cat}</span>
               <div class="student-avatar-container">
                 <span class="crown-icon">👑</span>
-                <img src="${photoUrl}" alt="${initials}" class="student-avatar" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop'">
+                <img src="${photoUrl}" alt="${displayName}" class="student-avatar" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop'">
               </div>
-              <h4 class="kala-initials">${initials}</h4>
+              <h4 class="kala-initials">${displayName}</h4>
               <p class="team-name">${displayTeam}</p>
               <div class="kala-score-row">
                 <span class="kala-score-num">${champ.points}</span>
