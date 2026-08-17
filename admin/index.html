@@ -262,21 +262,21 @@
 
                 <div class="form-group">
                   <label for="media-title">Title / Caption</label>
-                  <input type="text" class="form-control" id="media-title" placeholder="E.g., Quran Recitation Highlights / Speech Session" required>
+                  <input type="text" class="form-control" id="media-title" placeholder="Thanafus 2K26 (Default)">
                 </div>
 
                 <!-- Image upload file input -->
                 <div class="form-group" id="media-file-group">
-                  <label for="media-file">Choose Image File</label>
-                  <input type="file" class="form-control" id="media-file" accept="image/*" required>
-                  <span style="font-size:0.75rem; color:var(--text-gray);">Maximum file size: 1MB. (Supported: JPG, PNG, WebP).</span>
+                  <label for="media-file">Choose Image File(s)</label>
+                  <input type="file" class="form-control" id="media-file" accept="image/*" multiple required>
+                  <span style="font-size:0.75rem; color:var(--text-gray);">Maximum file size: 1MB. (Supported: JPG, PNG, WebP). Multiple selection allowed.</span>
                 </div>
 
                 <!-- Media URL input (YouTube / Instagram / Video / Web Image) -->
                 <div class="form-group" id="media-url-group" style="display: none;">
                   <label for="media-url" id="media-url-label">Media Link / URL</label>
-                  <input type="url" class="form-control" id="media-url" placeholder="Paste link here...">
-                  <span id="media-url-help" style="font-size:0.75rem; color:var(--text-gray);">Paste link to the media item.</span>
+                  <textarea class="form-control" id="media-url" placeholder="Paste link here... (For bulk upload, paste multiple links one per line)" rows="3"></textarea>
+                  <span id="media-url-help" style="font-size:0.75rem; color:var(--text-gray);">Paste link to the media item. One per line for bulk uploads.</span>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -302,11 +302,11 @@
 
                 <div class="form-group">
                   <label for="media-event">Event Name</label>
-                  <input type="text" class="form-control" id="media-event" placeholder="E.g. Quran Recitation" required>
+                  <input type="text" class="form-control" id="media-event" placeholder="Thanafus (Default)">
                 </div>
 
                 <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
-                  <i class="fa-solid fa-cloud-arrow-up"></i> Upload Media Item
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Upload Media Item(s)
                 </button>
               </form>
             </div>
@@ -1685,14 +1685,17 @@
     function handleMediaUpload(event) {
       event.preventDefault();
       const type = document.getElementById("media-type").value;
-      const title = document.getElementById("media-title").value.trim();
+      const title = document.getElementById("media-title").value.trim() || "Thanafus 2K26";
       const day = document.getElementById("media-day").value;
       const category = document.getElementById("media-cat").value;
-      const eventVal = document.getElementById("media-event").value.trim();
+      const eventVal = document.getElementById("media-event").value.trim() || "Thanafus";
 
       const upload = (url, formatType) => {
         ThanafusDB.addMedia(formatType || type, title, url, day, category, eventVal);
-        showAlert("Media item added to gallery database successfully.", "success");
+      };
+
+      const finishUpload = (count) => {
+        showAlert(`${count} media item(s) added to gallery database successfully.`, "success");
         document.getElementById("mediaUploadForm").reset();
         toggleMediaFileInput('image');
         renderMediaTable();
@@ -1701,29 +1704,52 @@
       if (type === 'image') {
         const fileInput = document.getElementById("media-file");
         if (fileInput.files && fileInput.files.length > 0) {
-          const file = fileInput.files[0];
-          if (file.size > 1024 * 1024) {
-            showAlert("File is too large! Maximum limit is 1MB.", "warning");
-            return;
+          const files = [...fileInput.files];
+          // Validate sizes
+          for (let file of files) {
+            if (file.size > 1024 * 1024) {
+              showAlert(`File "${file.name}" is too large! Maximum limit is 1MB.`, "warning");
+              return;
+            }
           }
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            upload(e.target.result, 'image');
-          };
-          reader.readAsDataURL(file);
+
+          let loadedCount = 0;
+          files.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              upload(e.target.result, 'image');
+              loadedCount++;
+              if (loadedCount === files.length) {
+                finishUpload(files.length);
+              }
+            };
+            reader.readAsDataURL(file);
+          });
         } else {
-          showAlert("Please select an image file to upload.", "warning");
+          showAlert("Please select one or more image files to upload.", "warning");
         }
       } else {
-        const url = document.getElementById("media-url").value.trim();
-        if (!url) {
+        const urlText = document.getElementById("media-url").value.trim();
+        if (!urlText) {
           showAlert("Please enter a valid URL.", "warning");
+          return;
+        }
+
+        // Split by newlines, filter out empty lines
+        const urls = urlText.split("\n").map(u => u.trim()).filter(Boolean);
+        if (urls.length === 0) {
+          showAlert("Please enter at least one valid URL.", "warning");
           return;
         }
 
         let resolvedType = type;
         if (type === 'image_url') resolvedType = 'image';
-        upload(url, resolvedType);
+
+        urls.forEach(url => {
+          upload(url, resolvedType);
+        });
+
+        finishUpload(urls.length);
       }
     }
 
