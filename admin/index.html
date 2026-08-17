@@ -1218,7 +1218,8 @@
 
       filtered.forEach(p => {
         const publishButton = p.resultsPublished 
-          ? `<button class="btn btn-outline btn-sm" onclick="unpublishResults('${p.id}')" style="padding:4px 8px; font-size:0.75rem; border-color:#e2a32c; color:#d97706;"><i class="fa-solid fa-rotate-left"></i> Unpublish</button>`
+          ? `<button class="btn btn-primary btn-sm" onclick="openResultPublishModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem; background:#4f46e5; border-color:#4f46e5; margin-right:4px;"><i class="fa-solid fa-pen-to-square"></i> Edit Results</button>
+             <button class="btn btn-outline btn-sm" onclick="unpublishResults('${p.id}')" style="padding:4px 8px; font-size:0.75rem; border-color:#e2a32c; color:#d97706;"><i class="fa-solid fa-rotate-left"></i> Unpublish</button>`
           : `<button class="btn btn-primary btn-sm" onclick="openResultPublishModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem; background:#10b981; border-color:#10b981;"><i class="fa-solid fa-circle-check"></i> Evaluate & Publish</button>`;
 
         const statusText = p.resultsPublished 
