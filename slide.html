@@ -724,44 +724,26 @@
       `;
     }
 
-    // Group results by rank so ties render inside ONE row split into halves
+    // Render each result as a clean vertical row (Option 1: Vertical Stack Sheet style)
     function medalRowsHTML(rows, maxPts) {
-      const groups = [];
-      rows.forEach(r => {
-        const rnk = Number(r.rank) || 0;
-        const g = groups.find(x => Number(x.rank) === rnk);
-        if (g) g.items.push(r); else groups.push({ rank: rnk, items: [r] });
-      });
       const medal = ["🥇", "🥈", "🥉"];
-      return groups.map(g => {
-        const rankCls = g.rank === 1 ? "rank-1" : g.rank === 2 ? "rank-2" : g.rank === 3 ? "rank-3" : "rank-n";
-        const m = (g.rank >= 1 && g.rank <= 3) ? medal[g.rank - 1] : (g.rank > 0 ? `#${g.rank}` : "•");
-        const pct = r => Math.max(8, Math.round((r.pts / maxPts) * 100));
-        if (g.items.length === 1) {
-          const r = g.items[0];
-          return `
-            <div class="medal-row ${rankCls}">
-              <div class="medal">${m}</div>
-              <div class="medal-half">
-                <div class="medal-name" title="${r.name}">${r.name}</div>
-                ${r.sub ? `<div class="medal-sub">${r.sub}</div>` : ""}
-                <div class="medal-bar"><div class="bar-fill" style="width:${pct(r)}%"></div></div>
-                <div class="medal-pts">${r.pts} pts</div>
-              </div>
-            </div>
-          `;
-        }
+      return rows.map(r => {
+        const rankCls = r.rank === 1 ? "rank-1" : r.rank === 2 ? "rank-2" : r.rank === 3 ? "rank-3" : "rank-n";
+        const m = (r.rank >= 1 && r.rank <= 3) ? medal[r.rank - 1] : (r.rank > 0 ? `#${r.rank}` : "•");
+        const pct = Math.max(8, Math.round((r.pts / maxPts) * 100));
+        
+        // Show Grade badge next to name if present
+        const gradeBadge = r.grade ? `<span style="font-size:0.7rem;font-weight:700;color:#fbbf24;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);padding:1px 5px;border-radius:4px;margin-left:6px;white-space:nowrap;vertical-align:middle;">Grade ${r.grade}</span>` : "";
+
         return `
-          <div class="medal-row medal-tie ${rankCls}">
+          <div class="medal-row ${rankCls}">
             <div class="medal">${m}</div>
-            ${g.items.map(r => `
-              <div class="medal-half">
-                <div class="medal-name" title="${r.name}">${r.name}</div>
-                ${r.sub ? `<div class="medal-sub">${r.sub}</div>` : ""}
-                <div class="medal-bar"><div class="bar-fill" style="width:${pct(r)}%"></div></div>
-                <div class="medal-pts">${r.pts} pts</div>
-              </div>
-            `).join("")}
+            <div class="medal-half">
+              <div class="medal-name" title="${r.name}">${r.name}${gradeBadge}</div>
+              ${r.sub ? `<div class="medal-sub">${r.sub}</div>` : ""}
+              <div class="medal-bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+              <div class="medal-pts">${r.pts} pts</div>
+            </div>
           </div>
         `;
       }).join("");
@@ -798,7 +780,7 @@
             teamName = t ? t.name : "";
             pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
           }
-          return { rank: Number(w.rank), name: name || "—", teamName: teamName || "", pts: pts || 0 };
+          return { rank: Number(w.rank), name: name || "—", teamName: teamName || "", pts: pts || 0, grade: w.grade || "" };
         });
         items.push({ prog: prog.name || "Programme", cat: prog.category || "", rows });
       });
