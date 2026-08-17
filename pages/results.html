@@ -774,6 +774,40 @@
         });
       }
 
+      // Get all penalties for this team
+      ThanafusDB.db.penalties = ThanafusDB.db.penalties || [];
+      const teamPenalties = ThanafusDB.db.penalties.filter(pen => pen.teamId === id);
+      let penaltiesHtml = "";
+      if (teamPenalties.length > 0) {
+        penaltiesHtml = `
+          <h3 style="color:#ef4444; margin-bottom:15px; margin-top:30px;"><i class="fa-solid fa-triangle-exclamation"></i> Deductions &amp; Penalties</h3>
+          <div class="table-wrapper" style="border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; overflow: hidden;">
+            <table>
+              <thead>
+                <tr style="background: rgba(239, 68, 68, 0.05);">
+                  <th style="color:#ef4444;">Deduction</th>
+                  <th style="color:#ef4444;">Reason / Description</th>
+                  <th style="color:#ef4444;">Points Deducted</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${teamPenalties.map(pen => {
+                  const prog = ThanafusDB.db.programmes.find(pr => pr.id === pen.programmeId);
+                  const progLabel = prog ? `${prog.name} (${prog.category})` : "General Penalty";
+                  return `
+                    <tr>
+                      <td data-label="Deduction" style="color:#f87171; font-weight:700;">${progLabel}</td>
+                      <td data-label="Reason">${pen.reason}</td>
+                      <td data-label="Points Deducted" style="color:#ef4444; font-weight:800;">-${pen.points} pts</td>
+                    </tr>
+                  `;
+                }).join("")}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
       container.innerHTML = `
         <div class="team-results-card">
           <div class="team-header-flex">
@@ -813,7 +847,7 @@
           </div>
 
           <h3 style="color:var(--primary-emerald); margin-bottom:15px;">Programme-wise Points Breakdown (${currentCategory})</h3>
-          <div class="table-wrapper">
+          <div class="table-wrapper" style="margin-bottom:30px;">
             <table>
               <thead>
                 <tr>
@@ -827,6 +861,8 @@
               </tbody>
             </table>
           </div>
+
+          ${penaltiesHtml}
         </div>
       `;
     }
