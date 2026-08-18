@@ -699,7 +699,7 @@
 
         <div class="form-group">
           <label for="prog-cat">Category Division</label>
-          <select class="form-control" id="prog-cat" required>
+          <select class="form-control" id="prog-cat" onchange="syncProgCatUI()" required>
             <option value="Sub Junior">Sub Junior</option>
             <option value="Junior">Junior</option>
             <option value="Senior">Senior</option>
@@ -1380,35 +1380,51 @@
 
       // Populate team/group dropdown from current teams
       const teamSel = document.getElementById("prog-team");
-      teamSel.innerHTML = '<option value="">— Select team —</option>';
-      const teams = (ThanafusDB.db && ThanafusDB.db.teams) || [];
-      teams.forEach(t => {
-        const opt = document.createElement("option");
-        opt.value = t.id;
-        opt.textContent = t.name;
-        teamSel.appendChild(opt);
-      });
+      if (teamSel) {
+        teamSel.innerHTML = '<option value="">— Select team —</option>';
+        const teams = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.teams)) ? ThanafusDB.db.teams : [];
+        teams.forEach(t => {
+          if (t) {
+            const opt = document.createElement("option");
+            opt.value = t.id;
+            opt.textContent = t.name || t.id;
+            teamSel.appendChild(opt);
+          }
+        });
+      }
 
       if (id) {
         title.innerText = "Edit Programme Details";
-        const programmes = (ThanafusDB.db && ThanafusDB.db.programmes) || [];
-        const prog = programmes.find(p => p.id === id);
+        if (form) form.reset();
+        const programmes = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.programmes)) ? ThanafusDB.db.programmes : [];
+        const prog = programmes.find(p => p && String(p.id) === String(id));
         if (prog) {
-          document.getElementById("prog-id").value = prog.id;
-          document.getElementById("prog-name").value = prog.name;
-          document.getElementById("prog-cat").value = prog.category;
+          document.getElementById("prog-id").value = prog.id || "";
+          document.getElementById("prog-name").value = prog.name || "";
+          document.getElementById("prog-cat").value = prog.category || "Sub Junior";
           document.getElementById("prog-type").value = prog.type || "individual";
-          document.getElementById("prog-team").value = prog.teamId || "";
+          if (document.getElementById("prog-team")) {
+            document.getElementById("prog-team").value = prog.teamId || "";
+          }
+        } else {
+          showAlert("Programme not found for editing.", "danger");
+          return;
         }
       } else {
         title.innerText = "Register Programme";
-        form.reset();
+        if (form) form.reset();
+        document.getElementById("prog-id").value = "";
         document.getElementById("prog-type").value = "individual";
-        document.getElementById("prog-team").value = "";
+        if (document.getElementById("prog-team")) {
+          document.getElementById("prog-team").value = "";
+        }
       }
 
       syncProgCatUI();
-      modal.style.display = "flex";
+      if (modal) {
+        modal.style.display = "flex";
+        modal.style.zIndex = "5000";
+      }
     }
 
     function syncProgCatUI() {
@@ -1670,15 +1686,18 @@
         const container = document.getElementById("results-rows-container");
         if (!container) return;
 
+        const rankStr = String(rank || "").trim();
+        const gradeStr = String(selectedGrade || "").trim().toUpperCase();
+
         const rowDiv = document.createElement("div");
         rowDiv.className = "result-row";
         rowDiv.innerHTML = `
           <div>
             <select class="form-control res-rank" style="font-weight:600;">
               <option value="">None / Part.</option>
-              <option value="1" ${rank == 1 ? 'selected' : ''}>🥇 1st Place</option>
-              <option value="2" ${rank == 2 ? 'selected' : ''}>🥈 2nd Place</option>
-              <option value="3" ${rank == 3 ? 'selected' : ''}>🥉 3rd Place</option>
+              <option value="1" ${rankStr === "1" ? 'selected' : ''}>🥇 1st Place</option>
+              <option value="2" ${rankStr === "2" ? 'selected' : ''}>🥈 2nd Place</option>
+              <option value="3" ${rankStr === "3" ? 'selected' : ''}>🥉 3rd Place</option>
             </select>
           </div>
           <div>
@@ -1689,20 +1708,21 @@
           <div>
             <select class="form-control res-grade" style="font-weight:600;">
               <option value="">No Grade</option>
-              <option value="A" ${selectedGrade === 'A' ? 'selected' : ''}>Grade A (+5)</option>
-              <option value="B" ${selectedGrade === 'B' ? 'selected' : ''}>Grade B (+3)</option>
-              <option value="C" ${selectedGrade === 'C' ? 'selected' : ''}>Grade C (+1)</option>
+              <option value="A" ${gradeStr === 'A' ? 'selected' : ''}>Grade A (+5)</option>
+              <option value="B" ${gradeStr === 'B' ? 'selected' : ''}>Grade B (+3)</option>
+              <option value="C" ${gradeStr === 'C' ? 'selected' : ''}>Grade C (+1)</option>
             </select>
           </div>
           <div style="text-align:center;">
             <button type="button" class="btn btn-outline btn-sm" onclick="this.closest('.result-row').remove()" style="color:#ef4444; border-color:#fca5a5; padding:6px 8px;" title="Remove this row"><i class="fa-solid fa-trash"></i></button>
           </div>
         `;
+        container.appendChild(rowDiv);
+
         const studentSelect = rowDiv.querySelector(".res-student");
         if (studentSelect && selectedStudentId) {
-          studentSelect.value = selectedStudentId;
+          studentSelect.value = String(selectedStudentId);
         }
-        container.appendChild(rowDiv);
       } catch (e) {
         console.error("Error adding result row:", e);
       }
@@ -1716,13 +1736,19 @@
         const selectedStudents = new Set();
         const programmes = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.programmes)) ? ThanafusDB.db.programmes : [];
         const prog = programmes.find(p => p && String(p.id) === String(resultPublishProgId));
-        const isGeneral = prog && prog.category === 'General';
+        if (!prog) {
+          showAlert("Programme not found. Please refresh.", "danger");
+          return;
+        }
+        const isGeneral = prog.category === 'General';
 
         for (let i = 0; i < rows.length; i++) {
           const studentSelect = rows[i].querySelector(".res-student");
-          const studentId = studentSelect ? studentSelect.value : "";
-          const rank = rows[i].querySelector(".res-rank") ? rows[i].querySelector(".res-rank").value : "";
-          const grade = rows[i].querySelector(".res-grade") ? rows[i].querySelector(".res-grade").value : "";
+          const studentId = studentSelect ? studentSelect.value.trim() : "";
+          const rankSelect = rows[i].querySelector(".res-rank");
+          const rank = rankSelect ? rankSelect.value.trim() : "";
+          const gradeSelect = rows[i].querySelector(".res-grade");
+          const grade = gradeSelect ? gradeSelect.value.trim() : "";
 
           if (!studentId) continue; // Skip empty rows
 
@@ -1741,7 +1767,7 @@
             });
           } else {
             resultsArray.push({
-              studentId,
+              studentId: studentId,
               teamId: null,
               rank: rank ? parseInt(rank) : null,
               grade: grade || null
@@ -1755,7 +1781,7 @@
         }
 
         if (resultsArray.length === 0) {
-          showAlert("⚠️ Please choose a participant/student in at least one row to publish results.", "warning");
+          showAlert("⚠️ Please choose a participant/team in at least one row to publish results.", "warning");
           return;
         }
 

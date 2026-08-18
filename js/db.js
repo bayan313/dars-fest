@@ -136,6 +136,22 @@ class Database {
     this.calculateLeaderboard();
   }
 
+  _loadFromCache() {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const cached = localStorage.getItem('thanafus_fest_db_cache');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && typeof parsed === 'object') {
+            this.db = parsed;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Cache load notice:", e);
+    }
+  }
+
   _persistLocal() {
     try {
       if (typeof localStorage !== 'undefined' && this.db) {
@@ -748,7 +764,7 @@ class Database {
   }
 
   editProgramme(id, name, category, type, teamId) {
-    const prog = this.db.programmes.find(p => p.id === id);
+    const prog = this.db.programmes.find(p => p && String(p.id) === String(id));
     if (prog) {
       prog.name = name;
       prog.category = category;
@@ -760,14 +776,14 @@ class Database {
   }
 
   deleteProgramme(id) {
-    this.db.programmes = this.db.programmes.filter(p => p.id !== id);
+    this.db.programmes = this.db.programmes.filter(p => p && String(p.id) !== String(id));
     this.save(false, 'programmes');
     this.calculateLeaderboard();
   }
 
   // Publish Results
   publishResults(programmeId, resultsArray) {
-    const prog = this.db.programmes.find(p => p.id === programmeId);
+    const prog = this.db.programmes.find(p => p && String(p.id) === String(programmeId));
     if (prog) {
       prog.results = resultsArray.map(r => ({
         rank: r.rank ? parseInt(r.rank) : null,
@@ -786,7 +802,7 @@ class Database {
   }
 
   unpublishResults(programmeId) {
-    const prog = this.db.programmes.find(p => p.id === programmeId);
+    const prog = this.db.programmes.find(p => p && String(p.id) === String(programmeId));
     if (prog) {
       prog.results = [];
       prog.resultsPublished = false;
