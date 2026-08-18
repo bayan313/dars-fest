@@ -858,8 +858,13 @@
       console.warn("Save sync notice:", e);
       const isConflict = e && e.status === 409;
       showAlert(isConflict
-        ? "Another account updated the data. Refreshing the latest data now — please remeasure your change."
+        ? "Another device updated the data. Auto-merging and retrying your save now — please keep this tab open."
         : "⚠️ " + (e && e.message ? e.message : "Data updated in local storage and queued for synchronization."), isConflict ? "warning" : "info");
+    };
+    window.__onDbSaved = function() {
+      if (activeAdminTab && typeof switchAdminTab === 'function' && !window.__adminFormDirty) {
+        switchAdminTab(activeAdminTab);
+      }
     };
 
     // Re-render the currently active admin tab with fresh data

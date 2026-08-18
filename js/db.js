@@ -119,7 +119,23 @@ class Database {
       if (response.ok) {
         const serverData = await response.json();
         if (serverData && typeof serverData === 'object' && !serverData.isOffline) {
-          this.db = serverData;
+          // Keep any local collections still mid-save (unsent marks etc.) from
+          // being clobbered by the fresher server snapshot.
+          const protectedCols = this._activeLocalCollections();
+          const mergedData = { ...serverData };
+          protectedCols.forEach(col => {
+            if (col === 'contact' || col === 'settings') {
+              if (this.db[col] !== undefined) mergedData[col] = this.db[col];
+            } else if (Array.isArray(this.db[col])) {
+              mergedData[col] = this._mergeDocs(serverData[col], this.db[col]);
+            }
+          });
+          // The server's revision only wins if we are not about to retry a save;
+          // otherwise keep our (merged) revision so the retry is not rejected.
+          if (this._pendingCollections.size > 0 || this._dirty || this._saving) {
+            mergedData.revision = this.db.revision;
+          }
+          this.db = mergedData;
           this._ensureDbDefaults();
           if (typeof this.db.revision !== 'number') this.db.revision = 0;
           this.loadedFromServer = true;
@@ -190,6 +206,8 @@ class Database {
     if (collectionName) {
       this._dirtyCollections = this._dirtyCollections || new Set();
       this._dirtyCollections.add(collectionName);
+      this._pendingCollections = this._pendingCollections || new Set();
+      this._pendingCollections.add(collectionName);
     }
     this._persistLocal();
     if (isReset || this._allowUnpublishAll) this._pendingReset = true;
@@ -201,13 +219,17 @@ class Database {
   _flushSave() {
     if (this._saving) return;
     if (!this._dirty) return;
+
+    // Always rebuild the payload from the LATEST local db, including any
+    // collections that previously failed and are queued for retry.
+    const collections = new Set([
+      ...Array.from(this._dirtyCollections || []),
+      ...Array.from(this._pendingCollections || [])
+    ]);
+    const changedCollections = [...collections];
     this._dirty = false;
     this._saving = true;
 
-    const changedCollections = this._dirtyCollections ? [...this._dirtyCollections] : [];
-
-    // Send the full local snapshot, but tell the API which collections may be changed.
-    // This prevents one admin's stale cache from replacing another admin's fresh data.
     const payload = {
       ...this.db,
       collections: changedCollections,
@@ -223,61 +245,144 @@ class Database {
     }
     this._allowUnpublishAll = false;
     this._dirtyCollections = new Set();
+    // Keep the collections marked so a failed send is retried automatically.
+    this._pendingCollections = collections;
 
+    this._sendSave(payload, changedCollections, 0);
+  }
+
+  // Collections that are still being saved/retried and must not be silently
+  // overwritten by a polling load.
+  _activeLocalCollections() {
+    return new Set([
+      ...Array.from(this._dirtyCollections || []),
+      ...Array.from(this._pendingCollections || [])
+    ]);
+  }
+
+  // Merge two doc lists by id. Local docs win for ids present locally; any doc
+  // only on the server (added by another device) is preserved.
+  _mergeDocs(freshDocs, localDocs) {
+    const fresh = Array.isArray(freshDocs) ? freshDocs : [];
+    const local = Array.isArray(localDocs) ? localDocs : [];
+    const map = new Map();
+    fresh.forEach(d => { if (d && d.id != null) map.set(String(d.id), d); });
+    local.forEach(d => { if (d && d.id != null) map.set(String(d.id), d); });
+    return Array.from(map.values());
+  }
+
+  async _sendSave(payload, changedCollections, attempt) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-    fetch('/api/all', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal: controller.signal
-    })
-      .then(res => {
-        clearTimeout(timeoutId);
-        if (!res.ok) {
-          return res.json().catch(() => ({})).then(err => {
-            const error = new Error(err.error || ('Server error (HTTP ' + res.status + ')'));
-            error.status = res.status;
-            throw error;
-          });
-        }
-        return res.json();
-      })
-      .then(data => {
-        this._retries = 0;
-        if (data && typeof data === 'object' && !data.isOffline) {
-          if (typeof data.revision === 'number') this.db.revision = data.revision;
-          this.loadedFromServer = true;
-          this.calculateLeaderboard();
-          this._persistLocal();
-        }
-        this._saving = false;
-        if (this._dirty) {
-          this._flushSave();
-        }
-      })
-      .catch(e => {
-        clearTimeout(timeoutId);
-        this._saving = false;
-        console.warn('API sync notice (saved locally):', e.message || e);
-        if (e && e.status === 409 && typeof window !== 'undefined') {
-          if (typeof window.__onDbSaveError === 'function') {
-            window.__onDbSaveError(e);
-          }
-          // Another device saved first — pull the latest data so this device
-          // stops showing stale content instead of waiting for a manual refresh.
-          this.load().then(() => {
-            this.calculateLeaderboard();
-            this._persistLocal();
-            if (typeof window.__onDbConflictReloaded === 'function') {
-              window.__onDbConflictReloaded(e);
-            }
-          }).catch(() => {});
-          return;
-        }
-        this._persistLocal();
+    try {
+      const res = await fetch('/api/all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const error = new Error(err.error || ('Server error (HTTP ' + res.status + ')'));
+        error.status = res.status;
+        throw error;
+      }
+
+      const data = await res.json();
+      this._retries = 0;
+      this._mergeAttempts = 0;
+      this._pendingCollections = new Set();
+      if (data && typeof data === 'object' && !data.isOffline) {
+        if (typeof data.revision === 'number') this.db.revision = data.revision;
+        this.loadedFromServer = true;
+        this.calculateLeaderboard();
+        this._persistLocal();
+      }
+      this._saving = false;
+      if (typeof window !== 'undefined' && typeof window.__onDbSaved === 'function') {
+        window.__onDbSaved();
+      }
+      if (this._dirty) {
+        this._flushSave();
+      }
+    } catch (e) {
+      clearTimeout(timeoutId);
+
+      if (e && e.status === 409) {
+        // Another device saved first. Merge the local changes into the freshest
+        // server data and retry, so the marks entered here are never discarded.
+        if (typeof window !== 'undefined' && typeof window.__onDbSaveError === 'function') {
+          window.__onDbSaveError(e);
+        }
+        const mergeCollections = Array.isArray(payload.collections) ? payload.collections : changedCollections;
+        this._mergeAttempts = (this._mergeAttempts || 0) + 1;
+        if (this._mergeAttempts <= 5) {
+          try {
+            const fresh = await this._fetchFresh();
+            if (fresh && !fresh.isOffline) {
+              const merged = { ...fresh };
+              mergeCollections.forEach(col => {
+                if (col === 'contact' || col === 'settings') {
+                  if (this.db[col] !== undefined) merged[col] = this.db[col];
+                } else if (Array.isArray(this.db[col])) {
+                  merged[col] = this._mergeDocs(fresh[col], this.db[col]);
+                }
+              });
+              merged.revision = fresh.revision || 0;
+              this.db = merged;
+              this._persistLocal();
+              this._pendingCollections = new Set(mergeCollections);
+              // Wait a moment for concurrent saves to settle, then retry with
+              // the fresh revision and merged data.
+              this._saving = false;
+              setTimeout(() => {
+                this._dirty = true;
+                this._flushSave();
+              }, 800);
+              return;
+            }
+          } catch (mergeErr) {
+            console.warn('Conflict merge failed:', mergeErr.message || mergeErr);
+          }
+        }
+        this._saving = false;
+        console.warn('Conflict retries exhausted; changes kept locally.', e.message || e);
+        this._persistLocal();
+        return;
+      }
+
+      this._saving = false;
+      console.warn('API sync notice (saved locally):', e.message || e);
+      this._persistLocal();
+
+      // Retry transient failures (network / 503 / merge-then-post) automatically
+      // so the data eventually reaches the server without a manual refresh.
+      if (attempt < 6 && (this._pendingCollections.size > 0 || this._dirty)) {
+        setTimeout(() => {
+          if (!this._saving && (this._pendingCollections.size > 0 || this._dirty)) {
+            this._dirty = true;
+            this._flushSave();
+          }
+        }, 5000 * (attempt + 1));
+      }
+    }
+  }
+
+  async _fetchFresh() {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    try {
+      const res = await fetch('/api/all', { cache: 'no-store', signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      clearTimeout(timeoutId);
+      return null;
+    }
   }
 
   reset() {
