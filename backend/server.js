@@ -16,7 +16,7 @@ const syncAdminPassword = async () => {
       // Create settings if missing
       await Settings.create({ adminPassword: ADMIN_PASSWORD_FIXED });
       console.log('Created Settings with admin password');
-    } else if (settings.adminPassword !== ADMIN_PASSWORD_FIXED && process.env.ADMIN_PASSWORD) {
+    } else if (settings.adminPassword !== ADMIN_PASSWORD_FIXED) {
       settings.adminPassword = ADMIN_PASSWORD_FIXED;
       await settings.save();
       console.log('Updated admin password in Settings');
