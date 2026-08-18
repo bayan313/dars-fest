@@ -233,7 +233,6 @@
                     <th>Programme Name</th>
                     <th>Category</th>
                     <th>Type</th>
-                    <th>Team</th>
                     <th>Results Status</th>
                     <th>Actions</th>
                   </tr>
@@ -711,15 +710,15 @@
         <div class="form-group" id="prog-type-group">
           <label for="prog-type">Event Type <span style="opacity:0.6;">(scoring)</span></label>
           <select class="form-control" id="prog-type">
-            <option value="individual">വ്യക്തിത്വം (Individual) — 1st=10, 2nd=8, 3rd=6</option>
+            <option value="individual">വ്യക്തിഗതം (Individual) — 1st=10, 2nd=8, 3rd=6</option>
             <option value="group">ഗ്രൂപ്പ് (Group) — 1st=15, 2nd=13, 3rd=11</option>
           </select>
         </div>
 
-        <div class="form-group" id="prog-team-group">
-          <label for="prog-team">Team / Group <span style="opacity:0.6;">(General team events — whole team)</span></label>
+        <div class="form-group" id="prog-team-group" style="display:none;">
+          <label for="prog-team">Team / Group <span style="opacity:0.6;">(General team events — optional)</span></label>
           <select class="form-control" id="prog-team">
-            <option value="">— Select team —</option>
+            <option value="">— All Teams Participate (Standard) —</option>
           </select>
         </div>
 
@@ -732,8 +731,8 @@
       <div id="prog-bulk-block" style="display:none;">
         <div class="form-group">
           <label for="prog-bulk-input">Bulk Programmes (one per line)</label>
-          <textarea id="prog-bulk-input" class="form-control" style="min-height:160px;" placeholder="Programme Name | Category | Team | Type&#10;Lecture | Junior | | individual&#10;Group Quiz | General | Al Fath | group"></textarea>
-          <span style="font-size:0.75rem; color:var(--text-gray);">Format: <strong>Name | Category | Team | Type</strong> — Team (General-ന് required), Type: <em>individual</em> (1st=10/2nd=8/3rd=6) / <em>group</em> (1st=15/2nd=13/3rd=11), General ആണെങ്കിൽ automatic group. ഓരോ programme ഒരരു വരയിൽ.</span>
+          <textarea id="prog-bulk-input" class="form-control" style="min-height:160px;" placeholder="Programme Name | Category | Type&#10;Quran Recitation | Junior | individual&#10;Group Song | General | group"></textarea>
+          <span style="font-size:0.75rem; color:var(--text-gray);">Format: <strong>Name | Category | Type</strong> — Category: <em>Sub Junior / Junior / Senior / General</em>, Type: <em>individual</em> (1st=10/2nd=8/3rd=6) / <em>group</em> (1st=15/2nd=13/3rd=11), General ആണെങ്കിൽ automatic group scoring. ഓരോ programme ഓരോ വരിയിൽ.</span>
         </div>
         <button type="button" class="btn btn-gold" style="width:100%; justify-content:center; padding:12px; margin-top:10px;" onclick="handleBulkProgSave()">
           <i class="fa-solid fa-layer-group"></i> Add All Programmes
@@ -1288,36 +1287,48 @@
         countEl.textContent = `Showing ${filtered.length} of ${allProgs.length}${filter !== "all" ? ` (${filter}: ${counts[filter]||0})` : ""}${search ? ` — search: "${search}"` : ""}`;
       }
 
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:32px 16px; color:var(--text-gray);"><i class="fa-solid fa-folder-open" style="font-size:1.8rem; opacity:0.35; display:block; margin-bottom:8px;"></i>No programmes found matching your filter criteria.</td></tr>';
+        return;
+      }
+
       let rowsHtml = "";
       filtered.forEach(p => {
         const publishButton = p.resultsPublished 
-          ? `<button type="button" class="btn btn-primary btn-sm" onclick="window.openResultPublishModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem; background:#4f46e5; border-color:#4f46e5; margin-right:4px;"><i class="fa-solid fa-pen-to-square"></i> Edit Results</button>
-             <button type="button" class="btn btn-outline btn-sm" onclick="window.unpublishResults('${p.id}')" style="padding:4px 8px; font-size:0.75rem; border-color:#e2a32c; color:#d97706;"><i class="fa-solid fa-rotate-left"></i> Unpublish</button>`
-          : `<button type="button" class="btn btn-primary btn-sm" onclick="window.openResultPublishModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem; background:#10b981; border-color:#10b981;"><i class="fa-solid fa-circle-check"></i> Evaluate & Publish</button>`;
+          ? `<button type="button" class="btn btn-primary btn-sm" onclick="window.openResultPublishModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem; background:#4f46e5; border-color:#4f46e5;" title="Edit Results"><i class="fa-solid fa-pen-to-square"></i> Edit Results</button>
+             <button type="button" class="btn btn-outline btn-sm" onclick="window.unpublishResults('${p.id}')" style="padding:4px 8px; font-size:0.75rem; border-color:#e2a32c; color:#d97706; background:#fffbeb;" title="Unpublish Results"><i class="fa-solid fa-rotate-left"></i> Unpublish</button>`
+          : `<button type="button" class="btn btn-primary btn-sm" onclick="window.openResultPublishModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem; background:#10b981; border-color:#10b981;" title="Evaluate and Publish Results"><i class="fa-solid fa-circle-check"></i> Evaluate &amp; Publish</button>`;
 
         const statusText = p.resultsPublished 
-          ? `<span style="color:#10b981;font-weight:600;"><i class="fa-solid fa-circle-check"></i> Published (${p.results ? p.results.length : 0} entries)</span>` 
-          : `<span style="color:var(--text-gray);"><i class="fa-regular fa-clock"></i> Pending</span>`;
+          ? `<span style="display:inline-flex; align-items:center; gap:5px; color:#047857; font-weight:600; background:#ecfdf5; border:1px solid #a7f3d0; padding:3px 8px; border-radius:4px; font-size:0.75rem;"><i class="fa-solid fa-circle-check"></i> Published (${p.results ? p.results.length : 0} entries)</span>` 
+          : `<span style="display:inline-flex; align-items:center; gap:5px; color:var(--text-gray); background:#f8fafc; border:1px solid #e2e8f0; padding:3px 8px; border-radius:4px; font-size:0.75rem;"><i class="fa-regular fa-clock"></i> Pending</span>`;
 
-        const typeLabel = (p.type === 'group' || p.category === 'General') 
-          ? (p.category === 'General' ? 'ഗ്രൂപ്പ് (Team)' : 'ഗ്രൂപ്പ് (Group)') 
-          : 'വ്യക്തിത്വം';
-        const teamLabel = (p.category === 'General' && p.teamId) 
-          ? (teams.find(t => t && t.id === p.teamId) || {}).name || p.teamId 
-          : '—';
+        const isGroup = (p.type === 'group' || p.category === 'General');
+        const typeBadge = isGroup
+          ? (p.category === 'General'
+              ? `<span style="display:inline-flex; align-items:center; gap:4px; background:#fef3c7; color:#b45309; border:1px solid #fde68a; font-size:0.75rem; font-weight:600; padding:3px 8px; border-radius:4px;"><i class="fa-solid fa-people-group"></i> ഗ്രൂപ്പ് (Team)</span>`
+              : `<span style="display:inline-flex; align-items:center; gap:4px; background:#fef3c7; color:#b45309; border:1px solid #fde68a; font-size:0.75rem; font-weight:600; padding:3px 8px; border-radius:4px;"><i class="fa-solid fa-users"></i> ഗ്രൂപ്പ് (Group)</span>`)
+          : `<span style="display:inline-flex; align-items:center; gap:4px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-size:0.75rem; font-weight:600; padding:3px 8px; border-radius:4px;"><i class="fa-solid fa-user"></i> വ്യക്തിഗതം</span>`;
+
+        const catBadge = p.category === 'Sub Junior'
+          ? `<span style="background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; font-size:0.75rem; font-weight:700; padding:3px 8px; border-radius:4px;">Sub Junior</span>`
+          : p.category === 'Junior'
+          ? `<span style="background:#f5f3ff; color:#7c3aed; border:1px solid #ddd6fe; font-size:0.75rem; font-weight:700; padding:3px 8px; border-radius:4px;">Junior</span>`
+          : p.category === 'Senior'
+          ? `<span style="background:#fdf2f8; color:#db2777; border:1px solid #fbcfe8; font-size:0.75rem; font-weight:700; padding:3px 8px; border-radius:4px;">Senior</span>`
+          : `<span style="background:#f0fdfa; color:#0d9488; border:1px solid #99f6e4; font-size:0.75rem; font-weight:700; padding:3px 8px; border-radius:4px;">${p.category || 'General'}</span>`;
 
         rowsHtml += `
           <tr>
-            <td data-label="Programme Name"><strong>${p.name || ''}</strong></td>
-            <td data-label="Category">${p.category || ''}</td>
-            <td data-label="Type">${typeLabel}</td>
-            <td data-label="Team">${teamLabel}</td>
+            <td data-label="Programme Name"><strong style="color:var(--primary-emerald-dark);">${p.name || ''}</strong></td>
+            <td data-label="Category">${catBadge}</td>
+            <td data-label="Type">${typeBadge}</td>
             <td data-label="Results Status">${statusText}</td>
             <td data-label="Actions" class="action-cell">
-              <div style="display:flex; gap:6px;">
+              <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
                 ${publishButton}
-                <button type="button" class="btn btn-primary btn-sm" onclick="window.openProgModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-pen"></i></button>
-                <button type="button" class="btn btn-outline btn-sm" onclick="window.deleteProg('${p.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="window.openProgModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem;" title="Edit Programme Details"><i class="fa-solid fa-pen"></i></button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="window.deleteProg('${p.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;" title="Delete Programme"><i class="fa-solid fa-trash"></i></button>
               </div>
             </td>
           </tr>
@@ -1458,7 +1469,7 @@
           return;
         }
 
-        const typeTxt = (prog.type === 'group' || prog.category === 'General') ? 'ഗ്രൂപ്പ് (Group)' : 'വ്യക്തിത്വം (Individual)';
+        const typeTxt = (prog.type === 'group' || prog.category === 'General') ? 'ഗ്രൂപ്പ് (Group)' : 'വ്യക്തിഗതം (Individual)';
         const titleEl = document.getElementById("publish-prog-title");
         if (titleEl) {
           titleEl.innerText = `${prog.name || 'Programme'} (${prog.category || 'General'} • ${typeTxt})`;
