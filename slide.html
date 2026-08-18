@@ -778,10 +778,10 @@
 
         const rows = rankWinners.map(w => {
           let name = "—", teamName = "", pts = 0;
-          if (prog.category === "General") {
+          if ((prog.type || "").trim().toLowerCase() === "group" || (prog.category || "").trim().toLowerCase() === "general") {
             const t = ThanafusDB.db.teams.find(tm => tm.id === (w.teamId || prog.teamId));
             name = t ? t.name : "Team";
-            teamName = "General";
+            teamName = "Team Event";
             pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
           } else {
             const s = ThanafusDB.db.students.find(st => st.id === w.studentId);

@@ -348,8 +348,8 @@ class Database {
         let team = null;
         let studentName = "";
 
-        if ((prog.category || '').trim().toLowerCase() === 'general') {
-          // General team event: score goes to the participating team directly
+        if ((prog.type || '').trim().toLowerCase() === 'group' || (prog.category || '').trim().toLowerCase() === 'general') {
+          // Team event: score goes to the selected team directly
           team = this.db.teams.find(t => t.id === (res.teamId || prog.teamId));
           studentName = team ? team.name : "Team";
         } else {
@@ -419,7 +419,7 @@ class Database {
 
       prog.results.forEach(res => {
         let team = null;
-        if ((prog.category || '').trim().toLowerCase() === 'general') {
+        if ((prog.type || '').trim().toLowerCase() === 'group' || (prog.category || '').trim().toLowerCase() === 'general') {
           team = this.db.teams.find(t => t.id === (res.teamId || prog.teamId));
         } else {
           const student = this.db.students.find(s => s.id === res.studentId);
@@ -784,8 +784,8 @@ class Database {
     if (prog) {
       prog.results = resultsArray.map(r => ({
         rank: r.rank ? parseInt(r.rank) : null,
-        studentId: ((prog.category || '').trim().toLowerCase() === 'general') ? null : (r.studentId || null),
-        teamId: ((prog.category || '').trim().toLowerCase() === 'general') ? (r.teamId || r.studentId || null) : null,
+        studentId: ((prog.type || '').trim().toLowerCase() === 'group' || (prog.category || '').trim().toLowerCase() === 'general') ? null : (r.studentId || null),
+        teamId: ((prog.type || '').trim().toLowerCase() === 'group' || (prog.category || '').trim().toLowerCase() === 'general') ? (r.teamId || r.studentId || null) : null,
         grade: r.grade ? r.grade.toUpperCase().trim() : null
       }));
       prog.resultsPublished = true;

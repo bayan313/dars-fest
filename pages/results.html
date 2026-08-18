@@ -260,6 +260,7 @@
 
       let html = "";
       programmes.forEach(p => {
+        const isTeamEvent = (p.type || '').trim().toLowerCase() === 'group' || (p.category || '').trim().toLowerCase() === 'general';
         const publishStatus = p.resultsPublished 
           ? `<span style="font-size:0.75rem;color:#10b981;font-weight:600;"><i class="fa-solid fa-circle-check"></i> Published</span>` 
           : `<span style="font-size:0.75rem;color:var(--text-gray);"><i class="fa-regular fa-clock"></i> Pending</span>`;
@@ -268,7 +269,7 @@
           <div class="prog-item-card" onclick="viewProgrammeDetails('${p.id}')" data-name="${p.name.toLowerCase()}">
             <h4>${p.name}</h4>
             <div class="flex-between" style="margin-top: 5px; margin-bottom: 0;">
-              <span class="venue"><i class="fa-solid fa-people-group"></i> ${p.category === 'General' ? (ThanafusDB.db.teams.find(t => t.id === p.teamId) ? ThanafusDB.db.teams.find(t => t.id === p.teamId).name : 'Team event') : (p.venue || 'Venue TBA')}</span>
+              <span class="venue"><i class="fa-solid fa-people-group"></i> ${isTeamEvent ? (ThanafusDB.db.teams.find(t => t.id === p.teamId) ? ThanafusDB.db.teams.find(t => t.id === p.teamId).name : 'Team event') : (p.venue || 'Venue TBA')}</span>
               ${publishStatus}
             </div>
           </div>
@@ -294,14 +295,15 @@
       const container = document.getElementById("programme-detail-container");
       const prog = ThanafusDB.db.programmes.find(p => p.id === id);
       if (!prog) return;
+      const isTeamEvent = (prog.type || '').trim().toLowerCase() === 'group' || (prog.category || '').trim().toLowerCase() === 'general';
 
       if (!prog.resultsPublished) {
         container.innerHTML = `
           <div class="card text-center" style="padding: 50px 20px;">
             <i class="fa-solid fa-hourglass-half" style="font-size: 3.5rem; color: var(--accent-gold); margin-bottom: 15px;"></i>
             <h2>${prog.name}</h2>
-            ${prog.category === 'General' 
-              ? `<p class="prog-meta-badge" style="display:inline-block; margin-bottom:15px;">General Team Event</p>`
+            ${isTeamEvent 
+              ? `<p class="prog-meta-badge" style="display:inline-block; margin-bottom:15px;">Team Event</p>`
               : `<p class="prog-meta-badge" style="display:inline-block; margin-bottom:15px;">Venue: ${prog.venue} | Judge: ${prog.judge}</p>`}
             <h3 style="color: var(--text-gray); margin-top:10px;">Results Pending</h3>
             <p style="color: var(--text-gray);">The evaluations for this programme are currently in progress. Standard rankings will be shown once uploaded by the coordinator.</p>
@@ -323,10 +325,10 @@
           let name = "Unknown";
           let teamName = "N/A";
           
-          if (prog.category === 'General') {
+          if (isTeamEvent) {
             const team = ThanafusDB.db.teams.find(t => t.id === (res.teamId || prog.teamId));
             name = team ? team.name : "Team";
-            teamName = "General Team Event";
+            teamName = "Team Event";
           } else {
             const stud = ThanafusDB.db.students.find(s => s.id === res.studentId);
             const team = stud ? ThanafusDB.db.teams.find(t => t.id === stud.teamId) : null;
@@ -335,7 +337,7 @@
           }
 
           const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
-          const maxPts = (prog.category === 'General' || prog.type === 'group') ? 15 : 10;
+          const maxPts = isTeamEvent ? 15 : 10;
           const barPct = Math.min(100, Math.max(25, (pts / maxPts) * 100));
           const gradeClass = res.grade === 'A' ? 'grade-pill-a' : res.grade === 'B' ? 'grade-pill-b' : 'grade-pill-c';
           const gradeHtml = res.grade ? `<span class="grade-pill-tag ${gradeClass}">Grade ${res.grade}</span>` : '';
@@ -394,10 +396,10 @@
         winners.forEach(res => {
           let name = "Unknown";
           let teamName = "N/A";
-          if (prog.category === 'General') {
+          if (isTeamEvent) {
             const team = ThanafusDB.db.teams.find(t => t.id === (res.teamId || prog.teamId));
             name = team ? team.name : "Team";
-            teamName = "General Team Event";
+            teamName = "Team Event";
           } else {
             const stud = ThanafusDB.db.students.find(s => s.id === res.studentId);
             const team = stud ? ThanafusDB.db.teams.find(t => t.id === stud.teamId) : null;
@@ -405,7 +407,7 @@
             teamName = team ? team.name : "N/A";
           }
           const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
-          const maxPts = (prog.category === 'General' || prog.type === 'group') ? 15 : 10;
+          const maxPts = isTeamEvent ? 15 : 10;
           const barPct = Math.min(100, Math.max(25, (pts / maxPts) * 100));
           rows += `
             <div class="rank-participant-row">
@@ -475,9 +477,9 @@
       sortedParticipants.forEach(res => {
         let studName = "Unknown";
         let teamName = "N/A";
-        if (prog.category === 'General') {
+        if (isTeamEvent) {
           const t = ThanafusDB.db.teams.find(tm => tm.id === (res.teamId || prog.teamId));
-          if (t) { studName = t.name; teamName = "General Event"; }
+          if (t) { studName = t.name; teamName = "Team Event"; }
         } else {
           const stud = ThanafusDB.db.students.find(s => s.id === res.studentId);
           const teamObj = stud ? ThanafusDB.db.teams.find(t => t.id === stud.teamId) : null;
@@ -503,7 +505,7 @@
             <div>
               <h2 style="color:var(--primary-emerald);">${prog.name}</h2>
               <p style="color:var(--text-gray);font-size:0.9rem;margin-top:2px;">
-                ${prog.category === 'General' 
+                ${isTeamEvent 
                   ? `<i class="fa-solid fa-people-group"></i> Team Event &nbsp;|&nbsp; <i class="fa-solid fa-users"></i> Whole Team Scoring`
                   : `<i class="fa-solid fa-location-dot"></i> ${prog.venue} &nbsp;|&nbsp; <i class="fa-solid fa-user-tie"></i> Judge: ${prog.judge}`}
               </p>
@@ -731,8 +733,9 @@
         let progPts = 0;
         let studentsWithPts = [];
 
-        if (prog.category === 'General') {
-          // Whole-team General event: check if this teamId matches
+        const isTeamEvent = (prog.type || '').trim().toLowerCase() === 'group' || (prog.category || '').trim().toLowerCase() === 'general';
+        if (isTeamEvent) {
+          // Team event: check if this teamId matches
           prog.results.forEach(res => {
             if ((res.teamId || prog.teamId) === id) {
               const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
