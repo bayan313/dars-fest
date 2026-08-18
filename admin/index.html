@@ -1396,6 +1396,22 @@
       document.getElementById("publish-prog-title").innerText = `${prog.name} (${prog.category} • ${typeTxt})`;
       clearEvalStudentSearch();
       
+      // Pre-build options HTML once to avoid nested loop performance lags when adding rows
+      window.evalOptionsHTML = "";
+      if (prog.category === 'General') {
+        window.evalOptionsHTML = `<option value="">-- Choose Team --</option>` + 
+          ThanafusDB.db.teams.map(t => `<option value="${t.id}">${t.name} (Team)</option>`).join("");
+      } else {
+        const categoryStudents = ThanafusDB.db.students.filter(s => s.category === prog.category);
+        window.evalOptionsHTML = `<option value="">-- Choose Participant --</option>` + 
+          categoryStudents.map(s => {
+            const teamObj = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+            const teamLabel = teamObj ? `(${teamObj.name})` : '';
+            const chestLabel = s.chestNo ? `[#${s.chestNo}] ` : '';
+            return `<option value="${s.id}">${chestLabel}${s.name} ${teamLabel}</option>`;
+          }).join("");
+      }
+
       const container = document.getElementById("results-rows-container");
       container.innerHTML = "";
 
@@ -1537,28 +1553,6 @@
       const prog = ThanafusDB.db.programmes.find(p => p.id === resultPublishProgId);
       if (!prog) return;
 
-      // Filter students who are in the matching category
-      const categoryStudents = ThanafusDB.db.students.filter(s => s.category === prog.category);
-
-      let options = "";
-      if (prog.category === 'General') {
-        // General team event: participants are teams
-        options = `<option value="">-- Choose Team --</option>`;
-        ThanafusDB.db.teams.forEach(t => {
-          const selectedAttr = t.id === selectedStudentId ? 'selected' : '';
-          options += `<option value="${t.id}" ${selectedAttr}>${t.name} (Team)</option>`;
-        });
-      } else {
-        options = `<option value="">-- Choose Participant --</option>`;
-        categoryStudents.forEach(s => {
-          const teamObj = ThanafusDB.db.teams.find(t => t.id === s.teamId);
-          const teamLabel = teamObj ? `(${teamObj.name})` : '';
-          const chestLabel = s.chestNo ? `[#${s.chestNo}] ` : '';
-          const selectedAttr = s.id === selectedStudentId ? 'selected' : '';
-          options += `<option value="${s.id}" ${selectedAttr}>${chestLabel}${s.name} ${teamLabel}</option>`;
-        });
-      }
-
       const rowDiv = document.createElement("div");
       rowDiv.className = "result-row";
       rowDiv.innerHTML = `
@@ -1572,7 +1566,7 @@
         </div>
         <div>
           <select class="form-control res-student" required>
-            ${options}
+            ${window.evalOptionsHTML || ""}
           </select>
         </div>
         <div>
@@ -1587,6 +1581,8 @@
           <button type="button" class="btn btn-outline btn-sm" onclick="this.closest('.result-row').remove()" style="color:#ef4444; border-color:#fca5a5; padding:6px 8px;" title="Remove this row"><i class="fa-solid fa-trash"></i></button>
         </div>
       `;
+      // Set value programmatically for maximum speed and simplicity
+      rowDiv.querySelector(".res-student").value = selectedStudentId;
       container.appendChild(rowDiv);
     }
 
