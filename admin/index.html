@@ -1389,7 +1389,8 @@
     // RESULT PUBLISHER DRAWER
     function openResultPublishModal(progId) {
       resultPublishProgId = progId;
-      const prog = ThanafusDB.db.programmes.find(p => p.id === progId);
+      const programmes = ThanafusDB.db.programmes || [];
+      const prog = programmes.find(p => p.id === progId);
       if (!prog) return;
 
       const typeTxt = (prog.type === 'group' || prog.category === 'General') ? 'ഗ്രൂപ്പ് (Group)' : 'വ്യക്തിത്വം (Individual)';
@@ -1398,14 +1399,17 @@
       
       // Pre-build options HTML once to avoid nested loop performance lags when adding rows
       window.evalOptionsHTML = "";
+      const teams = ThanafusDB.db.teams || [];
+      const students = ThanafusDB.db.students || [];
+
       if (prog.category === 'General') {
         window.evalOptionsHTML = `<option value="">-- Choose Team --</option>` + 
-          ThanafusDB.db.teams.map(t => `<option value="${t.id}">${t.name} (Team)</option>`).join("");
+          teams.map(t => `<option value="${t.id}">${t.name} (Team)</option>`).join("");
       } else {
-        const categoryStudents = ThanafusDB.db.students.filter(s => s.category === prog.category);
+        const categoryStudents = students.filter(s => s.category === prog.category);
         window.evalOptionsHTML = `<option value="">-- Choose Participant --</option>` + 
           categoryStudents.map(s => {
-            const teamObj = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+            const teamObj = teams.find(t => t.id === s.teamId);
             const teamLabel = teamObj ? `(${teamObj.name})` : '';
             const chestLabel = s.chestNo ? `[#${s.chestNo}] ` : '';
             return `<option value="${s.id}">${chestLabel}${s.name} ${teamLabel}</option>`;
@@ -2414,9 +2418,12 @@
         return;
       }
 
+      const programmes = ThanafusDB.db.programmes || [];
+      const teams = ThanafusDB.db.teams || [];
+
       ThanafusDB.db.penalties.forEach(p => {
-        const prog = ThanafusDB.db.programmes.find(pr => pr.id === p.programmeId);
-        const team = ThanafusDB.db.teams.find(t => t.id === p.teamId);
+        const prog = programmes.find(pr => pr.id === p.programmeId);
+        const team = teams.find(t => t.id === p.teamId);
         
         const progName = prog ? `${prog.name} (${prog.category})` : "General Penalty";
         const teamName = team ? team.name : "Unknown Team";
@@ -2441,10 +2448,11 @@
       document.getElementById("pen-pts").value = "";
       document.getElementById("pen-reason").value = "";
 
-      // Populate team dropdown
+      // Populate team dropdown safely
       const teamSelect = document.getElementById("pen-team");
       teamSelect.innerHTML = `<option value="">-- Select Team --</option>`;
-      ThanafusDB.db.teams.forEach(t => {
+      const teams = ThanafusDB.db.teams || [];
+      teams.forEach(t => {
         teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
       });
 
