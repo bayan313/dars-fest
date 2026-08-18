@@ -1025,9 +1025,11 @@
       });
     }
 
-    let lastPublishedSignature = "";
+    let refreshInProgress = false;
 
     async function refreshData() {
+      if (refreshInProgress) return;
+      refreshInProgress = true;
       try {
         await ThanafusDB.load();
         ThanafusDB.calculateLeaderboard();
@@ -1037,24 +1039,18 @@
         renderCategorySlides();
         renderLatestResult();
 
-        // Check if published results signature changed to rebuild slides if necessary
-        const currentSig = ThanafusDB.db.programmes
-          .filter(p => p.resultsPublished)
-          .map(p => p.id + ':' + (p.results ? p.results.length : 0))
-          .join('|');
-        if (lastPublishedSignature !== "" && lastPublishedSignature !== currentSig) {
-          // New results published! Re-render all slides
-          renderCategorySlides();
-          renderLatestResult();
-        }
-        lastPublishedSignature = currentSig;
-
         const u = document.getElementById("slide-updated");
         if (u) {
           u.innerHTML = `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#10b981;margin-right:5px;box-shadow:0 0 8px #10b981;"></span> Live Auto-Sync: ${new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
         }
       } catch (e) {
         console.error("Auto-refresh failed:", e);
+        const u = document.getElementById("slide-updated");
+        if (u) {
+          u.innerHTML = `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#ef4444;margin-right:5px;"></span> Auto-Sync retrying...`;
+        }
+      } finally {
+        refreshInProgress = false;
       }
     }
 
