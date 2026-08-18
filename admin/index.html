@@ -898,7 +898,7 @@
       event.preventDefault();
       await ThanafusDB.ready();
       const pass = document.getElementById("admin-pass").value;
-      const truePass = (ThanafusDB.db.settings && ThanafusDB.db.settings.adminPassword) || "admin@9526";
+      const truePass = (ThanafusDB.db && ThanafusDB.db.settings && ThanafusDB.db.settings.adminPassword) || "admin@9526";
 
       if (pass === truePass) {
         sessionStorage.setItem('thanafus_admin_auth', 'true');
@@ -1022,7 +1022,8 @@
       // Populate team dropdown options
       const teamSelect = document.getElementById("stud-team");
       teamSelect.innerHTML = '<option value="">Choose Team</option>';
-      ThanafusDB.db.teams.forEach(t => {
+      const teams = (ThanafusDB.db && ThanafusDB.db.teams) || [];
+      teams.forEach(t => {
         teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
       });
 
@@ -1031,7 +1032,8 @@
 
       if (id) {
         title.innerText = "Edit Student Profile";
-        const stud = ThanafusDB.db.students.find(s => s.id === id);
+        const students = (ThanafusDB.db && ThanafusDB.db.students) || [];
+        const stud = students.find(s => s.id === id);
         if (stud) {
           document.getElementById("stud-id").value = stud.id;
           document.getElementById("stud-name").value = stud.name;
@@ -1127,7 +1129,8 @@
 
       if (id) {
         title.innerText = "Edit Team Profile";
-        const team = ThanafusDB.db.teams.find(t => t.id === id);
+        const teams = (ThanafusDB.db && ThanafusDB.db.teams) || [];
+        const team = teams.find(t => t.id === id);
         if (team) {
           document.getElementById("team-id").value = team.id;
           document.getElementById("team-name").value = team.name;
@@ -1302,6 +1305,7 @@
       if (!text) { showAlert("Enter at least one programme.", "warning"); return; }
 
       let added = 0;
+      const teams = (ThanafusDB.db && ThanafusDB.db.teams) || [];
       text.split("\n").forEach(line => {
         line = line.trim();
         if (!line) return;
@@ -1310,7 +1314,7 @@
         if (!name) return;
         const category = parts[1] || "";
         const teamName = (parts[2] || "").trim();
-        const teamId = teamName ? (ThanafusDB.db.teams.find(t => t.name === teamName) || {}).id || "" : "";
+        const teamId = teamName ? (teams.find(t => t.name === teamName) || {}).id || "" : "";
         const type = (category === "General") ? "group" : (parts[3] ? parts[3].trim() : "individual");
         ThanafusDB.addProgramme(name, category, type, teamId);
         added++;
@@ -1330,7 +1334,8 @@
       // Populate team/group dropdown from current teams
       const teamSel = document.getElementById("prog-team");
       teamSel.innerHTML = '<option value="">— Select team —</option>';
-      ThanafusDB.db.teams.forEach(t => {
+      const teams = (ThanafusDB.db && ThanafusDB.db.teams) || [];
+      teams.forEach(t => {
         const opt = document.createElement("option");
         opt.value = t.id;
         opt.textContent = t.name;
@@ -1339,7 +1344,8 @@
 
       if (id) {
         title.innerText = "Edit Programme Details";
-        const prog = ThanafusDB.db.programmes.find(p => p.id === id);
+        const programmes = (ThanafusDB.db && ThanafusDB.db.programmes) || [];
+        const prog = programmes.find(p => p.id === id);
         if (prog) {
           document.getElementById("prog-id").value = prog.id;
           document.getElementById("prog-name").value = prog.name;
@@ -1402,7 +1408,7 @@
     // RESULT PUBLISHER DRAWER
     function openResultPublishModal(progId) {
       resultPublishProgId = progId;
-      const programmes = ThanafusDB.db.programmes || [];
+      const programmes = (ThanafusDB.db && ThanafusDB.db.programmes) || [];
       const prog = programmes.find(p => p.id === progId);
       if (!prog) return;
 
@@ -1412,8 +1418,8 @@
       
       // Pre-build options HTML once to avoid nested loop performance lags when adding rows
       window.evalOptionsHTML = "";
-      const teams = ThanafusDB.db.teams || [];
-      const students = ThanafusDB.db.students || [];
+      const teams = (ThanafusDB.db && ThanafusDB.db.teams) || [];
+      const students = (ThanafusDB.db && ThanafusDB.db.students) || [];
 
       if (prog.category === 'General') {
         window.evalOptionsHTML = `<option value="">-- Choose Team --</option>` + 
@@ -1475,13 +1481,16 @@
         return;
       }
 
-      const prog = ThanafusDB.db.programmes.find(p => p.id === resultPublishProgId);
+      const programmes = (ThanafusDB.db && ThanafusDB.db.programmes) || [];
+      const prog = programmes.find(p => p.id === resultPublishProgId);
       if (!prog) return;
 
       let suggestionsHtml = "";
+      const teams = (ThanafusDB.db && ThanafusDB.db.teams) || [];
+      const students = (ThanafusDB.db && ThanafusDB.db.students) || [];
 
       if (prog.category === 'General') {
-        const matchingTeams = ThanafusDB.db.teams.filter(t => 
+        const matchingTeams = teams.filter(t => 
           t.name.toLowerCase().includes(q) || (t.captain && t.captain.toLowerCase().includes(q))
         );
 
@@ -1506,11 +1515,11 @@
         });
       } else {
         // Search students matching category
-        const matchingStudents = ThanafusDB.db.students.filter(s => {
+        const matchingStudents = students.filter(s => {
           if (s.category !== prog.category) return false;
           const matchName = (s.name || "").toLowerCase().includes(q);
           const matchChest = (s.chestNo || "").toLowerCase().includes(q);
-          const teamObj = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+          const teamObj = teams.find(t => t.id === s.teamId);
           const matchTeam = teamObj && teamObj.name.toLowerCase().includes(q);
           return matchName || matchChest || matchTeam;
         });
@@ -1522,7 +1531,7 @@
         }
 
         matchingStudents.forEach(s => {
-          const teamObj = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+          const teamObj = teams.find(t => t.id === s.teamId);
           const teamName = teamObj ? teamObj.name : "";
           const chestLabel = s.chestNo ? `#${s.chestNo}` : "";
           suggestionsHtml += `
@@ -1567,7 +1576,8 @@
 
     function addResultRow(rank = "", selectedStudentId = "", selectedGrade = "") {
       const container = document.getElementById("results-rows-container");
-      const prog = ThanafusDB.db.programmes.find(p => p.id === resultPublishProgId);
+      const programmes = (ThanafusDB.db && ThanafusDB.db.programmes) || [];
+      const prog = programmes.find(p => p.id === resultPublishProgId);
       if (!prog) return;
 
       const rowDiv = document.createElement("div");
@@ -1608,7 +1618,8 @@
       const resultsArray = [];
       let hasDuplicateStudent = false;
       const selectedStudents = new Set();
-      const prog = ThanafusDB.db.programmes.find(p => p.id === resultPublishProgId);
+      const programmes = (ThanafusDB.db && ThanafusDB.db.programmes) || [];
+      const prog = programmes.find(p => p.id === resultPublishProgId);
       const isGeneral = prog && prog.category === 'General';
 
       for (let i = 0; i < rows.length; i++) {
@@ -1794,7 +1805,7 @@
       if (!tbody) return;
       tbody.innerHTML = "";
 
-      const gallery = Array.isArray(ThanafusDB.db.gallery) ? ThanafusDB.db.gallery : [];
+      const gallery = (ThanafusDB.db && Array.isArray(ThanafusDB.db.gallery)) ? ThanafusDB.db.gallery : [];
 
       if (gallery.length === 0) {
         tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:25px; color:var(--text-gray);">No media items uploaded yet.</td></tr>`;
@@ -1873,7 +1884,7 @@
       const container = document.getElementById("admin-notifs-list-container");
       container.innerHTML = "";
       
-      const notifs = ThanafusDB.db.notifications;
+      const notifs = (ThanafusDB.db && ThanafusDB.db.notifications) || [];
       if (notifs.length === 0) {
         container.innerHTML = "<p>No active broadcasts.</p>";
         return;
@@ -1907,7 +1918,9 @@
       const tbody = document.getElementById("admin-appeals-table");
       tbody.innerHTML = "";
 
-      ThanafusDB.db.appeals.forEach(a => {
+      const appeals = (ThanafusDB.db && ThanafusDB.db.appeals) || [];
+
+      appeals.forEach(a => {
         let statusBadge = "";
         let actionBtn = "";
         
@@ -1939,7 +1952,8 @@
 
     // Print a single appeal as a formatted receipt
     function printAppeal(id) {
-      const appeal = ThanafusDB.db.appeals.find(a => a.id === id);
+      const appeals = (ThanafusDB.db && ThanafusDB.db.appeals) || [];
+      const appeal = appeals.find(a => a.id === id);
       if (!appeal) return;
       const statusColor = appeal.status === 'Approved' ? '#059669' : appeal.status === 'Rejected' ? '#dc2626' : '#b45309';
       const amountWords = numberToWords(appeal.fee || 50);
@@ -2125,7 +2139,7 @@
 
     // Print all appeals in a clean summary sheet
     function printAllAppeals() {
-      const appeals = ThanafusDB.db.appeals;
+      const appeals = (ThanafusDB.db && ThanafusDB.db.appeals) || [];
       const pending = appeals.filter(a => a.status === 'Pending').length;
       const approved = appeals.filter(a => a.status === 'Approved').length;
       const rejected = appeals.filter(a => a.status === 'Rejected').length;
@@ -2188,7 +2202,8 @@
     }
 
     function openAppealResolveModal(id) {
-      const appeal = ThanafusDB.db.appeals.find(a => a.id === id);
+      const appeals = (ThanafusDB.db && ThanafusDB.db.appeals) || [];
+      const appeal = appeals.find(a => a.id === id);
       if (!appeal) return;
 
       document.getElementById("appeal-id").value = appeal.id;
