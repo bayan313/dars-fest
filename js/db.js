@@ -82,12 +82,28 @@ class Database {
       }
     } catch (e) { /* silent */ }
 
-    if (!this.db) {
+    if (!this.db || !this.db.teams) {
       this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
     }
+    this._ensureDbDefaults();
 
     this._loadPromise = this.load();
     this._loadPromise.then(() => this.calculateLeaderboard());
+  }
+
+  _ensureDbDefaults() {
+    if (!this.db || typeof this.db !== 'object') this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
+    this.db.teams = Array.isArray(this.db.teams) ? this.db.teams : [];
+    this.db.students = Array.isArray(this.db.students) ? this.db.students : [];
+    this.db.programmes = Array.isArray(this.db.programmes) ? this.db.programmes : [];
+    this.db.notifications = Array.isArray(this.db.notifications) ? this.db.notifications : [];
+    this.db.appeals = Array.isArray(this.db.appeals) ? this.db.appeals : [];
+    this.db.gallery = Array.isArray(this.db.gallery) ? this.db.gallery : [];
+    this.db.messages = Array.isArray(this.db.messages) ? this.db.messages : [];
+    this.db.penalties = Array.isArray(this.db.penalties) ? this.db.penalties : [];
+    this.db.contact = (this.db.contact && typeof this.db.contact === 'object') ? this.db.contact : JSON.parse(JSON.stringify(DEFAULT_DB.contact));
+    this.db.settings = (this.db.settings && typeof this.db.settings === 'object') ? this.db.settings : JSON.parse(JSON.stringify(DEFAULT_DB.settings));
+    if (!this.db.settings.adminPassword) this.db.settings.adminPassword = "admin@9526";
   }
 
   async load() {
@@ -97,6 +113,7 @@ class Database {
         const serverData = await response.json();
         if (serverData && typeof serverData === 'object') {
           this.db = serverData;
+          this._ensureDbDefaults();
           if (typeof this.db.revision !== 'number') this.db.revision = 0;
           this.loadedFromServer = true;
           this._persistLocal();
@@ -107,9 +124,7 @@ class Database {
     } catch (e) {
       console.warn("Database loaded from local state / fallback:", e.message || e);
       this.loadedFromServer = false;
-      if (!this.db || !this.db.teams) {
-        this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
-      }
+      this._ensureDbDefaults();
       if (typeof window !== 'undefined' && window.__onDbLoadFail) {
         window.__onDbLoadFail(e);
       }

@@ -244,7 +244,7 @@
             <p class="details">Captain: ${team.captain}</p>
             <div class="score">${team.totalScore} <span style="font-size:0.9rem;font-weight:normal;color:var(--text-gray);">Points</span></div>
             <p class="details" style="margin-top: 5px;">
-              A: ${team.grades.A || 0} | B: ${team.grades.B || 0} | C: ${team.grades.C || 0}
+              A: ${(team.grades && team.grades.A) || 0} | B: ${(team.grades && team.grades.B) || 0} | C: ${(team.grades && team.grades.C) || 0}
             </p>
           </div>
         `;
