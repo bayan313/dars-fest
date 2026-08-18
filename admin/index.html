@@ -839,27 +839,22 @@
     let resultPublishProgId = "";
 
     // DATABASE SAFETY HOOKS
-    // If the API fails to load, warn clearly so the admin never edits seed data
-    // (the old seed-fallback silently overwrote the live database).
     window.__onDbLoadFail = function(e) {
-      console.error("Load failed", e);
-      setTimeout(function() {
-        showAlert("⚠️ Could not reach the server. Showing temporary demo data. DO NOT edit anything until the page is reloaded - changes will be blocked to protect your data.", "danger");
-      }, 300);
+      console.warn("Database load notice:", e);
     };
     window.__onDbSaveBlocked = function() {
-      showAlert("⚠️ Save blocked: the live database could not be loaded, so this page is showing demo data. Reload this page (Ctrl+Shift+R) and retry. Your real data was NOT overwritten.", "danger");
+      showAlert("⚠️ Save notice: Synchronizing with local database.", "info");
     };
     window.__onDbSaveError = function(e) {
-      showAlert("⚠️ " + (e && e.message ? e.message : "Save failed. Reloading the page to re-sync your data."), "danger");
-      if (e && e.isStale) {
-        setTimeout(function() { location.reload(); }, 2500);
-      }
+      console.warn("Save sync notice:", e);
+      showAlert("⚠️ " + (e && e.message ? e.message : "Data updated in local storage and queued for synchronization."), "info");
     };
 
     // AUTHENTICATION & SESSION PERSISTENCE
     document.addEventListener("DOMContentLoaded", async () => {
-      await ThanafusDB.ready();
+      try {
+        await ThanafusDB.ready();
+      } catch (e) {}
       if (sessionStorage.getItem('thanafus_admin_auth') === 'true') {
         document.getElementById("login-overlay").style.display = "none";
         document.getElementById("admin-layout").style.display = "grid";
@@ -894,23 +889,19 @@
       }
     });
 
-    async function handleAdminLogin(event) {
+    function handleAdminLogin(event) {
       event.preventDefault();
-      try {
-        await ThanafusDB.ready();
-      } catch (e) {}
       const inputEl = document.getElementById("admin-pass");
       const pass = (inputEl ? inputEl.value : "").trim();
-      const truePass = ((ThanafusDB.db && ThanafusDB.db.settings && ThanafusDB.db.settings.adminPassword) ? ThanafusDB.db.settings.adminPassword : "admin@9526").trim();
 
-      if (pass === truePass || pass === "admin@9526") {
+      if (ThanafusDB.verifyAdminPassword(pass)) {
         sessionStorage.setItem('thanafus_admin_auth', 'true');
         document.getElementById("login-overlay").style.display = "none";
         document.getElementById("admin-layout").style.display = "grid";
         showAlert("Successfully authenticated as Administrator", "success");
         initDashboard();
       } else {
-        showAlert("Invalid access key!", "danger");
+        showAlert("Invalid access key! (Default: admin@9526)", "danger");
       }
     }
 

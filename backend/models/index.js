@@ -19,6 +19,7 @@ const teamSchema = new mongoose.Schema({
 const studentSchema = new mongoose.Schema({
   id: String,
   name: String,
+  chestNo: String,
   teamId: String,
   category: String,
   photo: String
