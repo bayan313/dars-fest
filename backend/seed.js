@@ -67,24 +67,27 @@ async function seed() {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Connected to MongoDB');
 
-    await Team.deleteMany({});
-    await Student.deleteMany({});
-    await Programme.deleteMany({});
-    await Notification.deleteMany({});
-    await Appeal.deleteMany({});
-    await Gallery.deleteMany({});
-    await Contact.deleteMany({});
-    await Settings.deleteMany({});
-    await Penalty.deleteMany({});
+    const siteKey = (process.env.SITE_KEY && String(process.env.SITE_KEY).trim()) ? String(process.env.SITE_KEY).trim() : 'default';
+    const tag = (docs) => (docs || []).map(d => ({ ...d, siteKey }));
 
-    await Team.insertMany(DEFAULT_DB.teams);
-    await Student.insertMany(DEFAULT_DB.students);
-    await Programme.insertMany(DEFAULT_DB.programmes);
-    await Notification.insertMany(DEFAULT_DB.notifications);
-    await Appeal.insertMany(DEFAULT_DB.appeals);
-    await Gallery.insertMany(DEFAULT_DB.gallery);
-    await Contact.create(DEFAULT_DB.contact);
-    await Settings.create(DEFAULT_DB.settings);
+    await Team.deleteMany({ siteKey });
+    await Student.deleteMany({ siteKey });
+    await Programme.deleteMany({ siteKey });
+    await Notification.deleteMany({ siteKey });
+    await Appeal.deleteMany({ siteKey });
+    await Gallery.deleteMany({ siteKey });
+    await Contact.deleteMany({ siteKey });
+    await Settings.deleteMany({ siteKey });
+    await Penalty.deleteMany({ siteKey });
+
+    await Team.insertMany(tag(DEFAULT_DB.teams));
+    await Student.insertMany(tag(DEFAULT_DB.students));
+    await Programme.insertMany(tag(DEFAULT_DB.programmes));
+    await Notification.insertMany(tag(DEFAULT_DB.notifications));
+    await Appeal.insertMany(tag(DEFAULT_DB.appeals));
+    await Gallery.insertMany(tag(DEFAULT_DB.gallery));
+    await Contact.create({ ...DEFAULT_DB.contact, siteKey });
+    await Settings.create({ ...DEFAULT_DB.settings, siteKey });
 
     console.log('Database seeded successfully');
     process.exit(0);

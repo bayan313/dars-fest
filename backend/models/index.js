@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const teamSchema = new mongoose.Schema({
+  siteKey: String,
   id: String,
   name: String,
   captain: String,
@@ -17,6 +18,7 @@ const teamSchema = new mongoose.Schema({
 });
 
 const studentSchema = new mongoose.Schema({
+  siteKey: String,
   id: String,
   name: String,
   chestNo: String,
@@ -33,6 +35,7 @@ const resultSchema = new mongoose.Schema({
 }, { _id: false });
 
 const programmeSchema = new mongoose.Schema({
+  siteKey: String,
   id: String,
   name: String,
   category: String,
@@ -46,6 +49,7 @@ const programmeSchema = new mongoose.Schema({
 });
 
 const notificationSchema = new mongoose.Schema({
+  siteKey: String,
   id: String,
   title: String,
   content: String,
@@ -54,6 +58,7 @@ const notificationSchema = new mongoose.Schema({
 });
 
 const appealSchema = new mongoose.Schema({
+  siteKey: String,
   id: String,
   studentName: String,
   team: String,
@@ -68,6 +73,7 @@ const appealSchema = new mongoose.Schema({
 });
 
 const gallerySchema = new mongoose.Schema({
+  siteKey: String,
   id: String,
   type: String,
   title: String,
@@ -78,6 +84,7 @@ const gallerySchema = new mongoose.Schema({
 });
 
 const contactSchema = new mongoose.Schema({
+  siteKey: String,
   coordinatorName: String,
   coordinatorPhone: String,
   techSupportName: String,
@@ -87,6 +94,7 @@ const contactSchema = new mongoose.Schema({
 });
 
 const messageSchema = new mongoose.Schema({
+  siteKey: String,
   id: String,
   name: String,
   email: String,
@@ -97,12 +105,14 @@ const messageSchema = new mongoose.Schema({
 });
 
 const settingsSchema = new mongoose.Schema({
+  siteKey: String,
   prospectusUrl: String,
   adminPassword: String,
   revision: { type: Number, default: 0 }
 });
 
 const penaltySchema = new mongoose.Schema({
+  siteKey: String,
   id: String,
   programmeId: String,
   teamId: String,

@@ -9,6 +9,24 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const ADMIN_PASSWORD_FIXED = process.env.ADMIN_PASSWORD || "admin@9526";
 
+// siteKey scopes every document to a single deployed site/org so multiple
+// accounts can share one MongoDB without seeing each other's data.
+function siteKeyOf(req) {
+  if (process.env.SITE_KEY && String(process.env.SITE_KEY).trim()) {
+    return String(process.env.SITE_KEY).trim();
+  }
+  return 'default';
+}
+
+// Match documents belonging to this site, including legacy documents created
+// before site scoping existed (they belong to the 'default' site).
+function siteFilter(siteKey) {
+  if (!siteKey || siteKey === 'default') {
+    return { $or: [{ siteKey: 'default' }, { siteKey: { $exists: false } }, { siteKey: null }] };
+  }
+  return { siteKey };
+}
+
 // MongoDB Connection Manager with fail-safe timeout
 const mongooseOptions = {
   serverSelectionTimeoutMS: 5000,
@@ -17,12 +35,12 @@ const mongooseOptions = {
 
 let isConnecting = false;
 
-const syncAdminPassword = async () => {
+const syncAdminPassword = async (siteKey) => {
   try {
     if (mongoose.connection.readyState !== 1) return;
-    const settings = await Settings.findOne();
+    const settings = await Settings.findOne(siteFilter(siteKey));
     if (!settings) {
-      await Settings.create({ adminPassword: ADMIN_PASSWORD_FIXED, revision: 0 });
+      await Settings.create({ siteKey: siteKey || 'default', adminPassword: ADMIN_PASSWORD_FIXED, revision: 0 });
       console.log('Created Settings with default admin password');
     } else if (!settings.adminPassword) {
       settings.adminPassword = ADMIN_PASSWORD_FIXED;
@@ -46,7 +64,7 @@ const connectDB = async () => {
     await mongoose.connect(process.env.MONGO_URI, mongooseOptions);
     isConnecting = false;
     console.log('Connected to MongoDB');
-    await syncAdminPassword();
+    await syncAdminPassword(siteKeyOf({ headers: {} }));
     return true;
   } catch (err) {
     isConnecting = false;
@@ -84,9 +102,10 @@ app.get('/slide', (req, res) => {
   res.sendFile(path.join(__dirname, '../slide.html'));
 });
 
-async function getAllData() {
+async function getAllData(siteKey) {
+  const filter = siteFilter(siteKey);
   const [teams, students, programmes, notifications, appeals, gallery, contact, messages, settings, penalties] = await Promise.all([
-    Team.find(), Student.find(), Programme.find(), Notification.find(), Appeal.find(), Gallery.find(), Contact.findOne(), Message.find(), Settings.findOne(), Penalty.find()
+    Team.find(filter), Student.find(filter), Programme.find(filter), Notification.find(filter), Appeal.find(filter), Gallery.find(filter), Contact.findOne(filter), Message.find(filter), Settings.findOne(filter), Penalty.find(filter)
   ]);
   return { 
     teams: teams || [], 
@@ -105,14 +124,16 @@ async function getAllData() {
 // Get all data
 app.get('/api/all', async (req, res) => {
   try {
+    const siteKey = siteKeyOf(req);
     if (mongoose.connection.readyState !== 1) {
       await connectDB();
     }
 
     if (mongoose.connection.readyState === 1) {
-      const data = await getAllData();
+      const data = await getAllData(siteKey);
       const settings = data.settings || {};
       data.revision = (settings && typeof settings.revision === 'number') ? settings.revision : 0;
+      data.siteKey = siteKey;
       return res.json(data);
     } else {
       // Return fallback response with offline status so UI never hangs
@@ -130,6 +151,7 @@ app.get('/api/all', async (req, res) => {
 // Update all data
 app.post('/api/all', async (req, res) => {
   try {
+    const siteKey = siteKeyOf(req);
     if (mongoose.connection.readyState !== 1) {
       await connectDB();
     }
@@ -148,7 +170,7 @@ app.post('/api/all', async (req, res) => {
       return res.status(409).json({ error: 'This browser has an outdated sync session. Refresh the page before saving again.' });
     }
     const collections = new Set(db.reset ? ['teams', 'students', 'programmes', 'notifications', 'appeals', 'gallery', 'messages', 'penalties', 'contact', 'settings'] : db.collections);
-    const currentSettingsBeforeSave = await Settings.findOne();
+    const currentSettingsBeforeSave = await Settings.findOne(siteFilter(siteKey));
     const clientRevision = typeof db.revision === 'number' ? db.revision : 0;
     if (!db.reset && currentSettingsBeforeSave && clientRevision !== (currentSettingsBeforeSave.revision || 0)) {
       return res.status(409).json({ error: 'Data was updated by another account. Refresh this page before saving to avoid overwriting those changes.' });
@@ -191,14 +213,20 @@ app.post('/api/all', async (req, res) => {
       });
 
       const clean = stripIds(dedupe(cleanDocs));
+      clean.forEach(d => { if (d) d.siteKey = siteKey; });
       const ids = clean.filter(d => d.id != null).map(d => String(d.id));
+      // Match both scoped docs and (for the legacy 'default' site) any docs
+      // still missing a siteKey so they are adopted and upgraded on save.
+      const writeFilter = (extra) => siteKey === 'default'
+        ? { $or: [{ siteKey: 'default' }, { siteKey: { $exists: false } }, { siteKey: null }, { siteKey: '' }], ...extra }
+        : { siteKey, ...extra };
       if (clean.length > 0) {
         await Model.bulkWrite(clean.map(d => ({
-          replaceOne: { filter: { id: String(d.id) }, replacement: d, upsert: true }
+          replaceOne: { filter: writeFilter({ id: String(d.id) }), replacement: d, upsert: true }
         })));
       }
       if (ids.length > 0) {
-        await Model.deleteMany({ id: { $nin: ids } });
+        await Model.deleteMany(writeFilter({ id: { $nin: ids } }));
       }
     };
 
@@ -212,32 +240,42 @@ app.post('/api/all', async (req, res) => {
     if (collections.has('penalties') && db.penalties)         { await syncCollection(Penalty, db.penalties); }
     
     if (collections.has('contact') && db.contact) { 
-      await Contact.deleteMany({}); 
-      await Contact.create(stripIds([db.contact])[0] || {}); 
+      const contact = stripIds([db.contact])[0] || {};
+      contact.siteKey = siteKey;
+      const contactFilter = siteKey === 'default'
+        ? { $or: [{ siteKey: 'default' }, { siteKey: { $exists: false } }, { siteKey: null }, { siteKey: '' }] }
+        : { siteKey };
+      await Contact.deleteMany(contactFilter); 
+      await Contact.create(contact); 
     }
     
     if (collections.has('settings') && db.settings) {
       const s = stripIds([db.settings])[0] || {};
-      const existing = await Settings.findOne();
+      s.siteKey = siteKey;
+      const existing = await Settings.findOne(siteFilter(siteKey));
       if (existing && existing.revision) s.revision = existing.revision;
-      await Settings.deleteMany({});
+      const settingsFilter = siteKey === 'default'
+        ? { $or: [{ siteKey: 'default' }, { siteKey: { $exists: false } }, { siteKey: null }, { siteKey: '' }] }
+        : { siteKey };
+      await Settings.deleteMany(settingsFilter);
       await Settings.create(s);
     }
 
-    // Bump revision on save
+    // Bump revision on save (per site)
     try {
-      let settings = await Settings.findOne();
+      let settings = await Settings.findOne(siteFilter(siteKey));
       if (!settings) {
-        settings = await Settings.create({ adminPassword: ADMIN_PASSWORD_FIXED, revision: 1 });
+        settings = await Settings.create({ siteKey, adminPassword: ADMIN_PASSWORD_FIXED, revision: 1 });
       } else {
         settings.revision = (settings.revision || 0) + 1;
         await settings.save();
       }
     } catch (e) { /* non-fatal */ }
 
-    const updatedData = await getAllData();
-    const currentSettings = await Settings.findOne();
+    const updatedData = await getAllData(siteKey);
+    const currentSettings = await Settings.findOne(siteFilter(siteKey));
     updatedData.revision = (currentSettings && typeof currentSettings.revision === 'number') ? currentSettings.revision : 0;
+    updatedData.siteKey = siteKey;
     res.json(updatedData);
   } catch (err) {
     console.error('POST /api/all error:', err.message);
@@ -248,9 +286,11 @@ app.post('/api/all', async (req, res) => {
 // Specific Collection Update Routes
 app.post('/api/teams', async (req, res) => {
   try {
+    const siteKey = siteKeyOf(req);
     await connectDB();
-    await Team.deleteMany({});
-    await Team.insertMany(req.body);
+    const docs = (req.body || []).map(d => d && typeof d === 'object' ? { ...d, siteKey } : d);
+    await Team.deleteMany({ siteKey });
+    await Team.insertMany(docs);
     res.json({ message: 'Teams updated' });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -259,9 +299,11 @@ app.post('/api/teams', async (req, res) => {
 
 app.post('/api/students', async (req, res) => {
   try {
+    const siteKey = siteKeyOf(req);
     await connectDB();
-    await Student.deleteMany({});
-    await Student.insertMany(req.body);
+    const docs = (req.body || []).map(d => d && typeof d === 'object' ? { ...d, siteKey } : d);
+    await Student.deleteMany({ siteKey });
+    await Student.insertMany(docs);
     res.json({ message: 'Students updated' });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -270,9 +312,11 @@ app.post('/api/students', async (req, res) => {
 
 app.post('/api/programmes', async (req, res) => {
   try {
+    const siteKey = siteKeyOf(req);
     await connectDB();
-    await Programme.deleteMany({});
-    await Programme.insertMany(req.body);
+    const docs = (req.body || []).map(d => d && typeof d === 'object' ? { ...d, siteKey } : d);
+    await Programme.deleteMany({ siteKey });
+    await Programme.insertMany(docs);
     res.json({ message: 'Programmes updated' });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -281,9 +325,11 @@ app.post('/api/programmes', async (req, res) => {
 
 app.post('/api/notifications', async (req, res) => {
   try {
+    const siteKey = siteKeyOf(req);
     await connectDB();
-    await Notification.deleteMany({});
-    await Notification.insertMany(req.body);
+    const docs = (req.body || []).map(d => d && typeof d === 'object' ? { ...d, siteKey } : d);
+    await Notification.deleteMany({ siteKey });
+    await Notification.insertMany(docs);
     res.json({ message: 'Notifications updated' });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -292,9 +338,11 @@ app.post('/api/notifications', async (req, res) => {
 
 app.post('/api/appeals', async (req, res) => {
   try {
+    const siteKey = siteKeyOf(req);
     await connectDB();
-    await Appeal.deleteMany({});
-    await Appeal.insertMany(req.body);
+    const docs = (req.body || []).map(d => d && typeof d === 'object' ? { ...d, siteKey } : d);
+    await Appeal.deleteMany({ siteKey });
+    await Appeal.insertMany(docs);
     res.json({ message: 'Appeals updated' });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -303,9 +351,11 @@ app.post('/api/appeals', async (req, res) => {
 
 app.post('/api/gallery', async (req, res) => {
   try {
+    const siteKey = siteKeyOf(req);
     await connectDB();
-    await Gallery.deleteMany({});
-    await Gallery.insertMany(req.body);
+    const docs = (req.body || []).map(d => d && typeof d === 'object' ? { ...d, siteKey } : d);
+    await Gallery.deleteMany({ siteKey });
+    await Gallery.insertMany(docs);
     res.json({ message: 'Gallery updated' });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -314,9 +364,11 @@ app.post('/api/gallery', async (req, res) => {
 
 app.post('/api/contact', async (req, res) => {
   try {
+    const siteKey = siteKeyOf(req);
     await connectDB();
-    await Contact.deleteMany({});
-    await Contact.create(req.body);
+    const body = { ...(req.body || {}), siteKey };
+    await Contact.deleteMany({ siteKey });
+    await Contact.create(body);
     res.json({ message: 'Contact updated' });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -325,9 +377,11 @@ app.post('/api/contact', async (req, res) => {
 
 app.post('/api/settings', async (req, res) => {
   try {
+    const siteKey = siteKeyOf(req);
     await connectDB();
-    await Settings.deleteMany({});
-    await Settings.create(req.body);
+    const body = { ...(req.body || {}), siteKey };
+    await Settings.deleteMany({ siteKey });
+    await Settings.create(body);
     res.json({ message: 'Settings updated' });
   } catch (e) {
     res.status(500).json({ error: e.message });

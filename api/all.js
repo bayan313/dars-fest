@@ -1,4 +1,4 @@
-const { connectDB, syncAdminPassword, getAllData, Team, Student, Programme, Notification, Appeal, Gallery, Contact, Message, Settings, Penalty } = require('./lib/db');
+const { connectDB, syncAdminPassword, getAllData, siteKeyOf, siteFilter, Team, Student, Programme, Notification, Appeal, Gallery, Contact, Message, Settings, Penalty } = require('./lib/db');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,14 +15,17 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    await syncAdminPassword();
+    await syncAdminPassword(siteKeyOf(req));
   } catch (e) {}
+
+  const siteKey = siteKeyOf(req);
 
   if (req.method === 'GET') {
     try {
-      const data = await getAllData();
+      const data = await getAllData(siteKey);
       const settings = data.settings || {};
       data.revision = (settings && typeof settings.revision === 'number') ? settings.revision : 0;
+      data.siteKey = siteKey;
       return res.status(200).json(data);
     } catch (err) {
       console.error('GET /api/all error:', err.message);
@@ -40,7 +43,7 @@ module.exports = async function handler(req, res) {
         return res.status(409).json({ error: 'This browser has an outdated sync session. Refresh the page before saving again.' });
       }
       const collections = new Set(db.reset ? ['teams', 'students', 'programmes', 'notifications', 'appeals', 'gallery', 'messages', 'penalties', 'contact', 'settings'] : db.collections);
-      const currentSettings = await Settings.findOne();
+      const currentSettings = await Settings.findOne(siteFilter(siteKey));
       const clientRevision = typeof db.revision === 'number' ? db.revision : 0;
       if (!db.reset && currentSettings && clientRevision !== (currentSettings.revision || 0)) {
         return res.status(409).json({ error: 'Data was updated by another account. Refresh this page before saving to avoid overwriting those changes.' });
@@ -80,14 +83,20 @@ module.exports = async function handler(req, res) {
         });
 
         const clean = stripIds(dedupe(cleanDocs));
+        clean.forEach(d => { if (d) d.siteKey = siteKey; });
         const ids = clean.filter(d => d.id != null).map(d => String(d.id));
+        // Match both scoped docs and (for the legacy 'default' site) any docs
+        // still missing a siteKey so they are adopted and upgraded on save.
+        const writeFilter = (extra) => siteKey === 'default'
+          ? { $or: [{ siteKey: 'default' }, { siteKey: { $exists: false } }, { siteKey: null }, { siteKey: '' }], ...extra }
+          : { siteKey, ...extra };
         if (clean.length > 0) {
           await Model.bulkWrite(clean.map(d => ({
-            replaceOne: { filter: { id: String(d.id) }, replacement: d, upsert: true }
+            replaceOne: { filter: writeFilter({ id: String(d.id) }), replacement: d, upsert: true }
           })));
         }
         if (ids.length > 0) {
-          await Model.deleteMany({ id: { $nin: ids } });
+          await Model.deleteMany(writeFilter({ id: { $nin: ids } }));
         }
       };
 
@@ -101,30 +110,40 @@ module.exports = async function handler(req, res) {
       if (collections.has('penalties') && db.penalties)         { await syncCollection(Penalty, db.penalties); }
       
       if (collections.has('contact') && db.contact) { 
-        await Contact.deleteMany({}); 
-        await Contact.create(stripIds([db.contact])[0] || {}); 
+        const contact = stripIds([db.contact])[0] || {};
+        contact.siteKey = siteKey;
+        const contactFilter = siteKey === 'default'
+          ? { $or: [{ siteKey: 'default' }, { siteKey: { $exists: false } }, { siteKey: null }, { siteKey: '' }] }
+          : { siteKey };
+        await Contact.deleteMany(contactFilter); 
+        await Contact.create(contact); 
       }
       
       if (collections.has('settings') && db.settings) { 
         const s = stripIds([db.settings])[0] || {};
-        const existing = await Settings.findOne();
+        s.siteKey = siteKey;
+        const existing = await Settings.findOne(siteFilter(siteKey));
         if (existing && existing.revision) s.revision = existing.revision;
-        await Settings.deleteMany({});     
+        const settingsFilter = siteKey === 'default'
+          ? { $or: [{ siteKey: 'default' }, { siteKey: { $exists: false } }, { siteKey: null }, { siteKey: '' }] }
+          : { siteKey };
+        await Settings.deleteMany(settingsFilter);     
         await Settings.create(s); 
       }
 
-      // Bump server revision
+      // Bump server revision for this site only
       try {
-        const settings = await Settings.findOne();
+        const settings = await Settings.findOne(siteFilter(siteKey));
         if (settings) {
           settings.revision = (settings.revision || 0) + 1;
           await settings.save();
         }
       } catch (e) {}
 
-      const updated = await getAllData();
-      const settings = await Settings.findOne();
+      const updated = await getAllData(siteKey);
+      const settings = await Settings.findOne(siteFilter(siteKey));
       updated.revision = (settings && typeof settings.revision === 'number') ? settings.revision : 0;
+      updated.siteKey = siteKey;
       return res.status(200).json(updated);
     } catch (err) {
       console.error('POST /api/all error:', err.message);
