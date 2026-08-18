@@ -663,7 +663,8 @@ class Database {
     const id = "team-" + (Date.now());
     this.db.teams.push({ id, name, captain, viceCaptain: viceCaptain || "", members, totalScore: 0, rank: this.db.teams.length + 1, grades: { A: 0, B: 0, C: 0 }, wins: [] });
     this.syncRosterToStudents(id, [captain, viceCaptain, ...members]);
-    this.save();
+    this.save(false, 'teams');
+    this.save(false, 'students');
     this.calculateLeaderboard();
     return id;
   }
@@ -676,7 +677,8 @@ class Database {
       team.viceCaptain = viceCaptain || "";
       team.members = members;
       this.syncRosterToStudents(team.id, [captain, viceCaptain, ...members]);
-      this.save();
+      this.save(false, 'teams');
+      this.save(false, 'students');
       this.calculateLeaderboard();
     }
   }
@@ -687,7 +689,8 @@ class Database {
     this.db.students.forEach(s => {
       if (s.teamId === id) s.teamId = "";
     });
-    this.save();
+    this.save(false, 'teams');
+    this.save(false, 'students');
     this.calculateLeaderboard();
   }
 
@@ -695,7 +698,7 @@ class Database {
   addStudent(name, teamId, category, photo = "") {
     const id = "stud-" + (Date.now());
     this.db.students.push({ id, name, teamId, category, photo });
-    this.save();
+    this.save(false, 'students');
     this.calculateLeaderboard();
     return id;
   }
@@ -707,7 +710,7 @@ class Database {
       student.teamId = teamId;
       student.category = category;
       if (photo) student.photo = photo;
-      this.save();
+      this.save(false, 'students');
       this.calculateLeaderboard();
     }
   }
@@ -718,7 +721,8 @@ class Database {
     this.db.programmes.forEach(prog => {
       prog.results = prog.results.filter(res => res.studentId !== id);
     });
-    this.save();
+    this.save(false, 'students');
+    this.save(false, 'programmes');
     this.calculateLeaderboard();
   }
 
@@ -726,7 +730,7 @@ class Database {
   addProgramme(name, category, type, teamId) {
     const id = "prog-" + (Date.now());
     this.db.programmes.push({ id, name, category, type: type || "individual", teamId: teamId || "", resultsPublished: false, results: [] });
-    this.save();
+    this.save(false, 'programmes');
     return id;
   }
 
@@ -737,14 +741,14 @@ class Database {
       prog.category = category;
       prog.type = (prog.category === 'General') ? 'group' : (type || prog.type || "individual");
       prog.teamId = teamId || "";
-      this.save();
+      this.save(false, 'programmes');
       this.calculateLeaderboard();
     }
   }
 
   deleteProgramme(id) {
     this.db.programmes = this.db.programmes.filter(p => p.id !== id);
-    this.save();
+    this.save(false, 'programmes');
     this.calculateLeaderboard();
   }
 
@@ -823,7 +827,7 @@ class Database {
       response: "",
       date: new Date().toISOString()
     });
-    this.save();
+    this.save(false, 'appeals');
     return id;
   }
 
@@ -832,7 +836,7 @@ class Database {
     if (appeal) {
       appeal.status = status;
       appeal.response = responseText;
-      this.save();
+      this.save(false, 'appeals');
 
       // Notify public channel
       const type = status === 'Approved' ? 'success' : 'danger';
@@ -921,12 +925,12 @@ class Database {
   // Prospectus & Contacts
   updateProspectus(base64Data) {
     this.db.settings.prospectusUrl = base64Data;
-    this.save();
+    this.save(false, 'settings');
   }
 
   updateContact(details) {
     this.db.contact = { ...this.db.contact, ...details };
-    this.save();
+    this.save(false, 'contact');
   }
 
   // Contact Messages from public users
@@ -942,7 +946,7 @@ class Database {
       read: false,
       date: new Date().toISOString()
     });
-    this.save();
+    this.save(false, 'messages');
     return id;
   }
 
@@ -951,19 +955,19 @@ class Database {
     const msg = this.db.messages.find(m => m.id === id);
     if (msg) {
       msg.read = readStatus;
-      this.save();
+      this.save(false, 'messages');
     }
   }
 
   deleteMessage(id) {
     if (!Array.isArray(this.db.messages)) return;
     this.db.messages = this.db.messages.filter(m => m.id !== id);
-    this.save();
+    this.save(false, 'messages');
   }
 
   updateSettings(settings) {
     this.db.settings = { ...this.db.settings, ...settings };
-    this.save();
+    this.save(false, 'settings');
   }
 }
 
