@@ -1401,16 +1401,19 @@
 
     // RESULT PUBLISHER DRAWER
     function openResultPublishModal(progId) {
-      resultPublishProgId = progId;
+      resultPublishProgId = String(progId);
       const programmes = (ThanafusDB.db && ThanafusDB.db.programmes) || [];
-      const prog = programmes.find(p => p.id === progId);
-      if (!prog) return;
+      const prog = programmes.find(p => String(p.id) === String(progId));
+      if (!prog) {
+        showAlert("Programme not found.", "danger");
+        return;
+      }
 
       const typeTxt = (prog.type === 'group' || prog.category === 'General') ? 'ഗ്രൂപ്പ് (Group)' : 'വ്യക്തിത്വം (Individual)';
       document.getElementById("publish-prog-title").innerText = `${prog.name} (${prog.category} • ${typeTxt})`;
       clearEvalStudentSearch();
       
-      // Pre-build options HTML once to avoid nested loop performance lags when adding rows
+      // Build options HTML with full robustness
       window.evalOptionsHTML = "";
       const teams = (ThanafusDB.db && ThanafusDB.db.teams) || [];
       const students = (ThanafusDB.db && ThanafusDB.db.students) || [];
@@ -1419,14 +1422,33 @@
         window.evalOptionsHTML = `<option value="">-- Choose Team --</option>` + 
           teams.map(t => `<option value="${t.id}">${t.name} (Team)</option>`).join("");
       } else {
-        const categoryStudents = students.filter(s => s.category === prog.category);
-        window.evalOptionsHTML = `<option value="">-- Choose Participant --</option>` + 
-          categoryStudents.map(s => {
-            const teamObj = teams.find(t => t.id === s.teamId);
-            const teamLabel = teamObj ? `(${teamObj.name})` : '';
-            const chestLabel = s.chestNo ? `[#${s.chestNo}] ` : '';
-            return `<option value="${s.id}">${chestLabel}${s.name} ${teamLabel}</option>`;
-          }).join("");
+        const catNorm = (prog.category || "").trim().toLowerCase();
+        const categoryStudents = students.filter(s => (s.category || "").trim().toLowerCase() === catNorm);
+        const otherStudents = students.filter(s => (s.category || "").trim().toLowerCase() !== catNorm);
+
+        let options = `<option value="">-- Choose Participant --</option>`;
+        if (categoryStudents.length > 0) {
+          options += `<optgroup label="${prog.category} Students (${categoryStudents.length})">` +
+            categoryStudents.map(s => {
+              const teamObj = teams.find(t => t.id === s.teamId);
+              const teamLabel = teamObj ? `(${teamObj.name})` : '';
+              const chestLabel = s.chestNo ? `[#${s.chestNo}] ` : '';
+              return `<option value="${s.id}">${chestLabel}${s.name} ${teamLabel}</option>`;
+            }).join("") + `</optgroup>`;
+        }
+        if (otherStudents.length > 0) {
+          options += `<optgroup label="All Other Registered Students (${otherStudents.length})">` +
+            otherStudents.map(s => {
+              const teamObj = teams.find(t => t.id === s.teamId);
+              const teamLabel = teamObj ? `(${teamObj.name})` : '';
+              const chestLabel = s.chestNo ? `[#${s.chestNo}] ` : '';
+              return `<option value="${s.id}">${chestLabel}${s.name} - ${s.category} ${teamLabel}</option>`;
+            }).join("") + `</optgroup>`;
+        }
+        if (students.length === 0) {
+          options = `<option value="">⚠️ No registered students in database - please register students first</option>`;
+        }
+        window.evalOptionsHTML = options;
       }
 
       const container = document.getElementById("results-rows-container");
@@ -1445,11 +1467,16 @@
         }
       }
 
-      document.getElementById("result-publish-modal").style.display = "flex";
+      const modalEl = document.getElementById("result-publish-modal");
+      if (modalEl) {
+        modalEl.style.display = "flex";
+        modalEl.style.zIndex = "5000";
+      }
     }
 
     function closeResultPublishModal() {
-      document.getElementById("result-publish-modal").style.display = "none";
+      const modalEl = document.getElementById("result-publish-modal");
+      if (modalEl) modalEl.style.display = "none";
       resultPublishProgId = "";
       clearEvalStudentSearch();
     }
@@ -1476,7 +1503,7 @@
       }
 
       const programmes = (ThanafusDB.db && ThanafusDB.db.programmes) || [];
-      const prog = programmes.find(p => p.id === resultPublishProgId);
+      const prog = programmes.find(p => String(p.id) === String(resultPublishProgId));
       if (!prog) return;
 
       let suggestionsHtml = "";
@@ -1485,7 +1512,7 @@
 
       if (prog.category === 'General') {
         const matchingTeams = teams.filter(t => 
-          t.name.toLowerCase().includes(q) || (t.captain && t.captain.toLowerCase().includes(q))
+          (t.name || "").toLowerCase().includes(q) || (t.captain && t.captain.toLowerCase().includes(q))
         );
 
         if (matchingTeams.length === 0) {
@@ -1508,9 +1535,7 @@
           `;
         });
       } else {
-        // Search students matching category
         const matchingStudents = students.filter(s => {
-          if (s.category !== prog.category) return false;
           const matchName = (s.name || "").toLowerCase().includes(q);
           const matchChest = (s.chestNo || "").toLowerCase().includes(q);
           const teamObj = teams.find(t => t.id === s.teamId);
@@ -1519,7 +1544,7 @@
         });
 
         if (matchingStudents.length === 0) {
-          suggBox.innerHTML = `<div style="padding:10px 14px; color:#64748b; font-size:0.85rem;">No matching students found in ${prog.category}.</div>`;
+          suggBox.innerHTML = `<div style="padding:10px 14px; color:#64748b; font-size:0.85rem;">No matching students found for "${query}".</div>`;
           suggBox.style.display = "block";
           return;
         }
@@ -1534,6 +1559,7 @@
                  onclick="addStudentFromSuggestion('${s.id}')">
               <div>
                 <strong style="color:var(--primary-emerald-dark);">${chestLabel} ${s.name}</strong>
+                <span style="font-size:0.75rem; color:#64748b; margin-left:6px;">(${s.category || 'General'})</span>
                 ${teamName ? `<span style="background:#e0e7ff; color:#3730a3; font-size:0.75rem; padding:2px 6px; border-radius:10px; margin-left:8px;">${teamName}</span>` : ''}
               </div>
               <button type="button" class="btn btn-gold btn-sm" style="padding:2px 8px; font-size:0.75rem;">+ Select</button>
@@ -1547,7 +1573,6 @@
     }
 
     function addStudentFromSuggestion(participantId) {
-      // First check if there is an empty existing row to fill
       const rows = document.querySelectorAll("#results-rows-container .result-row");
       let filledEmpty = false;
 
@@ -1561,7 +1586,6 @@
       }
 
       if (!filledEmpty) {
-        // Add a new row with this participant
         addResultRow("", participantId, "");
       }
 
@@ -1571,7 +1595,7 @@
     function addResultRow(rank = "", selectedStudentId = "", selectedGrade = "") {
       const container = document.getElementById("results-rows-container");
       const programmes = (ThanafusDB.db && ThanafusDB.db.programmes) || [];
-      const prog = programmes.find(p => p.id === resultPublishProgId);
+      const prog = programmes.find(p => String(p.id) === String(resultPublishProgId));
       if (!prog) return;
 
       const rowDiv = document.createElement("div");
@@ -1602,7 +1626,6 @@
           <button type="button" class="btn btn-outline btn-sm" onclick="this.closest('.result-row').remove()" style="color:#ef4444; border-color:#fca5a5; padding:6px 8px;" title="Remove this row"><i class="fa-solid fa-trash"></i></button>
         </div>
       `;
-      // Set value programmatically for maximum speed and simplicity
       rowDiv.querySelector(".res-student").value = selectedStudentId || "";
       container.appendChild(rowDiv);
     }
@@ -1613,13 +1636,14 @@
       let hasDuplicateStudent = false;
       const selectedStudents = new Set();
       const programmes = (ThanafusDB.db && ThanafusDB.db.programmes) || [];
-      const prog = programmes.find(p => p.id === resultPublishProgId);
+      const prog = programmes.find(p => String(p.id) === String(resultPublishProgId));
       const isGeneral = prog && prog.category === 'General';
 
       for (let i = 0; i < rows.length; i++) {
-        const studentId = rows[i].querySelector(".res-student").value;
-        const rank = rows[i].querySelector(".res-rank").value;
-        const grade = rows[i].querySelector(".res-grade").value;
+        const studentSelect = rows[i].querySelector(".res-student");
+        const studentId = studentSelect ? studentSelect.value : "";
+        const rank = rows[i].querySelector(".res-rank") ? rows[i].querySelector(".res-rank").value : "";
+        const grade = rows[i].querySelector(".res-grade") ? rows[i].querySelector(".res-grade").value : "";
 
         if (!studentId) continue; // Skip empty rows
 
@@ -1630,7 +1654,6 @@
         selectedStudents.add(studentId);
 
         if (isGeneral) {
-          // For General programmes, studentId is actually teamId
           resultsArray.push({
             studentId: null,
             teamId: studentId,
@@ -1648,12 +1671,12 @@
       }
 
       if (hasDuplicateStudent) {
-        showAlert("Duplicate student found! A student can only have one entry per programme.", "warning");
+        showAlert("Duplicate participant selected! A participant can only have one result entry per programme.", "warning");
         return;
       }
 
       if (resultsArray.length === 0) {
-        showAlert("Add at least one participant result to publish.", "warning");
+        showAlert("⚠️ Please choose a participant/student in at least one row to publish results.", "warning");
         return;
       }
 
@@ -1661,6 +1684,7 @@
       showAlert("Results successfully evaluated and published! Live Leaderboard updated.", "success");
       closeResultPublishModal();
       renderProgsTable();
+      initDashboard();
     }
 
     function unpublishResults(progId) {
@@ -1668,6 +1692,7 @@
         ThanafusDB.unpublishResults(progId);
         showAlert("Results unpublished.", "info");
         renderProgsTable();
+        initDashboard();
       }
     }
 
