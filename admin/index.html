@@ -602,9 +602,15 @@
       
       <form id="studentForm" onsubmit="handleStudentSave(event)">
         <input type="hidden" id="stud-id">
-        <div class="form-group">
-          <label for="stud-name">Student Full Name</label>
-          <input type="text" class="form-control" id="stud-name" placeholder="Name" required>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div class="form-group">
+            <label for="stud-name">Student Full Name</label>
+            <input type="text" class="form-control" id="stud-name" placeholder="Name" required>
+          </div>
+          <div class="form-group">
+            <label for="stud-chest">Chest Number</label>
+            <input type="text" class="form-control" id="stud-chest" placeholder="e.g. 101, 102">
+          </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -993,11 +999,13 @@
       const teams = (ThanafusDB.db && ThanafusDB.db.teams) || [];
 
       const filtered = students.filter(s => {
+        if (!s) return false;
         if (!q) return true;
-        const teamObj = teams.find(t => t.id === s.teamId);
+        const teamObj = teams.find(t => t && t.id === s.teamId);
         const teamName = teamObj ? teamObj.name : "";
         return (s.name || "").toLowerCase().includes(q) ||
                (s.category || "").toLowerCase().includes(q) ||
+               (s.chestNo || "").toLowerCase().includes(q) ||
                teamName.toLowerCase().includes(q);
       });
 
@@ -1008,23 +1016,26 @@
         return;
       }
 
+      let rowsHtml = "";
       filtered.forEach(s => {
-        const teamObj = teams.find(t => t.id === s.teamId);
+        const teamObj = teams.find(t => t && t.id === s.teamId);
         const photoLabel = s.photo ? '<span style="color:#10b981;"><i class="fa-solid fa-check"></i> Uploaded</span>' : '<span style="color:var(--text-gray);">None</span>';
+        const chestBadge = s.chestNo ? `<span style="background:#e0e7ff; color:#3730a3; font-size:0.75rem; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:700;">#${s.chestNo}</span>` : '';
         
-        tbody.innerHTML += `
+        rowsHtml += `
           <tr>
-            <td data-label="Student Name"><strong>${s.name}</strong></td>
-            <td data-label="Category">${s.category}</td>
+            <td data-label="Student Name"><strong>${s.name || ''}</strong> ${chestBadge}</td>
+            <td data-label="Category">${s.category || ''}</td>
             <td data-label="Team">${teamObj ? teamObj.name : '<span style="color:red;">No Team</span>'}</td>
             <td data-label="Photo Status">${photoLabel}</td>
             <td data-label="Actions" class="action-cell">
-              <button class="btn btn-primary btn-sm" onclick="openStudentModal('${s.id}')" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-pen"></i></button>
-              <button class="btn btn-outline btn-sm" onclick="deleteStudent('${s.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
+              <button type="button" class="btn btn-primary btn-sm" onclick="window.openStudentModal('${s.id}')" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-pen"></i></button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="window.deleteStudent('${s.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         `;
       });
+      tbody.innerHTML = rowsHtml;
     }
 
     function openStudentModal(id = "") {
@@ -1037,7 +1048,7 @@
       teamSelect.innerHTML = '<option value="">Choose Team</option>';
       const teams = (ThanafusDB.db && ThanafusDB.db.teams) || [];
       teams.forEach(t => {
-        teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+        if (t) teamSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
       });
 
       isEditingStudentPhoto = "";
@@ -1046,17 +1057,19 @@
       if (id) {
         title.innerText = "Edit Student Profile";
         const students = (ThanafusDB.db && ThanafusDB.db.students) || [];
-        const stud = students.find(s => s.id === id);
+        const stud = students.find(s => s && s.id === id);
         if (stud) {
-          document.getElementById("stud-id").value = stud.id;
-          document.getElementById("stud-name").value = stud.name;
-          document.getElementById("stud-cat").value = stud.category;
-          document.getElementById("stud-team").value = stud.teamId;
+          document.getElementById("stud-id").value = stud.id || "";
+          document.getElementById("stud-name").value = stud.name || "";
+          document.getElementById("stud-chest").value = stud.chestNo || "";
+          document.getElementById("stud-cat").value = stud.category || "Sub Junior";
+          document.getElementById("stud-team").value = stud.teamId || "";
         }
       } else {
         title.innerText = "Register Student";
         form.reset();
         document.getElementById("stud-id").value = "";
+        document.getElementById("stud-chest").value = "";
       }
 
       modal.style.display = "flex";
@@ -1071,16 +1084,17 @@
       event.preventDefault();
       const id = document.getElementById("stud-id").value;
       const name = document.getElementById("stud-name").value;
+      const chestNo = document.getElementById("stud-chest").value;
       const category = document.getElementById("stud-cat").value;
       const teamId = document.getElementById("stud-team").value;
       const fileInput = document.getElementById("stud-photo-file");
 
       const save = (photoBase64 = "") => {
         if (id) {
-          ThanafusDB.editStudent(id, name, teamId, category, photoBase64);
+          ThanafusDB.editStudent(id, name, teamId, category, photoBase64, chestNo);
           showAlert("Student profile updated successfully.", "success");
         } else {
-          ThanafusDB.addStudent(name, teamId, category, photoBase64);
+          ThanafusDB.addStudent(name, teamId, category, photoBase64, chestNo);
           showAlert("New student registered successfully.", "success");
         }
         closeStudentModal();
@@ -1116,23 +1130,30 @@
       const tbody = document.getElementById("admin-teams-table");
       tbody.innerHTML = "";
 
-      const teams = (ThanafusDB.db && ThanafusDB.db.teams) || [];
+      const teams = (ThanafusDB.db && Array.isArray(ThanafusDB.db.teams)) ? ThanafusDB.db.teams.filter(Boolean) : [];
 
+      if (teams.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-gray);">No teams registered yet.</td></tr>';
+        return;
+      }
+
+      let rowsHtml = "";
       teams.forEach(team => {
-        tbody.innerHTML += `
+        rowsHtml += `
           <tr>
-            <td data-label="Team Name"><strong>${team.name}</strong></td>
-            <td data-label="Captain">${team.captain}${team.viceCaptain ? '<br/><small style="color:var(--text-gray);">Asst: ' + team.viceCaptain + '</small>' : ''}</td>
-            <td data-label="Members">${team.members ? team.members.length : 0} members</td>
-            <td data-label="Score"><strong>${team.totalScore} pts</strong></td>
-            <td data-label="Rank">Rank #${team.rank}</td>
+            <td data-label="Team Name"><strong>${team.name || ''}</strong></td>
+            <td data-label="Captain">${team.captain || '—'}${team.viceCaptain ? '<br/><small style="color:var(--text-gray);">Asst: ' + team.viceCaptain + '</small>' : ''}</td>
+            <td data-label="Members">${Array.isArray(team.members) ? team.members.length : 0} members</td>
+            <td data-label="Score"><strong>${team.totalScore || 0} pts</strong></td>
+            <td data-label="Rank">Rank #${team.rank || '—'}</td>
             <td data-label="Actions" class="action-cell">
-              <button class="btn btn-primary btn-sm" onclick="openTeamModal('${team.id}')" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-pen"></i></button>
-              <button class="btn btn-outline btn-sm" onclick="deleteTeam('${team.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
+              <button type="button" class="btn btn-primary btn-sm" onclick="window.openTeamModal('${team.id}')" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-pen"></i></button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="window.deleteTeam('${team.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         `;
       });
+      tbody.innerHTML = rowsHtml;
     }
 
     function openTeamModal(id = "") {
@@ -1143,13 +1164,13 @@
       if (id) {
         title.innerText = "Edit Team Profile";
         const teams = (ThanafusDB.db && ThanafusDB.db.teams) || [];
-        const team = teams.find(t => t.id === id);
+        const team = teams.find(t => t && t.id === id);
         if (team) {
-          document.getElementById("team-id").value = team.id;
-          document.getElementById("team-name").value = team.name;
-          document.getElementById("team-captain").value = team.captain;
+          document.getElementById("team-id").value = team.id || "";
+          document.getElementById("team-name").value = team.name || "";
+          document.getElementById("team-captain").value = team.captain || "";
           document.getElementById("team-vice-captain").value = team.viceCaptain || "";
-          document.getElementById("team-members").value = team.members.join(", ");
+          document.getElementById("team-members").value = Array.isArray(team.members) ? team.members.join(", ") : "";
         }
       } else {
         title.innerText = "Register Team";
@@ -2439,13 +2460,17 @@
 
     // 9. SETTINGS & CONTACTS
     function loadSettingsForm() {
-      const c = ThanafusDB.db.contact;
-      document.getElementById("c-coord").value = c.coordinatorName;
-      document.getElementById("c-coord-phone").value = c.coordinatorPhone;
-      document.getElementById("c-tech").value = c.techSupportName;
-      document.getElementById("c-tech-phone").value = c.techSupportPhone;
-      document.getElementById("c-email").value = c.email;
-      document.getElementById("c-address").value = c.address;
+      const c = (ThanafusDB.db && ThanafusDB.db.contact) || {};
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val || "";
+      };
+      setVal("c-coord", c.coordinatorName);
+      setVal("c-coord-phone", c.coordinatorPhone);
+      setVal("c-tech", c.techSupportName);
+      setVal("c-tech-phone", c.techSupportPhone);
+      setVal("c-email", c.email);
+      setVal("c-address", c.address);
     }
 
     function handleContactUpdate(event) {
@@ -2608,6 +2633,44 @@
     window.handleLogout = handleLogout;
     window.switchAdminTab = switchAdminTab;
     window.renderProgsTable = renderProgsTable;
+    window.renderStudentsTable = renderStudentsTable;
+    window.openStudentModal = openStudentModal;
+    window.closeStudentModal = closeStudentModal;
+    window.handleStudentSave = handleStudentSave;
+    window.deleteStudent = deleteStudent;
+    window.renderTeamsTable = renderTeamsTable;
+    window.openTeamModal = openTeamModal;
+    window.closeTeamModal = closeTeamModal;
+    window.handleTeamSave = handleTeamSave;
+    window.deleteTeam = deleteTeam;
+    window.toggleMediaFileInput = toggleMediaFileInput;
+    window.handleMediaUpload = handleMediaUpload;
+    window.renderMediaTable = renderMediaTable;
+    window.deleteMedia = deleteMedia;
+    window.renderNotifsTable = renderNotifsTable;
+    window.handleNotificationCreate = handleNotificationCreate;
+    window.deleteNotif = deleteNotif;
+    window.renderAppealsTable = renderAppealsTable;
+    window.openAppealResolveModal = openAppealResolveModal;
+    window.closeAppealModal = closeAppealModal;
+    window.handleAppealResolveSubmit = handleAppealResolveSubmit;
+    window.printAppeal = printAppeal;
+    window.printAllAppeals = printAllAppeals;
+    window.renderMessagesTable = renderMessagesTable;
+    window.openMessageModal = openMessageModal;
+    window.closeMessageModal = closeMessageModal;
+    window.toggleMessageRead = toggleMessageRead;
+    window.handleDeleteMessage = handleDeleteMessage;
+    window.renderPenaltiesTable = renderPenaltiesTable;
+    window.openPenaltyModal = openPenaltyModal;
+    window.closePenaltyModal = closePenaltyModal;
+    window.handlePenaltySave = handlePenaltySave;
+    window.handlePenaltyDelete = handlePenaltyDelete;
+    window.loadSettingsForm = loadSettingsForm;
+    window.handleContactUpdate = handleContactUpdate;
+    window.handlePasswordChange = handlePasswordChange;
+    window.handleDatabaseReset = handleDatabaseReset;
+    window.handleProspectusUpload = handleProspectusUpload;
   </script>
 </body>
 </html>

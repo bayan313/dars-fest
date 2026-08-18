@@ -707,21 +707,22 @@ class Database {
   }
 
   // CRUD Students
-  addStudent(name, teamId, category, photo = "") {
+  addStudent(name, teamId, category, photo = "", chestNo = "") {
     const id = "stud-" + (Date.now());
-    this.db.students.push({ id, name, teamId, category, photo });
+    this.db.students.push({ id, name, teamId, category, photo, chestNo: chestNo ? String(chestNo).trim() : "" });
     this.save(false, 'students');
     this.calculateLeaderboard();
     return id;
   }
 
-  editStudent(id, name, teamId, category, photo = "") {
+  editStudent(id, name, teamId, category, photo = "", chestNo = undefined) {
     const student = this.db.students.find(s => s.id === id);
     if (student) {
       student.name = name;
       student.teamId = teamId;
       student.category = category;
       if (photo) student.photo = photo;
+      if (chestNo !== undefined) student.chestNo = chestNo ? String(chestNo).trim() : "";
       this.save(false, 'students');
       this.calculateLeaderboard();
     }
