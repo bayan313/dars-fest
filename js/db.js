@@ -128,7 +128,11 @@ class Database {
     await this._loadPromise;
   }
 
-  save(isReset) {
+  save(isReset, collectionName) {
+    if (collectionName) {
+      this._dirtyCollections = this._dirtyCollections || new Set();
+      this._dirtyCollections.add(collectionName);
+    }
     this._persistLocal();
     if (!this.loadedFromServer && !isReset && !this._allowUnpublishAll) {
       console.warn('Save queued: using local state until server reconnected.');
@@ -139,13 +143,33 @@ class Database {
   }
 
   // Serializes saves so out-of-order responses can never reorder writes.
-  // Always sends the latest in-memory snapshot and adopts the new server revision.
+  // Sends a minimal delta payload of only changed collections to prevent lagging/timeouts.
   _flushSave() {
     if (this._saving) return;
     if (!this._dirty) return;
     this._dirty = false;
     this._saving = true;
-    const payload = Object.assign({}, this.db);
+
+    // Create partial sync payload
+    const payload = {
+      revision: this.db.revision || 0
+    };
+
+    if (this._pendingReset || this._allowUnpublishAll || !this._dirtyCollections || this._dirtyCollections.size === 0) {
+      // Send full snapshot on reset or fallback
+      Object.assign(payload, this.db);
+    } else {
+      // Send only changed collections
+      this._dirtyCollections.forEach(col => {
+        payload[col] = this.db[col];
+      });
+      // Always include settings to preserve credentials/revision
+      payload.settings = this.db.settings;
+    }
+    
+    // Clear dirty set for next save
+    this._dirtyCollections = new Set();
+
     if (this._pendingReset || this._allowUnpublishAll || this.loadedFromServer) { 
       payload.allowUnpublishAll = true;
       payload.clientVerified = true;
@@ -156,6 +180,7 @@ class Database {
       this._pendingReset = false;
     }
     this._allowUnpublishAll = false;
+
     fetch('/api/all', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -176,6 +201,7 @@ class Database {
         if (this._dirty) {
           if (data && typeof data.revision === 'number') this.db.revision = data.revision;
         } else {
+          // Adopt the updated full database payload from server
           this.db = data;
         }
         this.loadedFromServer = true;
@@ -413,7 +439,7 @@ class Database {
     const id = "pen-" + Date.now();
     this.db.penalties = this.db.penalties || [];
     this.db.penalties.push({ id, programmeId, teamId, points: parseInt(points) || 0, reason });
-    this.save();
+    this.save(false, 'penalties');
     this.calculateLeaderboard();
     return id;
   }
@@ -421,7 +447,7 @@ class Database {
   deletePenalty(id) {
     if (this.db.penalties) {
       this.db.penalties = this.db.penalties.filter(p => p.id !== id);
-      this.save();
+      this.save(false, 'penalties');
       this.calculateLeaderboard();
     }
   }
@@ -734,7 +760,7 @@ class Database {
       }));
       prog.resultsPublished = true;
       prog.resultsPublishedAt = new Date().toISOString();
-      this.save();
+      this.save(false, 'programmes');
       this.calculateLeaderboard();
 
       // Trigger automatic announcement notification
@@ -751,7 +777,7 @@ class Database {
       delete prog.resultsPublishedAt;
       this._allowUnpublishAll = true;
       this.calculateLeaderboard();
-      this.save(true);
+      this.save(true, 'programmes');
     }
   }
 
@@ -762,7 +788,7 @@ class Database {
       delete prog.resultsPublishedAt;
     });
     this._allowUnpublishAll = true;
-    this.save(true);
+    this.save(true, 'programmes');
     this.calculateLeaderboard();
   }
 
@@ -772,13 +798,13 @@ class Database {
     this.db.notifications.unshift({ id, title, content, type, date: new Date().toISOString() });
     // Limit to latest 30 notifications
     if (this.db.notifications.length > 30) this.db.notifications.pop();
-    this.save();
+    this.save(false, 'notifications');
     return id;
   }
 
   deleteNotification(id) {
     this.db.notifications = this.db.notifications.filter(n => n.id !== id);
-    this.save();
+    this.save(false, 'notifications');
   }
 
   // Appeals
@@ -883,13 +909,13 @@ class Database {
       category, 
       event 
     });
-    this.save();
+    this.save(false, 'gallery');
     return id;
   }
 
   deleteMedia(id) {
     this.db.gallery = this.db.gallery.filter(g => g.id !== id);
-    this.save();
+    this.save(false, 'gallery');
   }
 
   // Prospectus & Contacts
