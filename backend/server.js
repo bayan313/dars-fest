@@ -126,7 +126,23 @@ app.post('/api/all', async (req, res) => {
   // Each doc is replaceOne-upserted (concurrent same-id writes keep one doc),
   // then docs removed from the client are deleted.
   const syncCollection = async (Model, docs) => {
-    const clean = stripIds(dedupe(docs));
+    // Recursively strip _id keys from documents and subdocuments
+    const cleanDocs = (docs || []).map(doc => {
+      if (!doc || typeof doc !== 'object') return doc;
+      const cleanDoc = JSON.parse(JSON.stringify(doc));
+      const recursiveStrip = (obj) => {
+        if (Array.isArray(obj)) {
+          obj.forEach(item => recursiveStrip(item));
+        } else if (obj && typeof obj === 'object') {
+          delete obj._id;
+          Object.values(obj).forEach(val => recursiveStrip(val));
+        }
+      };
+      recursiveStrip(cleanDoc);
+      return cleanDoc;
+    });
+
+    const clean = stripIds(dedupe(cleanDocs));
     const ids = clean.filter(d => d.id != null).map(d => String(d.id));
     if (clean.length > 0) {
       await Model.bulkWrite(clean.map(d => ({

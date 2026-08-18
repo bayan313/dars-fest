@@ -29,7 +29,7 @@ const resultSchema = new mongoose.Schema({
   studentId: String,
   teamId: String,
   grade: String
-});
+}, { _id: false });
 
 const programmeSchema = new mongoose.Schema({
   id: String,
