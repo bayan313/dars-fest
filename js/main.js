@@ -128,12 +128,67 @@ window.addEventListener("load", () => {
   }
 });
 
+// True while an admin is actively editing (modal open, typing, or a save in flight)
+function isAdminBusy() {
+  if (typeof ThanafusDB !== 'undefined' && typeof ThanafusDB.isSaving === 'function' && ThanafusDB.isSaving()) {
+    return true;
+  }
+  const el = document.activeElement;
+  if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') && !el.disabled && !el.readOnly) {
+    return true;
+  }
+  const overlays = document.querySelectorAll('.modal-overlay');
+  for (let i = 0; i < overlays.length; i++) {
+    const overlay = overlays[i];
+    if (overlay.style.display !== 'none' && window.getComputedStyle(overlay).display !== 'none') {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Re-render the currently visible public views after fresh data arrives
+function refreshPublicViews() {
+  if (typeof loadLeaderboard === 'function') loadLeaderboard();
+  if (typeof loadKalaprathibha === 'function') loadKalaprathibha();
+  if (typeof loadProgrammes === 'function') loadProgrammes();
+  if (typeof loadTeams === 'function') loadTeams();
+  if (window.activeProgrammeId && typeof viewProgrammeDetails === 'function') {
+    viewProgrammeDetails(window.activeProgrammeId);
+  }
+  if (window.activeTeamId && typeof selectTeam === 'function') {
+    selectTeam(window.activeTeamId);
+  }
+  if (typeof searchStudentByName === 'function') {
+    const input = document.getElementById("search-student");
+    if (input && input.value.trim()) searchStudentByName(input.value.trim());
+  }
+  if (typeof loadGallery === 'function') loadGallery();
+}
+
+// Live refresh when data is saved in another tab of the same browser
+window.addEventListener("storage", (e) => {
+  if (e.key && e.key.includes("thanafus") && typeof ThanafusDB !== 'undefined') {
+    if (window.location.pathname.includes('/admin/') && isAdminBusy()) return;
+    ThanafusDB.load().then(() => {
+      ThanafusDB.calculateLeaderboard();
+      if (window.location.pathname.includes('/admin/')) {
+        if (typeof window.__refreshAdminViews === 'function') window.__refreshAdminViews();
+      } else {
+        refreshPublicViews();
+      }
+    }).catch(() => {});
+  }
+});
+
 // Auto-refresh / sync loop to load new results, minus marks, and gallery media dynamically
 if (typeof ThanafusDB !== 'undefined') {
   setInterval(async () => {
     try {
-      // Don't auto-refresh if in admin panel to avoid disrupting admin inputs
-      if (window.location.pathname.includes('/admin/')) {
+      const isAdminPage = window.location.pathname.includes('/admin/');
+
+      // On admin pages, skip refresh only while the admin is actively editing
+      if (isAdminPage && isAdminBusy()) {
         return;
       }
 
@@ -144,33 +199,15 @@ if (typeof ThanafusDB !== 'undefined') {
 
       // If database has been updated (revision mismatch), update views
       if (oldRevision !== newRevision) {
-
-
-        // 1. Homepage (index.html) re-renders
-        if (typeof loadLeaderboard === 'function') loadLeaderboard();
-        if (typeof loadKalaprathibha === 'function') loadKalaprathibha();
-
-
-        // 2. Results portal page (results.html) re-renders
-        if (typeof loadProgrammes === 'function') loadProgrammes();
-        if (typeof loadTeams === 'function') loadTeams();
-        
-        if (window.activeProgrammeId && typeof viewProgrammeDetails === 'function') {
-          viewProgrammeDetails(window.activeProgrammeId);
+        if (isAdminPage) {
+          // Admin panel: re-render the current tab so fresh data shows immediately
+          if (typeof window.__refreshAdminViews === 'function') window.__refreshAdminViews();
+          return;
         }
-        if (window.activeTeamId && typeof selectTeam === 'function') {
-          selectTeam(window.activeTeamId);
-        }
-        if (typeof searchStudentByName === 'function') {
-          const input = document.getElementById("search-student");
-          if (input && input.value.trim()) searchStudentByName(input.value.trim());
-        }
-
-        // 3. Gallery page (gallery.html) re-renders
-        if (typeof loadGallery === 'function') loadGallery();
+        refreshPublicViews();
       }
     } catch (e) {
       console.warn("Auto-sync background check failed:", e.message || e);
     }
-  }, 10000); // Check for updates every 10 seconds
+  }, 5000); // Check for updates every 5 seconds
 }

@@ -144,6 +144,15 @@ app.post('/api/all', async (req, res) => {
     if (!db || typeof db !== 'object') {
       return res.status(400).json({ error: 'Invalid database payload' });
     }
+    if (!db.reset && !Array.isArray(db.collections)) {
+      return res.status(409).json({ error: 'This browser has an outdated sync session. Refresh the page before saving again.' });
+    }
+    const collections = new Set(db.reset ? ['teams', 'students', 'programmes', 'notifications', 'appeals', 'gallery', 'messages', 'penalties', 'contact', 'settings'] : db.collections);
+    const currentSettingsBeforeSave = await Settings.findOne();
+    const clientRevision = typeof db.revision === 'number' ? db.revision : 0;
+    if (!db.reset && currentSettingsBeforeSave && clientRevision !== (currentSettingsBeforeSave.revision || 0)) {
+      return res.status(409).json({ error: 'Data was updated by another account. Refresh this page before saving to avoid overwriting those changes.' });
+    }
 
     // Strip MongoDB _id fields sent by the client to avoid duplicate key errors
     const stripIds = (docs) => (docs || []).map(d => { 
@@ -193,21 +202,21 @@ app.post('/api/all', async (req, res) => {
       }
     };
 
-    if (db.teams)         { await syncCollection(Team, db.teams); }
-    if (db.students)      { await syncCollection(Student, db.students); }
-    if (db.programmes)    { await syncCollection(Programme, db.programmes); }
-    if (db.notifications) { await syncCollection(Notification, db.notifications); }
-    if (db.appeals)       { await syncCollection(Appeal, db.appeals); }
-    if (db.gallery)       { await syncCollection(Gallery, db.gallery); }
-    if (db.messages)      { await syncCollection(Message, db.messages); }
-    if (db.penalties)     { await syncCollection(Penalty, db.penalties); }
+    if (collections.has('teams') && db.teams)                 { await syncCollection(Team, db.teams); }
+    if (collections.has('students') && db.students)           { await syncCollection(Student, db.students); }
+    if (collections.has('programmes') && db.programmes)       { await syncCollection(Programme, db.programmes); }
+    if (collections.has('notifications') && db.notifications) { await syncCollection(Notification, db.notifications); }
+    if (collections.has('appeals') && db.appeals)             { await syncCollection(Appeal, db.appeals); }
+    if (collections.has('gallery') && db.gallery)             { await syncCollection(Gallery, db.gallery); }
+    if (collections.has('messages') && db.messages)           { await syncCollection(Message, db.messages); }
+    if (collections.has('penalties') && db.penalties)         { await syncCollection(Penalty, db.penalties); }
     
-    if (db.contact) { 
+    if (collections.has('contact') && db.contact) { 
       await Contact.deleteMany({}); 
       await Contact.create(stripIds([db.contact])[0] || {}); 
     }
     
-    if (db.settings) {
+    if (collections.has('settings') && db.settings) {
       const s = stripIds([db.settings])[0] || {};
       const existing = await Settings.findOne();
       if (existing && existing.revision) s.revision = existing.revision;

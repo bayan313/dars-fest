@@ -169,6 +169,10 @@ class Database {
     } catch (e) {}
   }
 
+  isSaving() {
+    return !!this._saving;
+  }
+
   verifyAdminPassword(password) {
     const entered = (password || "").trim();
     if (!entered) return false;
@@ -200,9 +204,13 @@ class Database {
     this._dirty = false;
     this._saving = true;
 
-    // Send complete consistent state so team standings, programmes, and settings match
+    const changedCollections = this._dirtyCollections ? [...this._dirtyCollections] : [];
+
+    // Send the full local snapshot, but tell the API which collections may be changed.
+    // This prevents one admin's stale cache from replacing another admin's fresh data.
     const payload = {
       ...this.db,
+      collections: changedCollections,
       revision: this.db.revision || 0,
       clientVerified: true,
       allowUnpublishAll: true,
@@ -228,10 +236,10 @@ class Database {
       .then(res => {
         clearTimeout(timeoutId);
         if (!res.ok) {
-          return res.json().then(err => {
-            throw new Error(err.error || ('Server error (HTTP ' + res.status + ')'));
-          }).catch(e => {
-            throw new Error('Server error (HTTP ' + res.status + ')');
+          return res.json().catch(() => ({})).then(err => {
+            const error = new Error(err.error || ('Server error (HTTP ' + res.status + ')'));
+            error.status = res.status;
+            throw error;
           });
         }
         return res.json();
@@ -253,6 +261,21 @@ class Database {
         clearTimeout(timeoutId);
         this._saving = false;
         console.warn('API sync notice (saved locally):', e.message || e);
+        if (e && e.status === 409 && typeof window !== 'undefined') {
+          if (typeof window.__onDbSaveError === 'function') {
+            window.__onDbSaveError(e);
+          }
+          // Another device saved first — pull the latest data so this device
+          // stops showing stale content instead of waiting for a manual refresh.
+          this.load().then(() => {
+            this.calculateLeaderboard();
+            this._persistLocal();
+            if (typeof window.__onDbConflictReloaded === 'function') {
+              window.__onDbConflictReloaded(e);
+            }
+          }).catch(() => {});
+          return;
+        }
         this._persistLocal();
       });
   }
@@ -791,7 +814,7 @@ class Database {
       prog.resultsPublished = true;
       prog.resultsPublishedAt = new Date().toISOString();
       this.calculateLeaderboard();
-      this.save(false);
+      this.save(false, 'programmes');
 
       // Trigger automatic announcement notification
       this.addNotification(`${prog.name} (${prog.category}) Results Published`, `The results for the program "${prog.name}" under category "${prog.category}" have been officially published. Check the results portal for details.`, "success");
@@ -806,7 +829,7 @@ class Database {
       delete prog.resultsPublishedAt;
       this._allowUnpublishAll = true;
       this.calculateLeaderboard();
-      this.save(true);
+      this.save(false, 'programmes');
     }
   }
 
@@ -818,7 +841,7 @@ class Database {
     });
     this._allowUnpublishAll = true;
     this.calculateLeaderboard();
-    this.save(true);
+    this.save(false, 'programmes');
   }
 
   // Notifications
