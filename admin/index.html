@@ -1267,11 +1267,12 @@
         countEl.textContent = `Showing ${filtered.length} of ${allProgs.length}${filter !== "all" ? ` (${filter}: ${counts[filter]||0})` : ""}${search ? ` — search: "${search}"` : ""}`;
       }
 
+      let rowsHtml = "";
       filtered.forEach(p => {
         const publishButton = p.resultsPublished 
-          ? `<button class="btn btn-primary btn-sm" onclick="openResultPublishModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem; background:#4f46e5; border-color:#4f46e5; margin-right:4px;"><i class="fa-solid fa-pen-to-square"></i> Edit Results</button>
-             <button class="btn btn-outline btn-sm" onclick="unpublishResults('${p.id}')" style="padding:4px 8px; font-size:0.75rem; border-color:#e2a32c; color:#d97706;"><i class="fa-solid fa-rotate-left"></i> Unpublish</button>`
-          : `<button class="btn btn-primary btn-sm" onclick="openResultPublishModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem; background:#10b981; border-color:#10b981;"><i class="fa-solid fa-circle-check"></i> Evaluate & Publish</button>`;
+          ? `<button type="button" class="btn btn-primary btn-sm" onclick="window.openResultPublishModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem; background:#4f46e5; border-color:#4f46e5; margin-right:4px;"><i class="fa-solid fa-pen-to-square"></i> Edit Results</button>
+             <button type="button" class="btn btn-outline btn-sm" onclick="window.unpublishResults('${p.id}')" style="padding:4px 8px; font-size:0.75rem; border-color:#e2a32c; color:#d97706;"><i class="fa-solid fa-rotate-left"></i> Unpublish</button>`
+          : `<button type="button" class="btn btn-primary btn-sm" onclick="window.openResultPublishModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem; background:#10b981; border-color:#10b981;"><i class="fa-solid fa-circle-check"></i> Evaluate & Publish</button>`;
 
         const statusText = p.resultsPublished 
           ? `<span style="color:#10b981;font-weight:600;"><i class="fa-solid fa-circle-check"></i> Published (${p.results ? p.results.length : 0} entries)</span>` 
@@ -1281,26 +1282,27 @@
           ? (p.category === 'General' ? 'ഗ്രൂപ്പ് (Team)' : 'ഗ്രൂപ്പ് (Group)') 
           : 'വ്യക്തിത്വം';
         const teamLabel = (p.category === 'General' && p.teamId) 
-          ? (teams.find(t => t.id === p.teamId) || {}).name || p.teamId 
+          ? (teams.find(t => t && t.id === p.teamId) || {}).name || p.teamId 
           : '—';
 
-        tbody.innerHTML += `
+        rowsHtml += `
           <tr>
-            <td data-label="Programme Name"><strong>${p.name}</strong></td>
-            <td data-label="Category">${p.category}</td>
+            <td data-label="Programme Name"><strong>${p.name || ''}</strong></td>
+            <td data-label="Category">${p.category || ''}</td>
             <td data-label="Type">${typeLabel}</td>
             <td data-label="Team">${teamLabel}</td>
             <td data-label="Results Status">${statusText}</td>
             <td data-label="Actions" class="action-cell">
               <div style="display:flex; gap:6px;">
                 ${publishButton}
-                <button class="btn btn-primary btn-sm" onclick="openProgModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn btn-outline btn-sm" onclick="deleteProg('${p.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="window.openProgModal('${p.id}')" style="padding:4px 8px; font-size:0.75rem;"><i class="fa-solid fa-pen"></i></button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="window.deleteProg('${p.id}')" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#ef4444;"><i class="fa-solid fa-trash"></i></button>
               </div>
             </td>
           </tr>
         `;
       });
+      tbody.innerHTML = rowsHtml;
     }
 
     function setProgMode(mode) {
@@ -2584,6 +2586,28 @@
         renderPenaltiesTable();
       }
     }
+
+    // Global Window Bindings for Inline HTML Event Handlers
+    window.openResultPublishModal = openResultPublishModal;
+    window.closeResultPublishModal = closeResultPublishModal;
+    window.saveResultsPublish = saveResultsPublish;
+    window.unpublishResults = unpublishResults;
+    window.handleUnpublishAllResults = handleUnpublishAllResults;
+    window.addResultRow = addResultRow;
+    window.handleEvalStudentSearch = handleEvalStudentSearch;
+    window.addStudentFromSuggestion = addStudentFromSuggestion;
+    window.clearEvalStudentSearch = clearEvalStudentSearch;
+    window.openProgModal = openProgModal;
+    window.closeProgModal = closeProgModal;
+    window.handleProgSave = handleProgSave;
+    window.deleteProg = deleteProg;
+    window.setProgMode = setProgMode;
+    window.handleBulkProgSave = handleBulkProgSave;
+    window.handleAdminLogin = handleAdminLogin;
+    window.togglePassVisibility = togglePassVisibility;
+    window.handleLogout = handleLogout;
+    window.switchAdminTab = switchAdminTab;
+    window.renderProgsTable = renderProgsTable;
   </script>
 </body>
 </html>

@@ -109,7 +109,7 @@ class Database {
   async load() {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
       const response = await fetch('/api/all', { 
         cache: 'no-store',
         signal: controller.signal 
@@ -125,13 +125,15 @@ class Database {
           this.loadedFromServer = true;
           this.calculateLeaderboard();
           this._persistLocal();
+          return;
         }
       }
     } catch (e) {
-      console.warn("Database loaded from local state / fallback:", e.message || e);
-      this._ensureDbDefaults();
-      this.calculateLeaderboard();
+      console.warn("Database sync notice:", e.message || e);
     }
+    this._loadFromCache();
+    this._ensureDbDefaults();
+    this.calculateLeaderboard();
   }
 
   _persistLocal() {

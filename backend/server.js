@@ -76,6 +76,9 @@ app.use((req, res, next) => {
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, '../')));
 
+// Favicon handler to avoid 404 logs
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // Projector slide page URL
 app.get('/slide', (req, res) => {
   res.sendFile(path.join(__dirname, '../slide.html'));
