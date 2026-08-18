@@ -144,13 +144,12 @@ if (typeof ThanafusDB !== 'undefined') {
 
       // If database has been updated (revision mismatch), update views
       if (oldRevision !== newRevision) {
-        console.log("Database update detected! Re-rendering page contents dynamically.");
+
 
         // 1. Homepage (index.html) re-renders
         if (typeof loadLeaderboard === 'function') loadLeaderboard();
         if (typeof loadKalaprathibha === 'function') loadKalaprathibha();
-        if (typeof loadNotificationBroadCasts === 'function') loadNotificationBroadCasts();
-        if (typeof loadAppealsList === 'function') loadAppealsList();
+
 
         // 2. Results portal page (results.html) re-renders
         if (typeof loadProgrammes === 'function') loadProgrammes();

@@ -172,14 +172,12 @@ class Database {
   verifyAdminPassword(password) {
     const entered = (password || "").trim();
     if (!entered) return false;
-    const stored = ((this.db && this.db.settings && this.db.settings.adminPassword) ? this.db.settings.adminPassword : "admin@9526").trim();
+    const stored = ((this.db && this.db.settings && this.db.settings.adminPassword) ? this.db.settings.adminPassword : "").trim();
     
-    // Direct matches (case-sensitive and case-insensitive)
+    if (!stored) return false;
+    
+    // Direct match only
     if (entered === stored || entered.toLowerCase() === stored.toLowerCase()) return true;
-    
-    // Standard access key fallbacks
-    const standardKeys = ["admin@9526", "admin9526", "9526", "admin"];
-    if (standardKeys.includes(entered.toLowerCase())) return true;
 
     return false;
   }
@@ -245,7 +243,6 @@ class Database {
           this.loadedFromServer = true;
           this.calculateLeaderboard();
           this._persistLocal();
-          console.log('Database synchronized with server');
         }
         this._saving = false;
         if (this._dirty) {
@@ -787,8 +784,8 @@ class Database {
     if (prog) {
       prog.results = resultsArray.map(r => ({
         rank: r.rank ? parseInt(r.rank) : null,
-        studentId: r.studentId || null,
-        teamId: (prog.category === 'General') ? (r.teamId || null) : null,
+        studentId: (prog.category === 'General') ? null : (r.studentId || null),
+        teamId: (prog.category === 'General') ? (r.teamId || r.studentId || null) : null,
         grade: r.grade ? r.grade.toUpperCase().trim() : null
       }));
       prog.resultsPublished = true;

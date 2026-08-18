@@ -11,8 +11,12 @@ module.exports = async function handler(req, res) {
   try {
     await connectDB();
   } catch (err) {
-    console.error('API MongoDB connection error:', err.message);
+    return res.status(503).json({ error: 'Database connection failed', isOffline: true });
   }
+
+  try {
+    await syncAdminPassword();
+  } catch (e) {}
 
   if (req.method === 'GET') {
     try {

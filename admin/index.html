@@ -30,7 +30,7 @@
               <i class="fa-solid fa-eye" id="pass-toggle-icon"></i>
             </button>
           </div>
-          <small style="color: var(--text-gray); font-size: 0.75rem; margin-top: 4px; display: block;">Default key: <strong style="color: var(--primary-emerald-dark);">admin@9526</strong></small>
+          <small style="color: var(--text-gray); font-size: 0.75rem; margin-top: 4px; display: block;">Contact administrator for access key</small>
         </div>
         <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
           <i class="fa-solid fa-right-to-bracket"></i> Authenticate
@@ -570,8 +570,6 @@
       <form id="penaltyForm" onsubmit="handlePenaltySave(event)">
         <input type="hidden" id="pen-id">
         <div class="form-group">
-
-        <div class="form-group">
           <label for="pen-team">Select Team (Group)</label>
           <select class="form-control" id="pen-team" required>
             <!-- Injected dynamically -->
@@ -925,7 +923,7 @@
         showAlert("Successfully authenticated as Administrator", "success");
         initDashboard();
       } else {
-        showAlert("Invalid access key! (Default: admin@9526)", "danger");
+        showAlert("Invalid access key! Please try again.", "danger");
       }
     }
 
@@ -1360,10 +1358,8 @@
         const name = parts[0] || "";
         if (!name) return;
         const category = parts[1] || "";
-        const teamName = (parts[2] || "").trim();
-        const teamId = teamName ? (teams.find(t => t.name === teamName) || {}).id || "" : "";
-        const type = (category === "General") ? "group" : (parts[3] ? parts[3].trim() : "individual");
-        ThanafusDB.addProgramme(name, category, type, teamId);
+        const type = (category === "General") ? "group" : (parts[2] ? parts[2].trim() : "individual");
+        ThanafusDB.addProgramme(name, category, type, "");
         added++;
       });
 
@@ -1470,95 +1466,89 @@
 
     // RESULT PUBLISHER DRAWER
     function openResultPublishModal(progId) {
-      try {
-        console.log("Opening result publish modal for:", progId);
-        resultPublishProgId = String(progId || "");
-        if (!resultPublishProgId) {
-          showAlert("Invalid programme ID.", "danger");
-          return;
+      resultPublishProgId = String(progId || "");
+      if (!resultPublishProgId) {
+        showAlert("Invalid programme ID.", "danger");
+        return;
+      }
+
+      const programmes = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.programmes)) ? ThanafusDB.db.programmes : [];
+      const prog = programmes.find(p => p && String(p.id) === resultPublishProgId);
+      if (!prog) {
+        showAlert("Programme not found (ID: " + progId + "). Please refresh.", "danger");
+        return;
+      }
+
+      const typeTxt = (prog.type === 'group' || prog.category === 'General') ? 'ഗ്രൂപ്പ് (Group)' : 'വ്യക്തിഗതം (Individual)';
+      const titleEl = document.getElementById("publish-prog-title");
+      if (titleEl) {
+        titleEl.innerText = `${prog.name || 'Programme'} (${prog.category || 'General'} • ${typeTxt})`;
+      }
+
+      clearEvalStudentSearch();
+
+      // Build options HTML
+      window.evalOptionsHTML = "";
+      const teams = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.teams)) ? ThanafusDB.db.teams.filter(Boolean) : [];
+      const students = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.students)) ? ThanafusDB.db.students.filter(Boolean) : [];
+
+      if (prog.category === 'General') {
+        window.evalOptionsHTML = `<option value="">-- Choose Team --</option>` +
+          teams.map(t => `<option value="${t.id}">${t.name || t.id} (Team)</option>`).join("");
+      } else {
+        const catNorm = (prog.category || "").trim().toLowerCase();
+        const categoryStudents = students.filter(s => s && (s.category || "").trim().toLowerCase() === catNorm);
+        const otherStudents = students.filter(s => s && (s.category || "").trim().toLowerCase() !== catNorm);
+
+        let options = `<option value="">-- Choose Participant --</option>`;
+        if (categoryStudents.length > 0) {
+          options += `<optgroup label="${prog.category} Students (${categoryStudents.length})">` +
+            categoryStudents.map(s => {
+              const teamObj = teams.find(t => t && t.id === s.teamId);
+              const teamLabel = teamObj ? `(${teamObj.name})` : '';
+              const chestLabel = s.chestNo ? `[#${s.chestNo}] ` : '';
+              return `<option value="${s.id}">${chestLabel}${s.name || s.id} ${teamLabel}</option>`;
+            }).join("") + `</optgroup>`;
         }
-
-        const programmes = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.programmes)) ? ThanafusDB.db.programmes : [];
-        const prog = programmes.find(p => p && String(p.id) === resultPublishProgId);
-        if (!prog) {
-          showAlert("Programme not found (ID: " + progId + "). Please refresh.", "danger");
-          return;
+        if (otherStudents.length > 0) {
+          options += `<optgroup label="All Other Registered Students (${otherStudents.length})">` +
+            otherStudents.map(s => {
+              const teamObj = teams.find(t => t && t.id === s.teamId);
+              const teamLabel = teamObj ? `(${teamObj.name})` : '';
+              const chestLabel = s.chestNo ? `[#${s.chestNo}] ` : '';
+              return `<option value="${s.id}">${chestLabel}${s.name || s.id} - ${s.category || ''} ${teamLabel}</option>`;
+            }).join("") + `</optgroup>`;
         }
-
-        const typeTxt = (prog.type === 'group' || prog.category === 'General') ? 'ഗ്രൂപ്പ് (Group)' : 'വ്യക്തിഗതം (Individual)';
-        const titleEl = document.getElementById("publish-prog-title");
-        if (titleEl) {
-          titleEl.innerText = `${prog.name || 'Programme'} (${prog.category || 'General'} • ${typeTxt})`;
+        if (students.length === 0) {
+          options = `<option value="">⚠️ No registered students in database - please register students first</option>`;
         }
-        
-        clearEvalStudentSearch();
-        
-        // Build options HTML with full robustness and null safety
-        window.evalOptionsHTML = "";
-        const teams = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.teams)) ? ThanafusDB.db.teams.filter(Boolean) : [];
-        const students = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.students)) ? ThanafusDB.db.students.filter(Boolean) : [];
+        window.evalOptionsHTML = options;
+      }
 
-        if (prog.category === 'General') {
-          window.evalOptionsHTML = `<option value="">-- Choose Team --</option>` + 
-            teams.map(t => `<option value="${t.id}">${t.name || t.id} (Team)</option>`).join("");
-        } else {
-          const catNorm = (prog.category || "").trim().toLowerCase();
-          const categoryStudents = students.filter(s => s && (s.category || "").trim().toLowerCase() === catNorm);
-          const otherStudents = students.filter(s => s && (s.category || "").trim().toLowerCase() !== catNorm);
+      // Always show modal FIRST, then populate rows
+      const modalEl = document.getElementById("result-publish-modal");
+      if (modalEl) {
+        modalEl.style.display = "flex";
+        modalEl.style.zIndex = "5000";
+      }
 
-          let options = `<option value="">-- Choose Participant --</option>`;
-          if (categoryStudents.length > 0) {
-            options += `<optgroup label="${prog.category} Students (${categoryStudents.length})">` +
-              categoryStudents.map(s => {
-                const teamObj = teams.find(t => t && t.id === s.teamId);
-                const teamLabel = teamObj ? `(${teamObj.name})` : '';
-                const chestLabel = s.chestNo ? `[#${s.chestNo}] ` : '';
-                return `<option value="${s.id}">${chestLabel}${s.name || s.id} ${teamLabel}</option>`;
-              }).join("") + `</optgroup>`;
-          }
-          if (otherStudents.length > 0) {
-            options += `<optgroup label="All Other Registered Students (${otherStudents.length})">` +
-              otherStudents.map(s => {
-                const teamObj = teams.find(t => t && t.id === s.teamId);
-                const teamLabel = teamObj ? `(${teamObj.name})` : '';
-                const chestLabel = s.chestNo ? `[#${s.chestNo}] ` : '';
-                return `<option value="${s.id}">${chestLabel}${s.name || s.id} - ${s.category || ''} ${teamLabel}</option>`;
-              }).join("") + `</optgroup>`;
-          }
-          if (students.length === 0) {
-            options = `<option value="">⚠️ No registered students in database - please register students first</option>`;
-          }
-          window.evalOptionsHTML = options;
-        }
+      // Populate result rows
+      const container = document.getElementById("results-rows-container");
+      if (container) {
+        container.innerHTML = "";
 
-        const container = document.getElementById("results-rows-container");
-        if (container) {
-          container.innerHTML = "";
-
-          // If already published and has results, load them for editing
-          if (prog.resultsPublished && Array.isArray(prog.results) && prog.results.length > 0) {
-            prog.results.forEach(res => {
-              if (res) {
-                const participantId = prog.category === 'General' ? res.teamId : res.studentId;
-                addResultRow(res.rank || "", participantId || "", res.grade || "");
-              }
-            });
-          } else {
-            // Seed 3 rows by default (for 1st, 2nd, 3rd)
-            for (let i = 1; i <= 3; i++) {
-              addResultRow(i, "", "");
+        if (prog.resultsPublished && Array.isArray(prog.results) && prog.results.length > 0) {
+          prog.results.forEach(res => {
+            if (res) {
+              const participantId = prog.category === 'General' ? res.teamId : res.studentId;
+              addResultRow(res.rank || "", participantId || "", res.grade || "");
             }
+          });
+        } else {
+          for (let i = 1; i <= 3; i++) {
+            addResultRow(i, "", "");
           }
         }
-
-        const modalEl = document.getElementById("result-publish-modal");
-        if (modalEl) {
-          modalEl.style.display = "flex";
-          modalEl.style.zIndex = "5000";
-        }
-      } catch (err) {
-        console.error("Error opening evaluation modal:", err);
-        showAlert("Failed to open evaluator: " + err.message, "danger");
       }
     }
 
@@ -1719,74 +1709,38 @@
         `;
         container.appendChild(rowDiv);
 
-        const studentSelect = rowDiv.querySelector(".res-student");
-        if (studentSelect && selectedStudentId) {
-          studentSelect.value = String(selectedStudentId);
+        if (selectedStudentId) {
+          const selects = rowDiv.querySelectorAll('.res-student');
+          if (selects.length > 0) selects[0].value = selectedStudentId;
         }
-      } catch (e) {
-        console.error("Error adding result row:", e);
+      } catch (err) {
+        console.error("Error in addResultRow:", err);
       }
     }
 
     function saveResultsPublish() {
-      try {
-        const rows = document.querySelectorAll("#results-rows-container .result-row");
-        const resultsArray = [];
-        let hasDuplicateStudent = false;
-        const selectedStudents = new Set();
-        const programmes = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.programmes)) ? ThanafusDB.db.programmes : [];
-        const prog = programmes.find(p => p && String(p.id) === String(resultPublishProgId));
-        if (!prog) {
-          showAlert("Programme not found. Please refresh.", "danger");
-          return;
-        }
-        const isGeneral = prog.category === 'General';
+      const rows = document.querySelectorAll("#results-rows-container .result-row");
+      const results = [];
+      const programmes = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.programmes)) ? ThanafusDB.db.programmes : [];
+      const currentProg = programmes.find(p => p && String(p.id) === String(resultPublishProgId));
+      const isGeneral = currentProg && currentProg.category === 'General';
 
-        for (let i = 0; i < rows.length; i++) {
-          const studentSelect = rows[i].querySelector(".res-student");
-          const studentId = studentSelect ? studentSelect.value.trim() : "";
-          const rankSelect = rows[i].querySelector(".res-rank");
-          const rank = rankSelect ? rankSelect.value.trim() : "";
-          const gradeSelect = rows[i].querySelector(".res-grade");
-          const grade = gradeSelect ? gradeSelect.value.trim() : "";
-
-          if (!studentId) continue; // Skip empty rows
-
-          if (selectedStudents.has(studentId)) {
-            hasDuplicateStudent = true;
-            break;
-          }
-          selectedStudents.add(studentId);
-
+      rows.forEach(row => {
+        const rank = row.querySelector(".res-rank").value;
+        const selectedValue = row.querySelector(".res-student").value;
+        const grade = row.querySelector(".res-grade").value;
+        if (selectedValue) {
           if (isGeneral) {
-            resultsArray.push({
-              studentId: null,
-              teamId: studentId,
-              rank: rank ? parseInt(rank) : null,
-              grade: grade || null
-            });
+            results.push({ rank, studentId: null, teamId: selectedValue, grade });
           } else {
-            resultsArray.push({
-              studentId: studentId,
-              teamId: null,
-              rank: rank ? parseInt(rank) : null,
-              grade: grade || null
-            });
+            results.push({ rank, studentId: selectedValue, grade });
           }
         }
+      });
 
-        if (hasDuplicateStudent) {
-          showAlert("Duplicate participant selected! A participant can only have one result entry per programme.", "warning");
-          return;
-        }
-
-        if (resultsArray.length === 0) {
-          showAlert("⚠️ Please choose a participant/team in at least one row to publish results.", "warning");
-          return;
-        }
-
-        ThanafusDB.publishResults(resultPublishProgId, resultsArray);
-        showAlert("Results successfully evaluated and published! Live Leaderboard updated.", "success");
+      try {
+        ThanafusDB.publishResults(resultPublishProgId, results);
+        showAlert("Results published/updated.", "success");
         closeResultPublishModal();
         renderProgsTable();
         initDashboard();
@@ -2115,7 +2069,20 @@
             border-bottom: 3px double #064e3b;
             padding-bottom: 10px; margin-bottom: 20px;
             display: flex; justify-content: space-between; align-items: center;
-            position: relative;
+          }
+          .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            pointer-events: auto; /* Ensure clicks pass through */
           }
           .brand { display: flex; align-items: center; gap: 12px; }
           .brand-logo {
