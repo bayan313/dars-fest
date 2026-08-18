@@ -1479,7 +1479,8 @@
         return;
       }
 
-      const typeTxt = (prog.type === 'group' || prog.category === 'General') ? 'ഗ്രൂപ്പ് (Group)' : 'വ്യക്തിഗതം (Individual)';
+      const isGeneralEvent = (prog.category || "").trim().toLowerCase() === 'general';
+      const typeTxt = (prog.type === 'group' || isGeneralEvent) ? 'ഗ്രൂപ്പ് (Group)' : 'വ്യക്തിഗതം (Individual)';
       const titleEl = document.getElementById("publish-prog-title");
       if (titleEl) {
         titleEl.innerText = `${prog.name || 'Programme'} (${prog.category || 'General'} • ${typeTxt})`;
@@ -1492,13 +1493,12 @@
       const teams = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.teams)) ? ThanafusDB.db.teams.filter(Boolean) : [];
       const students = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.students)) ? ThanafusDB.db.students.filter(Boolean) : [];
 
-      if (prog.category === 'General') {
+      if (isGeneralEvent) {
         window.evalOptionsHTML = `<option value="">-- Choose Team --</option>` +
           teams.map(t => `<option value="${t.id}">${t.name || t.id} (Team)</option>`).join("");
       } else {
         const catNorm = (prog.category || "").trim().toLowerCase();
         const categoryStudents = students.filter(s => s && (s.category || "").trim().toLowerCase() === catNorm);
-        const otherStudents = students.filter(s => s && (s.category || "").trim().toLowerCase() !== catNorm);
 
         let options = `<option value="">-- Choose Participant --</option>`;
         if (categoryStudents.length > 0) {
@@ -1510,17 +1510,8 @@
               return `<option value="${s.id}">${chestLabel}${s.name || s.id} ${teamLabel}</option>`;
             }).join("") + `</optgroup>`;
         }
-        if (otherStudents.length > 0) {
-          options += `<optgroup label="All Other Registered Students (${otherStudents.length})">` +
-            otherStudents.map(s => {
-              const teamObj = teams.find(t => t && t.id === s.teamId);
-              const teamLabel = teamObj ? `(${teamObj.name})` : '';
-              const chestLabel = s.chestNo ? `[#${s.chestNo}] ` : '';
-              return `<option value="${s.id}">${chestLabel}${s.name || s.id} - ${s.category || ''} ${teamLabel}</option>`;
-            }).join("") + `</optgroup>`;
-        }
-        if (students.length === 0) {
-          options = `<option value="">⚠️ No registered students in database - please register students first</option>`;
+        if (categoryStudents.length === 0) {
+          options = `<option value="">No ${prog.category || 'matching'} students registered</option>`;
         }
         window.evalOptionsHTML = options;
       }
@@ -1540,7 +1531,7 @@
         if (prog.resultsPublished && Array.isArray(prog.results) && prog.results.length > 0) {
           prog.results.forEach(res => {
             if (res) {
-              const participantId = prog.category === 'General' ? res.teamId : res.studentId;
+              const participantId = isGeneralEvent ? res.teamId : res.studentId;
               addResultRow(res.rank || "", participantId || "", res.grade || "");
             }
           });
@@ -1588,7 +1579,8 @@
       const teams = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.teams)) ? ThanafusDB.db.teams.filter(Boolean) : [];
       const students = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.students)) ? ThanafusDB.db.students.filter(Boolean) : [];
 
-      if (prog.category === 'General') {
+      const isGeneralEvent = (prog.category || "").trim().toLowerCase() === 'general';
+      if (isGeneralEvent) {
         const matchingTeams = teams.filter(t => 
           t && ((t.name || "").toLowerCase().includes(q) || (t.captain && t.captain.toLowerCase().includes(q)))
         );
@@ -1613,8 +1605,10 @@
           `;
         });
       } else {
+        const category = (prog.category || "").trim().toLowerCase();
         const matchingStudents = students.filter(s => {
           if (!s) return false;
+          if ((s.category || "").trim().toLowerCase() !== category) return false;
           const matchName = (s.name || "").toLowerCase().includes(q);
           const matchChest = (s.chestNo || "").toLowerCase().includes(q);
           const teamObj = teams.find(t => t && t.id === s.teamId);
@@ -1723,7 +1717,7 @@
       const results = [];
       const programmes = (ThanafusDB && ThanafusDB.db && Array.isArray(ThanafusDB.db.programmes)) ? ThanafusDB.db.programmes : [];
       const currentProg = programmes.find(p => p && String(p.id) === String(resultPublishProgId));
-      const isGeneral = currentProg && currentProg.category === 'General';
+      const isGeneral = currentProg && (currentProg.category || "").trim().toLowerCase() === 'general';
 
       rows.forEach(row => {
         const rank = row.querySelector(".res-rank").value;

@@ -328,7 +328,7 @@ class Database {
 
   // Programme points by type (individual vs group)
   programmePoints(prog, rank, grade) {
-    const isGroup = prog.type === 'group' || prog.category === 'General';
+    const isGroup = prog.type === 'group' || (prog.category || '').trim().toLowerCase() === 'general';
     return isGroup ? this.calculateGroupPoints(rank, grade) : this.calculatePoints(rank, grade);
   }
 
@@ -348,7 +348,7 @@ class Database {
         let team = null;
         let studentName = "";
 
-        if (prog.category === 'General') {
+        if ((prog.category || '').trim().toLowerCase() === 'general') {
           // General team event: score goes to the participating team directly
           team = this.db.teams.find(t => t.id === (res.teamId || prog.teamId));
           studentName = team ? team.name : "Team";
@@ -419,7 +419,7 @@ class Database {
 
       prog.results.forEach(res => {
         let team = null;
-        if (prog.category === 'General') {
+        if ((prog.category || '').trim().toLowerCase() === 'general') {
           team = this.db.teams.find(t => t.id === (res.teamId || prog.teamId));
         } else {
           const student = this.db.students.find(s => s.id === res.studentId);
@@ -765,7 +765,7 @@ class Database {
     if (prog) {
       prog.name = name;
       prog.category = category;
-      prog.type = (prog.category === 'General') ? 'group' : (type || prog.type || "individual");
+      prog.type = ((prog.category || '').trim().toLowerCase() === 'general') ? 'group' : (type || prog.type || "individual");
       prog.teamId = teamId || "";
       this.save(false, 'programmes');
       this.calculateLeaderboard();
@@ -784,8 +784,8 @@ class Database {
     if (prog) {
       prog.results = resultsArray.map(r => ({
         rank: r.rank ? parseInt(r.rank) : null,
-        studentId: (prog.category === 'General') ? null : (r.studentId || null),
-        teamId: (prog.category === 'General') ? (r.teamId || r.studentId || null) : null,
+        studentId: ((prog.category || '').trim().toLowerCase() === 'general') ? null : (r.studentId || null),
+        teamId: ((prog.category || '').trim().toLowerCase() === 'general') ? (r.teamId || r.studentId || null) : null,
         grade: r.grade ? r.grade.toUpperCase().trim() : null
       }));
       prog.resultsPublished = true;
