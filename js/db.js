@@ -178,10 +178,10 @@ class Database {
 
   async ready() {
     try {
-      await Promise.race([
-        this._loadPromise,
-        new Promise(resolve => setTimeout(resolve, 800))
-      ]);
+      // Wait for the real server fetch to finish (it has its own 12s timeout
+      // and falls back to the cache on failure) so pages never render the
+      // demo/sample DEFAULT_DB data instead of the site's actual data.
+      await this._loadPromise;
     } catch (e) {}
   }
 

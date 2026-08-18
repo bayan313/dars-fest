@@ -183,6 +183,7 @@ window.addEventListener("storage", (e) => {
 
 // Auto-refresh / sync loop to load new results, minus marks, and gallery media dynamically
 if (typeof ThanafusDB !== 'undefined') {
+  let lastPublicSignature = null;
   setInterval(async () => {
     try {
       const isAdminPage = window.location.pathname.includes('/admin/');
@@ -205,6 +206,19 @@ if (typeof ThanafusDB !== 'undefined') {
           return;
         }
         refreshPublicViews();
+        return;
+      }
+
+      // Public pages: also refresh when the actual content changed even though
+      // the revision stayed the same (e.g. a fresh site whose revision is 0, or
+      // another device's save that kept the revision number). Compare a cheap
+      // signature of the live data so we never re-render identical content.
+      if (!isAdminPage && ThanafusDB.loadedFromServer) {
+        const sig = JSON.stringify([ThanafusDB.db.teams, ThanafusDB.db.programmes, ThanafusDB.db.notifications, ThanafusDB.db.penalties, ThanafusDB.db.gallery]);
+        if (lastPublicSignature !== sig) {
+          lastPublicSignature = sig;
+          refreshPublicViews();
+        }
       }
     } catch (e) {
       console.warn("Auto-sync background check failed:", e.message || e);
