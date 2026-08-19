@@ -2,9 +2,17 @@
   "name": "dars-fest",
   "version": "1.0.0",
   "description": "THANAFUS Dars Fest 2026 website",
+  "main": "backend/server.js",
   "scripts": {
-    "dev": "vercel dev",
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js",
+    "seed": "node backend/seed.js",
     "build": "echo 'Static site - no build step required'"
   },
-  "dependencies": {}
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.9.1"
+  }
 }
