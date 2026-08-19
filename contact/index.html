@@ -31,7 +31,6 @@
       <ul class="nav-links">
         <li><a href="/"><i class="fa-solid fa-house"></i> Home</a></li>
         <li><a href="/results"><i class="fa-solid fa-trophy"></i> Results</a></li>
-        <li><a href="/slide"><i class="fa-solid fa-desktop"></i> Live Slide</a></li>
         <li><a href="/contact" class="active"><i class="fa-solid fa-envelope"></i> Contact</a></li>
       </ul>
     </nav>
@@ -45,83 +44,69 @@
           <p class="section-subtitle">Contact the THANAFUS Dars Fest control committee and technical team</p>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;">
-          <!-- Contact Details Cards -->
-          <div style="display: flex; flex-direction: column; gap: 20px;">
-            <div class="card">
-              <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px;">
-                <div class="notif-icon notif-info" style="width: 48px; height: 48px; font-size: 1.3rem;">
+        <div class="grid grid-2" style="gap: 32px; max-width: 900px; margin: 0 auto;">
+          <!-- Contact Details Card -->
+          <div class="card" style="display: flex; flex-direction: column; gap: 20px;">
+            <h3 style="color: var(--accent-gold); font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-address-book"></i> Festival Contacts
+            </h3>
+
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(217, 119, 6, 0.1); color: var(--accent-gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   <i class="fa-solid fa-user-tie"></i>
                 </div>
                 <div>
-                  <h4 style="font-size: 1.1rem;">Fest General Coordinator</h4>
-                  <p id="c-coord-name" class="text-gold" style="font-weight: 600;">Loading...</p>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">General Convener</div>
+                  <strong id="c-coord-name" style="font-size: 1rem; color: var(--text-main);">Loading...</strong>
+                  <div id="c-coord-phone" style="font-size: 0.9rem; color: var(--accent-gold); margin-top: 2px;">—</div>
                 </div>
               </div>
-              <p style="font-size: 0.9rem; color: var(--text-muted);">
-                <i class="fa-solid fa-phone" style="margin-right: 8px;"></i> <span id="c-coord-phone">—</span>
-              </p>
-            </div>
 
-            <div class="card">
-              <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px;">
-                <div class="notif-icon notif-success" style="width: 48px; height: 48px; font-size: 1.3rem;">
-                  <i class="fa-solid fa-headset"></i>
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(5, 150, 105, 0.1); color: var(--primary-emerald); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <i class="fa-solid fa-laptop-code"></i>
                 </div>
                 <div>
-                  <h4 style="font-size: 1.1rem;">Technical Support Team</h4>
-                  <p id="c-tech-name" class="text-emerald" style="font-weight: 600;">Loading...</p>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">Technical Support</div>
+                  <strong id="c-tech-name" style="font-size: 1rem; color: var(--text-main);">Loading...</strong>
+                  <div id="c-tech-phone" style="font-size: 0.9rem; color: var(--primary-emerald); margin-top: 2px;">—</div>
                 </div>
               </div>
-              <p style="font-size: 0.9rem; color: var(--text-muted);">
-                <i class="fa-solid fa-phone" style="margin-right: 8px;"></i> <span id="c-tech-phone">—</span>
-              </p>
-            </div>
 
-            <div class="card">
-              <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px;">
-                <div class="notif-icon notif-warning" style="width: 48px; height: 48px; font-size: 1.3rem;">
+              <div style="display: flex; gap: 12px; align-items: flex-start;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(30, 41, 59, 0.06); color: var(--text-muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   <i class="fa-solid fa-location-dot"></i>
                 </div>
                 <div>
-                  <h4 style="font-size: 1.1rem;">Official Address & Email</h4>
-                  <p id="c-email" class="text-gold" style="font-size: 0.9rem; font-weight: 500;">Loading...</p>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">Festival Venue</div>
+                  <div id="c-address" style="font-size: 0.9rem; color: var(--text-main); margin-top: 2px;">Bayanul Uloom Dars Campus</div>
                 </div>
               </div>
-              <p id="c-address" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">—</p>
             </div>
           </div>
 
-          <!-- Contact Us Form -->
+          <!-- Message Form -->
           <div class="card">
-            <h3 style="font-size: 1.3rem; margin-bottom: 8px;"><i class="fa-solid fa-paper-plane text-gold"></i> Send Us a Message</h3>
-            <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 24px;">Have inquiries or technical feedback? Submit a message directly to the fest committee inbox.</p>
-            
+            <h3 style="color: var(--accent-gold); font-size: 1.2rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-paper-plane"></i> Send a Message
+            </h3>
             <form onsubmit="handleContactMessage(event)">
-              <div style="display: flex; flex-direction: column; gap: 16px;">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
                 <div>
                   <label style="font-size: 0.85rem; color: var(--text-muted);">Your Name</label>
-                  <input type="text" id="msg-name" class="form-control" style="padding-left:14px;" placeholder="Full name..." required>
+                  <input type="text" id="msg-name" class="form-control" placeholder="Enter your full name" required>
                 </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                  <div>
-                    <label style="font-size: 0.85rem; color: var(--text-muted);">Email Address</label>
-                    <input type="email" id="msg-email" class="form-control" style="padding-left:14px;" placeholder="email@example.com" required>
-                  </div>
-                  <div>
-                    <label style="font-size: 0.85rem; color: var(--text-muted);">Phone Number</label>
-                    <input type="tel" id="msg-phone" class="form-control" style="padding-left:14px;" placeholder="Mobile number..." required>
-                  </div>
-                </div>
-
                 <div>
-                  <label style="font-size: 0.85rem; color: var(--text-muted);">Message</label>
-                  <textarea id="msg-content" class="form-control" style="padding-left:14px; height:120px; resize:none;" placeholder="Type your message here..." required></textarea>
+                  <label style="font-size: 0.85rem; color: var(--text-muted);">Phone Number</label>
+                  <input type="tel" id="msg-phone" class="form-control" placeholder="Mobile / WhatsApp number" required>
                 </div>
-
-                <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; height: 48px; margin-top: 8px;">
-                  <i class="fa-solid fa-paper-plane"></i> Dispatch Message
+                <div>
+                  <label style="font-size: 0.85rem; color: var(--text-muted);">Message / Query</label>
+                  <textarea id="msg-content" class="form-control" rows="4" placeholder="Type your message or appeal enquiry..." required style="padding: 10px 14px;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-gold" style="justify-content: center;">
+                  <i class="fa-solid fa-paper-plane"></i> Submit Message
                 </button>
               </div>
             </form>
@@ -142,7 +127,6 @@
         <ul class="footer-links">
           <li><a href="/">Home</a></li>
           <li><a href="/results">Results</a></li>
-          <li><a href="/slide">Live Slide</a></li>
           <li><a href="/contact">Contact</a></li>
           <li><a href="/admin" style="opacity: 0.4;"><i class="fa-solid fa-lock"></i></a></li>
         </ul>
@@ -170,18 +154,16 @@
       document.getElementById("c-coord-phone").innerText = c.coordinatorPhone || "+91 9988776655";
       document.getElementById("c-tech-name").innerText = c.techSupportName || "IT Control Room";
       document.getElementById("c-tech-phone").innerText = c.techSupportPhone || "+91 8877665544";
-      document.getElementById("c-email").innerText = c.email || "info@thanafusfest.com";
       document.getElementById("c-address").innerText = c.address || "THANAFUS Fest Committee Headquarters";
     }
 
     function handleContactMessage(e) {
       e.preventDefault();
       const name = document.getElementById("msg-name").value;
-      const email = document.getElementById("msg-email").value;
       const phone = document.getElementById("msg-phone").value;
       const msg = document.getElementById("msg-content").value;
 
-      ThanafusDB.addContactMessage(name, email, msg, phone);
+      ThanafusDB.addContactMessage(name, "", msg, phone);
       showAlert("Thank you! Your message has been sent to the control team.", "success");
       e.target.reset();
     }
