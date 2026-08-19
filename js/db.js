@@ -365,7 +365,7 @@ class Database {
         }
       }
     } catch (e) {
-      console.warn("Database sync notice:", e.message || e);
+      console.warn("Database sync notice:", e ? (e.message || e) : 'fetch notice');
     }
     this._loadFromCache();
     this._ensureDbDefaults();
@@ -608,6 +608,8 @@ class Database {
       clearTimeout(timeoutId);
       return null;
     }
+  }
+
   startAutoSync(intervalMs = 6000) {
     if (typeof window === 'undefined') return;
     if (this._syncTimer) clearInterval(this._syncTimer);

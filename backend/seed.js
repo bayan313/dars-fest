@@ -36,7 +36,8 @@ DEFAULT_DB.settings.adminPassword = process.env.ADMIN_PASSWORD || "bayanadmin";
 
 async function seed() {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    const uri = process.env.MONGO_URI || 'mongodb+srv://festweb:Ub0cEhGvvRwoRyCA@cluster0.0sx6md0.mongodb.net/dars_fest?retryWrites=true&w=majority';
+    await mongoose.connect(uri);
     console.log('Connected to MongoDB');
 
     const siteKey = (process.env.SITE_KEY && String(process.env.SITE_KEY).trim()) ? String(process.env.SITE_KEY).trim() : 'default';
