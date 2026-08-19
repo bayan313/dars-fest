@@ -30,6 +30,7 @@
       flex-direction: column;
       gap: 6px;
       height: fit-content;
+      box-shadow: var(--shadow-main);
     }
 
     .admin-nav-item {
@@ -39,7 +40,7 @@
       padding: 12px 16px;
       border-radius: var(--radius-md);
       color: var(--text-muted);
-      font-weight: 500;
+      font-weight: 600;
       font-size: 0.9rem;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -47,9 +48,9 @@
 
     .admin-nav-item:hover,
     .admin-nav-item.active {
-      background: rgba(245, 158, 11, 0.15);
-      color: var(--accent-gold-light);
-      font-weight: 600;
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--accent-gold);
+      font-weight: 700;
     }
 
     .admin-stat-card {
@@ -58,8 +59,9 @@
       justify-content: space-between;
       padding: 20px;
       border-radius: var(--radius-md);
-      background: rgba(15, 23, 42, 0.6);
+      background: #ffffff;
       border: 1px solid var(--border-glass);
+      box-shadow: var(--shadow-main);
     }
 
     .admin-stat-val {
@@ -115,7 +117,7 @@
         <button class="modal-close" onclick="closeResetModal()">&times;</button>
       </div>
       <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 16px;">
-        This action will reset the database to factory state! Please type <strong style="color:var(--accent-gold-light);">RESET</strong> to confirm.
+        This action will reset the database to factory state! Please type <strong style="color:var(--accent-gold);">RESET</strong> to confirm.
       </p>
       <input type="text" id="reset-confirm-input" class="form-control" style="padding-left:14px; margin-bottom: 20px;" placeholder="Type RESET here...">
       <div style="display: flex; gap: 12px; justify-content: flex-end;">
@@ -199,7 +201,7 @@
               <div class="admin-stat-card">
                 <div>
                   <span class="text-muted" style="font-size: 0.8rem;">Programmes</span>
-                  <div id="stat-progs" class="admin-stat-val" style="color:#3b82f6;">0</div>
+                  <div id="stat-progs" class="admin-stat-val" style="color:#2563eb;">0</div>
                 </div>
                 <i class="fa-solid fa-trophy fa-2x text-muted" style="opacity: 0.4;"></i>
               </div>
@@ -333,12 +335,12 @@
         <input type="hidden" id="mark-prog-id">
         
         <div style="display: flex; flex-direction: column; gap: 14px;">
-          <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; font-size: 0.9rem;" id="mark-prog-info"></div>
+          <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.9rem;" id="mark-prog-info"></div>
 
           <!-- 1st Rank -->
           <div style="display: grid; grid-template-columns: 1fr 140px; gap: 12px; align-items: center;">
             <div>
-              <label style="font-size: 0.8rem; color: var(--accent-gold-light); font-weight:700;">🥇 1st Rank Winner</label>
+              <label style="font-size: 0.8rem; color: var(--accent-gold); font-weight:700;">🥇 1st Rank Winner</label>
               <select id="m-rank1-winner" class="form-control"></select>
             </div>
             <div>
@@ -355,7 +357,7 @@
           <!-- 2nd Rank -->
           <div style="display: grid; grid-template-columns: 1fr 140px; gap: 12px; align-items: center;">
             <div>
-              <label style="font-size: 0.8rem; color: #94a3b8; font-weight:700;">🥈 2nd Rank Winner</label>
+              <label style="font-size: 0.8rem; color: #64748b; font-weight:700;">🥈 2nd Rank Winner</label>
               <select id="m-rank2-winner" class="form-control"></select>
             </div>
             <div>
@@ -429,7 +431,7 @@
     </div>
   </div>
 
-  <!-- Student Modal -->
+  <!-- Student Form Modal with Photo Uploading -->
   <div class="modal-overlay" id="student-form-modal">
     <div class="modal-card">
       <div class="modal-header">
@@ -460,6 +462,15 @@
           <div>
             <label style="font-size: 0.85rem; color: var(--text-muted);">Team</label>
             <select id="s-team" class="form-control" required></select>
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Student Photo (Optional)</label>
+            <input type="file" id="s-photo-file" accept="image/*" class="form-control" style="padding: 8px 12px;" onchange="handleStudentPhotoSelect(event)">
+            <input type="hidden" id="s-photo-base64">
+            <div id="s-photo-preview-wrap" style="display: none; margin-top: 10px; align-items: center; gap: 12px;">
+              <img id="s-photo-img" style="width: 54px; height: 54px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-gold);">
+              <button type="button" class="btn btn-outline btn-sm" onclick="clearStudentPhoto()"><i class="fa-solid fa-trash"></i> Remove Photo</button>
+            </div>
           </div>
         </div>
         <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
@@ -620,7 +631,7 @@
                 <td><strong>${t.name}</strong></td>
                 <td>${t.captain || '—'}</td>
                 <td>${t.viceCaptain || '—'}</td>
-                <td style="font-weight:700; color:var(--accent-gold-light);">${t.totalScore} PTS</td>
+                <td style="font-weight:700; color:var(--accent-gold);">${t.totalScore} PTS</td>
                 <td>
                   <button onclick="editTeamModal('${t.id}')" class="btn btn-gold btn-sm"><i class="fa-solid fa-pen"></i></button>
                   <button onclick="deleteTeam('${t.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
@@ -646,7 +657,7 @@
       container.innerHTML = `
         <table class="table">
           <thead>
-            <tr><th>Chest</th><th>Name</th><th>Category</th><th>Team</th><th>Actions</th></tr>
+            <tr><th>Chest</th><th>Student Profile</th><th>Category</th><th>Team</th><th>Actions</th></tr>
           </thead>
           <tbody>
             ${students.map(s => {
@@ -654,11 +665,18 @@
               return `
                 <tr>
                   <td>#${s.chestNo || '—'}</td>
-                  <td><strong>${s.name}</strong></td>
+                  <td>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      <div style="width:36px; height:36px; border-radius:50%; background:var(--gold-gradient); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; overflow:hidden; flex-shrink:0;">
+                        ${s.photo ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;">` : `<i class="fa-solid fa-user-graduate" style="font-size:0.8rem;"></i>`}
+                      </div>
+                      <strong>${s.name}</strong>
+                    </div>
+                  </td>
                   <td>${s.category}</td>
                   <td>${team ? team.name : 'Unassigned'}</td>
                   <td>
-                    <button onclick="editStudentModal('${s.id}')" class="btn btn-gold btn-sm"><i class="fa-solid fa-pen"></i></button>
+                    <button onclick="editStudentModal('${s.id}')" class="btn btn-gold btn-sm"><i class="fa-solid fa-pen"></i> Edit</button>
                     <button onclick="deleteStudent('${s.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
                   </td>
                 </tr>
@@ -687,7 +705,7 @@
             <div>
               <span class="kala-cat-tag" style="margin-bottom:4px;">${p.category}</span>
               <h3>${p.name}</h3>
-              <p class="text-muted" style="font-size:0.8rem;">Type: ${p.type} | Status: <strong style="color:${p.resultsPublished ? 'var(--primary-emerald)' : 'var(--accent-gold-light)'};">${p.resultsPublished ? 'Published' : 'Pending'}</strong></p>
+              <p class="text-muted" style="font-size:0.8rem;">Type: ${p.type} | Status: <strong style="color:${p.resultsPublished ? 'var(--primary-emerald)' : 'var(--accent-gold)'};">${p.resultsPublished ? 'Published' : 'Pending'}</strong></p>
             </div>
             <div style="display:flex; gap:8px;">
               <button onclick="openMarkModal('${p.id}')" class="btn btn-gold btn-sm"><i class="fa-solid fa-award"></i> ${p.resultsPublished ? 'Edit Marks' : 'Publish Results'}</button>
@@ -726,7 +744,6 @@
         r3Select.innerHTML = optionsHtml;
       }
 
-      // Pre-fill existing results if published
       if (prog.resultsPublished && prog.results) {
         const r1 = prog.results.find(r => r.rank === 1);
         const r2 = prog.results.find(r => r.rank === 2);
@@ -862,6 +879,31 @@
       showAlert("Database reset successfully to clean state!", "success");
     }
 
+    // Student Photo Handlers
+    function handleStudentPhotoSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        showAlert("Image size exceeds 2MB limit. Please choose a smaller photo.", "warning");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        document.getElementById("s-photo-base64").value = base64;
+        document.getElementById("s-photo-img").src = base64;
+        document.getElementById("s-photo-preview-wrap").style.display = "flex";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearStudentPhoto() {
+      document.getElementById("s-photo-file").value = "";
+      document.getElementById("s-photo-base64").value = "";
+      document.getElementById("s-photo-img").src = "";
+      document.getElementById("s-photo-preview-wrap").style.display = "none";
+    }
+
     // Modal Helpers & Operations
     function openTeamModal() {
       document.getElementById("edit-team-id").value = "";
@@ -892,12 +934,38 @@
     function openStudentModal() {
       const select = document.getElementById("s-team");
       select.innerHTML = (ThanafusDB.db.teams || []).map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+      document.getElementById("student-modal-title").innerText = "Add Student";
       document.getElementById("edit-student-id").value = "";
       document.getElementById("s-name").value = "";
       document.getElementById("s-chest").value = "";
+      clearStudentPhoto();
       document.getElementById("student-form-modal").classList.add("active");
     }
+
+    function editStudentModal(id) {
+      const s = (ThanafusDB.db.students || []).find(st => String(st.id) === String(id));
+      if (!s) return;
+      const select = document.getElementById("s-team");
+      select.innerHTML = (ThanafusDB.db.teams || []).map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+      document.getElementById("student-modal-title").innerText = "Edit Student";
+      document.getElementById("edit-student-id").value = s.id;
+      document.getElementById("s-name").value = s.name || "";
+      document.getElementById("s-chest").value = s.chestNo || "";
+      document.getElementById("s-cat").value = s.category || "Junior";
+      select.value = s.teamId || "";
+
+      if (s.photo) {
+        document.getElementById("s-photo-base64").value = s.photo;
+        document.getElementById("s-photo-img").src = s.photo;
+        document.getElementById("s-photo-preview-wrap").style.display = "flex";
+      } else {
+        clearStudentPhoto();
+      }
+      document.getElementById("student-form-modal").classList.add("active");
+    }
+
     function closeStudentFormModal() { document.getElementById("student-form-modal").classList.remove("active"); }
+
     function saveStudent(e) {
       e.preventDefault();
       const id = document.getElementById("edit-student-id").value;
@@ -905,16 +973,18 @@
       const chest = document.getElementById("s-chest").value;
       const cat = document.getElementById("s-cat").value;
       const teamId = document.getElementById("s-team").value;
+      const photo = document.getElementById("s-photo-base64").value;
 
       if (id) {
-        ThanafusDB.editStudent(id, name, teamId, cat, "", chest);
+        ThanafusDB.editStudent(id, name, teamId, cat, photo, chest);
       } else {
-        ThanafusDB.addStudent(name, teamId, cat, "", chest);
+        ThanafusDB.addStudent(name, teamId, cat, photo, chest);
       }
       closeStudentFormModal();
       renderStudentsAdmin();
       showAlert("Student saved successfully!", "success");
     }
+
     function deleteStudent(id) { ThanafusDB.deleteStudent(id); renderStudentsAdmin(); }
 
     function openProgModal() {
