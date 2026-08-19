@@ -53,16 +53,15 @@ const syncAdminPassword = async (siteKey) => {
   }
 };
 
+const DEFAULT_MONGO_URI = 'mongodb+srv://festweb:Ub0cEhGvvRwoRyCA@cluster0.0sx6md0.mongodb.net/dars_fest?retryWrites=true&w=majority';
+
 const connectDB = async () => {
   if (mongoose.connection.readyState === 1) return true;
   if (isConnecting) return false;
-  if (!process.env.MONGO_URI) {
-    console.warn('⚠️ MONGO_URI is missing from environment variables.');
-    return false;
-  }
+  const uri = process.env.MONGO_URI || DEFAULT_MONGO_URI;
   try {
     isConnecting = true;
-    await mongoose.connect(process.env.MONGO_URI, mongooseOptions);
+    await mongoose.connect(uri, mongooseOptions);
     isConnecting = false;
     console.log('Connected to MongoDB');
     await syncAdminPassword(siteKeyOf({ headers: {} }));

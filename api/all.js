@@ -8,19 +8,30 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
+  let isDbOnline = false;
   try {
-    await connectDB();
+    const conn = await connectDB();
+    isDbOnline = (conn && conn.readyState === 1);
   } catch (err) {
-    return res.status(503).json({ error: 'Database connection failed', isOffline: true });
+    isDbOnline = false;
   }
-
-  try {
-    await syncAdminPassword(siteKeyOf(req));
-  } catch (e) {}
 
   const siteKey = siteKeyOf(req);
 
+  if (isDbOnline) {
+    try {
+      await syncAdminPassword(siteKey);
+    } catch (e) {}
+  }
+
   if (req.method === 'GET') {
+    if (!isDbOnline) {
+      return res.status(200).json({
+        isOffline: true,
+        message: 'MongoDB Atlas is offline or IP is not whitelisted. Please add 0.0.0.0/0 in MongoDB Atlas Network Access.'
+      });
+    }
+
     try {
       const data = await getAllData(siteKey);
       const settings = data.settings || {};
@@ -29,25 +40,25 @@ module.exports = async function handler(req, res) {
       return res.status(200).json(data);
     } catch (err) {
       console.error('GET /api/all error:', err.message);
-      return res.status(500).json({ error: 'Failed to fetch database: ' + err.message });
+      return res.status(200).json({ isOffline: true, error: err.message });
     }
   }
 
   if (req.method === 'POST') {
+    const db = req.body;
+    if (!db || typeof db !== 'object') {
+      return res.status(400).json({ error: 'Invalid database payload' });
+    }
+
+    if (!isDbOnline) {
+      return res.status(200).json({
+        isOffline: true,
+        message: 'Saved locally in browser cache. Add 0.0.0.0/0 in MongoDB Atlas Network Access to sync across remote devices.'
+      });
+    }
+
     try {
-      const db = req.body;
-      if (!db || typeof db !== 'object') {
-        return res.status(400).json({ error: 'Invalid database payload' });
-      }
-      if (!db.reset && !Array.isArray(db.collections)) {
-        return res.status(409).json({ error: 'This browser has an outdated sync session. Refresh the page before saving again.' });
-      }
-      const collections = new Set(db.reset ? ['teams', 'students', 'programmes', 'notifications', 'appeals', 'gallery', 'messages', 'penalties', 'contact', 'settings'] : db.collections);
-      const currentSettings = await Settings.findOne(siteFilter(siteKey));
-      const clientRevision = typeof db.revision === 'number' ? db.revision : 0;
-      if (!db.reset && currentSettings && clientRevision !== (currentSettings.revision || 0)) {
-        return res.status(409).json({ error: 'Data was updated by another account. Refresh this page before saving to avoid overwriting those changes.' });
-      }
+      const collections = new Set(db.reset ? ['teams', 'students', 'programmes', 'notifications', 'appeals', 'gallery', 'messages', 'penalties', 'contact', 'settings'] : (Array.isArray(db.collections) && db.collections.length > 0 ? db.collections : ['teams', 'students', 'programmes', 'notifications', 'appeals', 'gallery', 'messages', 'penalties', 'contact', 'settings']));
 
       const stripIds = (docs) => (docs || []).map(d => { 
         if (!d || typeof d !== 'object') return d;

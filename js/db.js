@@ -289,6 +289,26 @@ class Database {
       this.calculateLeaderboard();
       this.startAutoSync(6000);
     });
+
+    // Cross-tab real-time sync with BroadcastChannel
+    try {
+      if (typeof window !== 'undefined' && typeof window.BroadcastChannel === 'function') {
+        this._channel = new BroadcastChannel('thanafus_fest_channel');
+        this._channel.onmessage = (event) => {
+          if (event && event.data && event.data.type === 'DB_UPDATED' && event.data.db) {
+            this.db = event.data.db;
+            this._ensureDbDefaults();
+            this.calculateLeaderboard();
+            try {
+              if (typeof localStorage !== 'undefined') {
+                localStorage.setItem('thanafus_fest_db_cache', JSON.stringify(this.db));
+              }
+            } catch (e) {}
+            window.dispatchEvent(new CustomEvent('thanafus:db-updated', { detail: { source: 'broadcast-channel' } }));
+          }
+        };
+      }
+    } catch (e) {}
   }
 
   _ensureDbDefaults() {
@@ -374,6 +394,11 @@ class Database {
         localStorage.setItem('thanafus_fest_db_cache', JSON.stringify(this.db));
       }
     } catch (e) { /* storage quota or restricted */ }
+    try {
+      if (this._channel && this.db) {
+        this._channel.postMessage({ type: 'DB_UPDATED', db: this.db });
+      }
+    } catch (e) {}
   }
 
   async ready() {

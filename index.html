@@ -6,8 +6,8 @@
   <title>THANAFUS Dars Fest 2026 | Official Portal</title>
   
   <!-- Modern Fonts & Stylesheets -->
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="mobile.css">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/mobile.css">
   
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,7 +17,7 @@
   <!-- Navigation Bar -->
   <header>
     <nav class="navbar">
-      <a href="index.html" class="logo-container">
+      <a href="/" class="logo-container">
         <div class="logo-icon">T</div>
         <div class="logo">
           <h2>THANAFUS<span>2026</span></h2>
@@ -29,9 +29,10 @@
       </button>
       
       <ul class="nav-links">
-        <li><a href="index.html" class="active"><i class="fa-solid fa-house"></i> Home</a></li>
-        <li><a href="pages/results.html"><i class="fa-solid fa-trophy"></i> Results</a></li>
-        <li><a href="pages/contact.html"><i class="fa-solid fa-envelope"></i> Contact</a></li>
+        <li><a href="/" class="active"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="/results"><i class="fa-solid fa-trophy"></i> Results</a></li>
+        <li><a href="/slide"><i class="fa-solid fa-desktop"></i> Live Slide</a></li>
+        <li><a href="/contact"><i class="fa-solid fa-envelope"></i> Contact</a></li>
       </ul>
     </nav>
   </header>
@@ -46,7 +47,7 @@
         <h1 class="hero-title">THANAFUS <span>DARS FEST 2026</span></h1>
         <p class="hero-motto">"Cultivating Knowledge, Ethics, and Islamic Artistry in Dars Education"</p>
         <div class="hero-actions">
-          <a href="pages/results.html" class="btn btn-gold btn-lg">
+          <a href="/results" class="btn btn-gold btn-lg">
             <i class="fa-solid fa-trophy"></i> Live Results Portal
           </a>
           <button onclick="openProspectusModal()" class="btn btn-outline btn-lg">
@@ -136,18 +137,19 @@
           <p style="font-size: 0.85rem; margin-top: 4px;">Dars Educational Arts Festival Committee Office</p>
         </div>
         <ul class="footer-links">
-          <li><a href="index.html">Home</a></li>
-          <li><a href="pages/results.html">Results</a></li>
-          <li><a href="pages/contact.html">Contact</a></li>
-          <li><a href="admin/admin.html" style="opacity: 0.4;" title="Control Portal"><i class="fa-solid fa-lock"></i></a></li>
+          <li><a href="/">Home</a></li>
+          <li><a href="/results">Results</a></li>
+          <li><a href="/slide">Live Slide</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/admin" style="opacity: 0.4;" title="Control Portal"><i class="fa-solid fa-lock"></i></a></li>
         </ul>
       </div>
     </div>
   </footer>
 
   <!-- Scripts -->
-  <script src="js/db.js"></script>
-  <script src="js/main.js"></script>
+  <script src="/js/db.js"></script>
+  <script src="/js/main.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
       await ThanafusDB.ready();

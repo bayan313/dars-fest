@@ -1,27 +1,32 @@
 const mongoose = require('mongoose');
+
+const DEFAULT_MONGO_URI = 'mongodb+srv://festweb:Ub0cEhGvvRwoRyCA@cluster0.0sx6md0.mongodb.net/dars_fest?retryWrites=true&w=majority';
+const DEFAULT_ADMIN_PASSWORD = 'bayanadmin';
+
 try {
   const path = require('path');
   require('dotenv').config({ path: path.join(__dirname, '../../.env') });
   require('dotenv').config({ path: path.join(__dirname, '../../backend/.env') });
 } catch (e) {}
 
-let isConnected = false;
+let cachedConn = null;
 
 async function connectDB() {
-  if (isConnected && mongoose.connection.readyState === 1) return;
-  if (!process.env.MONGO_URI) {
-    console.warn('MONGO_URI is not set in environment variables');
-    return;
-  }
+  if (mongoose.connection.readyState === 1) return mongoose.connection;
+  if (cachedConn) return cachedConn;
+
+  const uri = process.env.MONGO_URI || DEFAULT_MONGO_URI;
+
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000
+    cachedConn = await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 4000,
+      socketTimeoutMS: 30000,
+      bufferCommands: false
     });
-    isConnected = true;
+    return cachedConn;
   } catch (err) {
-    isConnected = false;
-    console.error('MongoDB connectDB error:', err.message);
+    cachedConn = null;
+    console.warn('MongoDB connect notice:', err.message);
     throw err;
   }
 }

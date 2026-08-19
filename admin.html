@@ -6,8 +6,8 @@
   <title>THANAFUS Dars Fest 2026 | Control Portal</title>
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="mobile.css">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/mobile.css">
   
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -136,7 +136,7 @@
   <!-- Header -->
   <header>
     <nav class="navbar">
-      <a href="index.html" class="logo-container">
+      <a href="/" class="logo-container">
         <div class="logo-icon">T</div>
         <div class="logo">
           <h2>THANAFUS<span>2026</span></h2>
@@ -567,17 +567,19 @@
           <p style="font-size: 0.85rem; margin-top: 4px;">Control Panel</p>
         </div>
         <ul class="footer-links">
-          <li><a href="index.html">Home</a></li>
-          <li><a href="results.html">Results</a></li>
-          <li><a href="contact.html">Contact</a></li>
+          <li><a href="/">Home</a></li>
+          <li><a href="/results">Results</a></li>
+          <li><a href="/slide">Live Slide</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/admin">Admin</a></li>
         </ul>
       </div>
     </div>
   </footer>
 
   <!-- Scripts -->
-  <script src="js/db.js"></script>
-  <script src="js/main.js"></script>
+  <script src="/js/db.js"></script>
+  <script src="/js/main.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
       await ThanafusDB.ready();
