@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THANAFUS Dars Fest 2026 | Official Results</title>
+  
+  <!-- Fonts & Stylesheets -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="mobile.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    .category-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .cat-tab-btn {
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      background: #ffffff;
+      border: 1px solid var(--border-glass);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+
+    .cat-tab-btn:hover,
+    .cat-tab-btn.active {
+      background: var(--gold-gradient);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: var(--shadow-gold);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header>
+    <nav class="navbar">
+      <a href="index.html" class="logo-container">
+        <div class="logo-icon">T</div>
+        <div class="logo">
+          <h2>THANAFUS<span>2026</span></h2>
+        </div>
+      </a>
+      
+      <button class="hamburger" aria-label="Toggle Navigation">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      
+      <ul class="nav-links">
+        <li><a href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="results.html" class="active"><i class="fa-solid fa-trophy"></i> Results</a></li>
+        <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Header Title Section -->
+    <section class="section" style="padding: 40px 0 20px;">
+      <div class="container">
+        <div class="section-header">
+          <h1 class="section-title">Official Results Portal</h1>
+          <p class="section-subtitle">Select category or search by student name, chest number, or programme</p>
+        </div>
+
+        <!-- Category Tabs (Sub Junior, Junior, Senior, General) -->
+        <div class="category-tabs">
+          <button class="cat-tab-btn active" onclick="setCategoryFilter('ALL', this)">All Categories</button>
+          <button class="cat-tab-btn" onclick="setCategoryFilter('Sub Junior', this)"><i class="fa-solid fa-child"></i> Sub Junior</button>
+          <button class="cat-tab-btn" onclick="setCategoryFilter('Junior', this)"><i class="fa-solid fa-user-graduate"></i> Junior</button>
+          <button class="cat-tab-btn" onclick="setCategoryFilter('Senior', this)"><i class="fa-solid fa-user-tie"></i> Senior</button>
+          <button class="cat-tab-btn" onclick="setCategoryFilter('General', this)"><i class="fa-solid fa-people-group"></i> General</button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="results-filter-bar">
+          <div class="search-input-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="search-student" class="form-control" placeholder="Search student name or chest no..." onkeyup="handleStudentSearch()">
+          </div>
+
+          <div style="min-width: 220px; flex: 1;">
+            <select id="filter-programme" class="form-control" onchange="filterResults()">
+              <option value="ALL">All Programmes</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Listing Section -->
+    <section class="section" style="padding-top: 0;">
+      <div class="container">
+        <!-- Live Search Results Container -->
+        <div id="search-results-container" style="display: none; margin-bottom: 30px;">
+          <h3 style="margin-bottom: 16px; font-size: 1.2rem;"><i class="fa-solid fa-user-check text-gold"></i> Search Matches</h3>
+          <div id="search-results-list" class="table-responsive"></div>
+        </div>
+
+        <!-- Main Programmes Results Container -->
+        <div id="programmes-results-list" style="display: flex; flex-direction: column; gap: 24px;">
+          <div class="card text-center" style="padding: 40px;">
+            <p class="text-muted"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Loading Published Results...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Student Profile Modal -->
+  <div class="modal-overlay" id="student-modal">
+    <div class="modal-card" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 id="modal-student-name" style="font-size: 1.4rem;">Student Profile</h3>
+        <button class="modal-close" onclick="closeStudentModal()">&times;</button>
+      </div>
+      <div id="modal-student-body"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3 style="color: var(--accent-gold); font-size: 1.3rem;">THANAFUS 2026</h3>
+          <p style="font-size: 0.85rem; margin-top: 4px;">Dars Educational Arts Festival Committee Office</p>
+        </div>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="results.html">Results</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="admin.html" style="opacity: 0.4;"><i class="fa-solid fa-lock"></i></a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/db.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    let currentCategoryFilter = 'ALL';
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await ThanafusDB.ready();
+      populateFilters();
+      filterResults();
+    });
+
+    function setCategoryFilter(cat, btnEl) {
+      currentCategoryFilter = cat;
+      document.querySelectorAll('.cat-tab-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+      filterResults();
+    }
+
+    function populateFilters() {
+      const progSelect = document.getElementById("filter-programme");
+      if (!progSelect) return;
+
+      const progs = ThanafusDB.db.programmes || [];
+      progSelect.innerHTML = `<option value="ALL">All Programmes</option>` + progs.map(p => `<option value="${p.id}">${p.name} (${p.category})</option>`).join('');
+    }
+
+    function filterResults() {
+      const progId = document.getElementById("filter-programme").value;
+      const container = document.getElementById("programmes-results-list");
+
+      const published = (ThanafusDB.db.programmes || []).filter(p => {
+        if (!p.resultsPublished) return false;
+        if (currentCategoryFilter !== 'ALL' && p.category !== currentCategoryFilter) return false;
+        if (progId !== 'ALL' && String(p.id) !== String(progId)) return false;
+        return true;
+      });
+
+      if (published.length === 0) {
+        container.innerHTML = `
+          <div class="card text-center" style="padding: 40px;">
+            <i class="fa-solid fa-clipboard-list fa-3x text-muted" style="margin-bottom: 14px;"></i>
+            <h3>No Published Results Found</h3>
+            <p class="text-muted" style="font-size:0.9rem;">Results for selected category or programme are pending official announcement.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = published.map(prog => {
+        const results = prog.results || [];
+        const isGroup = (prog.type || '').toLowerCase() === 'group' || (prog.category || '').toLowerCase() === 'general';
+
+        const rowsHtml = results.map(res => {
+          let name = "N/A";
+          let chest = "—";
+          let teamName = "N/A";
+
+          if (isGroup) {
+            const t = ThanafusDB.db.teams.find(x => x.id === (res.teamId || prog.teamId));
+            name = t ? t.name : "Team";
+            teamName = t ? t.name : "Team";
+          } else {
+            const s = ThanafusDB.db.students.find(x => x.id === res.studentId);
+            if (s) {
+              name = `<a href="#" onclick="viewStudentModal('${s.id}'); return false;" class="text-gold" style="font-weight:600;">${s.name}</a>`;
+              chest = s.chestNo || "—";
+              const t = ThanafusDB.db.teams.find(x => x.id === s.teamId);
+              teamName = t ? t.name : "Unassigned";
+            }
+          }
+
+          const rankBadge = res.rank === 1 ? `<span class="rank-badge rank-1" style="width:28px;height:28px;font-size:0.9rem;">1</span>`
+            : res.rank === 2 ? `<span class="rank-badge rank-2" style="width:28px;height:28px;font-size:0.9rem;">2</span>`
+            : res.rank === 3 ? `<span class="rank-badge rank-3" style="width:28px;height:28px;font-size:0.9rem;">3</span>`
+            : `<span class="text-muted">—</span>`;
+
+          const gradeBadge = res.grade ? `<span class="grade-chip ${res.grade.toLowerCase()}">${res.grade}</span>` : '—';
+          const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
+
+          return `
+            <tr>
+              <td>${rankBadge}</td>
+              <td>${chest}</td>
+              <td>${name}</td>
+              <td>${teamName}</td>
+              <td>${gradeBadge}</td>
+              <td style="font-family:'Outfit'; font-weight:700; color:var(--primary-emerald);">${pts} PTS</td>
+            </tr>
+          `;
+        }).join('');
+
+        return `
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+              <div>
+                <span class="kala-cat-tag" style="margin-bottom:6px;">${prog.category}</span>
+                <h3 style="font-size:1.3rem;">${prog.name}</h3>
+                <p class="text-muted" style="font-size:0.8rem;">Venue: ${prog.venue || 'Main Stage'} | Evaluator: ${prog.judge || 'Official Panel'}</p>
+              </div>
+              <span style="font-size:0.8rem; color:var(--text-dim);"><i class="fa-solid fa-clock"></i> Published</span>
+            </div>
+            
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Chest</th>
+                    <th>Name</th>
+                    <th>Team</th>
+                    <th>Grade</th>
+                    <th>Points</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rowsHtml || `<tr><td colspan="6" class="text-center text-muted">No result records available</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleStudentSearch() {
+      const q = document.getElementById("search-student").value.trim().toLowerCase();
+      const wrap = document.getElementById("search-results-container");
+      const list = document.getElementById("search-results-list");
+
+      if (!q) {
+        wrap.style.display = "none";
+        return;
+      }
+
+      const matches = (ThanafusDB.db.students || []).filter(s => 
+        (s.name && s.name.toLowerCase().includes(q)) || 
+        (s.chestNo && s.chestNo.toLowerCase().includes(q))
+      );
+
+      if (matches.length === 0) {
+        list.innerHTML = `<div class="card text-center"><p class="text-muted">No matching student found for "${q}"</p></div>`;
+      } else {
+        list.innerHTML = `
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Chest</th>
+                <th>Student Name</th>
+                <th>Category</th>
+                <th>Team</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${matches.map(s => {
+                const team = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+                return `
+                  <tr>
+                    <td>#${s.chestNo || '—'}</td>
+                    <td><strong>${s.name}</strong></td>
+                    <td>${s.category}</td>
+                    <td>${team ? team.name : 'N/A'}</td>
+                    <td>
+                      <button onclick="viewStudentModal('${s.id}')" class="btn btn-gold btn-sm"><i class="fa-solid fa-eye"></i> View Profile</button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+      wrap.style.display = "block";
+    }
+
+    function viewStudentModal(studentId) {
+      const profile = ThanafusDB.getStudentProfile(studentId);
+      if (!profile) return;
+
+      document.getElementById("modal-student-name").innerText = profile.name;
+      const body = document.getElementById("modal-student-body");
+
+      body.innerHTML = `
+        <div style="display:flex; gap:20px; align-items:center; margin-bottom:20px; background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:12px;">
+          <div class="kala-avatar" style="margin:0; width:70px; height:70px; font-size:1.8rem;">
+            ${profile.photo ? `<img src="${profile.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : `<i class="fa-solid fa-user-graduate"></i>`}
+          </div>
+          <div>
+            <h4 style="font-size:1.1rem;">${profile.name} ${profile.chestNo ? `(#${profile.chestNo})` : ''}</h4>
+            <p class="text-muted" style="font-size:0.85rem;">Team: <strong>${profile.teamName}</strong> | Category: <strong>${profile.category}</strong></p>
+            <p style="font-size:0.9rem; color:var(--primary-emerald); font-weight:700; margin-top:4px;">
+              Total Score: ${profile.totalScore} PTS | Category Rank: #${profile.position}
+            </p>
+          </div>
+        </div>
+
+        <h4 style="margin-bottom:12px; font-size:1rem;">Programme Participations</h4>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Programme</th>
+                <th>Rank</th>
+                <th>Grade</th>
+                <th>Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${profile.participations.map(p => `
+                <tr>
+                  <td>${p.programmeName}</td>
+                  <td>${p.rank ? `#${p.rank}` : '—'}</td>
+                  <td>${p.grade ? `<span class="grade-chip ${p.grade.toLowerCase()}">${p.grade}</span>` : '—'}</td>
+                  <td style="font-weight:700; color:var(--primary-emerald);">${p.points} PTS</td>
+                </tr>
+              `).join('') || `<tr><td colspan="4" class="text-center text-muted">No published event records</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      document.getElementById("student-modal").classList.add("active");
+    }
+
+    function closeStudentModal() {
+      document.getElementById("student-modal").classList.remove("active");
+    }
+
+    window.loadProgrammes = filterResults;
+  </script>
+</body>
+</html>
