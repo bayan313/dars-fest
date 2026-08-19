@@ -15,10 +15,11 @@
   <style>
     .admin-layout {
       display: grid;
-      grid-template-columns: 250px 1fr;
+      grid-template-columns: 260px 1fr;
       gap: 24px;
       min-height: calc(100vh - 160px);
       margin-top: 20px;
+      align-items: start;
     }
 
     .admin-sidebar {
@@ -31,6 +32,11 @@
       gap: 6px;
       height: fit-content;
       box-shadow: var(--shadow-main);
+      position: sticky;
+      top: 92px;
+      max-height: calc(100vh - 110px);
+      overflow-y: auto;
+      z-index: 100;
     }
 
     .admin-nav-item {
@@ -326,74 +332,104 @@
   
   <!-- Mark Entry Modal -->
   <div class="modal-overlay" id="mark-entry-modal">
-    <div class="modal-card" style="max-width: 620px;">
+    <div class="modal-card" style="max-width: 680px;">
       <div class="modal-header">
-        <h3 id="mark-modal-title"><i class="fa-solid fa-award text-gold"></i> Publish Results</h3>
+        <h3 id="mark-modal-title"><i class="fa-solid fa-award text-gold"></i> Publish Results & Marks Entry</h3>
         <button class="modal-close" onclick="closeMarkModal()">&times;</button>
       </div>
       <form onsubmit="saveMarks(event)">
         <input type="hidden" id="mark-prog-id">
         
-        <div style="display: flex; flex-direction: column; gap: 14px;">
-          <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.9rem;" id="mark-prog-info"></div>
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="background: #f8fafc; padding: 14px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 0.9rem;" id="mark-prog-info"></div>
 
-          <!-- 1st Rank -->
-          <div style="display: grid; grid-template-columns: 1fr 140px; gap: 12px; align-items: center;">
-            <div>
-              <label style="font-size: 0.8rem; color: var(--accent-gold); font-weight:700;">🥇 1st Rank Winner</label>
-              <select id="m-rank1-winner" class="form-control"></select>
-            </div>
-            <div>
-              <label style="font-size: 0.8rem; color: var(--text-muted);">Grade</label>
-              <select id="m-rank1-grade" class="form-control">
-                <option value="A">Grade A</option>
-                <option value="B">Grade B</option>
-                <option value="C">Grade C</option>
-                <option value="">No Grade</option>
-              </select>
+          <!-- Section: Top 3 Ranks -->
+          <div>
+            <h4 style="font-size: 0.95rem; margin-bottom: 10px; color: #0f172a;"><i class="fa-solid fa-trophy text-gold"></i> Rank Winners (1st, 2nd, 3rd)</h4>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- 1st Rank -->
+              <div style="display: grid; grid-template-columns: 1fr 150px 80px; gap: 10px; align-items: center; background: #ffffff; border: 1px solid #e2e8f0; padding: 10px 12px; border-radius: 10px;">
+                <div>
+                  <label style="font-size: 0.8rem; color: var(--accent-gold); font-weight:700; display:block; margin-bottom:4px;">🥇 1st Rank Winner</label>
+                  <select id="m-rank1-winner" class="form-control" onchange="updateMarksPointsPreview()"></select>
+                </div>
+                <div>
+                  <label style="font-size: 0.8rem; color: var(--text-muted); display:block; margin-bottom:4px;">Grade</label>
+                  <select id="m-rank1-grade" class="form-control" onchange="updateMarksPointsPreview()">
+                    <option value="">No Grade (Rank Only)</option>
+                    <option value="A">Grade A (+5 PTS)</option>
+                    <option value="B">Grade B (+3 PTS)</option>
+                    <option value="C">Grade C (+1 PTS)</option>
+                  </select>
+                </div>
+                <div style="text-align:center;">
+                  <label style="font-size: 0.75rem; color: var(--text-dim); display:block; margin-bottom:4px;">Points</label>
+                  <span id="m-rank1-pts" class="grade-chip" style="background:rgba(217,119,6,0.12); color:#d97706; font-size:0.85rem; font-weight:800;">—</span>
+                </div>
+              </div>
+
+              <!-- 2nd Rank -->
+              <div style="display: grid; grid-template-columns: 1fr 150px 80px; gap: 10px; align-items: center; background: #ffffff; border: 1px solid #e2e8f0; padding: 10px 12px; border-radius: 10px;">
+                <div>
+                  <label style="font-size: 0.8rem; color: #64748b; font-weight:700; display:block; margin-bottom:4px;">🥈 2nd Rank Winner</label>
+                  <select id="m-rank2-winner" class="form-control" onchange="updateMarksPointsPreview()"></select>
+                </div>
+                <div>
+                  <label style="font-size: 0.8rem; color: var(--text-muted); display:block; margin-bottom:4px;">Grade</label>
+                  <select id="m-rank2-grade" class="form-control" onchange="updateMarksPointsPreview()">
+                    <option value="">No Grade (Rank Only)</option>
+                    <option value="A">Grade A (+5 PTS)</option>
+                    <option value="B">Grade B (+3 PTS)</option>
+                    <option value="C">Grade C (+1 PTS)</option>
+                  </select>
+                </div>
+                <div style="text-align:center;">
+                  <label style="font-size: 0.75rem; color: var(--text-dim); display:block; margin-bottom:4px;">Points</label>
+                  <span id="m-rank2-pts" class="grade-chip" style="background:rgba(100,116,139,0.12); color:#475569; font-size:0.85rem; font-weight:800;">—</span>
+                </div>
+              </div>
+
+              <!-- 3rd Rank -->
+              <div style="display: grid; grid-template-columns: 1fr 150px 80px; gap: 10px; align-items: center; background: #ffffff; border: 1px solid #e2e8f0; padding: 10px 12px; border-radius: 10px;">
+                <div>
+                  <label style="font-size: 0.8rem; color: #b45309; font-weight:700; display:block; margin-bottom:4px;">🥉 3rd Rank Winner</label>
+                  <select id="m-rank3-winner" class="form-control" onchange="updateMarksPointsPreview()"></select>
+                </div>
+                <div>
+                  <label style="font-size: 0.8rem; color: var(--text-muted); display:block; margin-bottom:4px;">Grade</label>
+                  <select id="m-rank3-grade" class="form-control" onchange="updateMarksPointsPreview()">
+                    <option value="">No Grade (Rank Only)</option>
+                    <option value="A">Grade A (+5 PTS)</option>
+                    <option value="B">Grade B (+3 PTS)</option>
+                    <option value="C">Grade C (+1 PTS)</option>
+                  </select>
+                </div>
+                <div style="text-align:center;">
+                  <label style="font-size: 0.75rem; color: var(--text-dim); display:block; margin-bottom:4px;">Points</label>
+                  <span id="m-rank3-pts" class="grade-chip" style="background:rgba(180,83,9,0.12); color:#b45309; font-size:0.85rem; font-weight:800;">—</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- 2nd Rank -->
-          <div style="display: grid; grid-template-columns: 1fr 140px; gap: 12px; align-items: center;">
-            <div>
-              <label style="font-size: 0.8rem; color: #64748b; font-weight:700;">🥈 2nd Rank Winner</label>
-              <select id="m-rank2-winner" class="form-control"></select>
+          <!-- Section: Additional Grade-Only Winners -->
+          <div style="border-top: 1px dashed #cbd5e1; padding-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <div>
+                <h4 style="font-size: 0.95rem; color: #0f172a; margin-bottom: 2px;"><i class="fa-solid fa-medal text-emerald"></i> Additional Grade-Only Winners</h4>
+                <p class="text-muted" style="font-size: 0.75rem;">Add participants who achieved a Grade without a top 3 rank</p>
+              </div>
+              <button type="button" class="btn btn-outline btn-sm" onclick="addGradeOnlyRow()"><i class="fa-solid fa-plus"></i> Add Grade Winner</button>
             </div>
-            <div>
-              <label style="font-size: 0.8rem; color: var(--text-muted);">Grade</label>
-              <select id="m-rank2-grade" class="form-control">
-                <option value="A">Grade A</option>
-                <option value="B">Grade B</option>
-                <option value="C">Grade C</option>
-                <option value="">No Grade</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- 3rd Rank -->
-          <div style="display: grid; grid-template-columns: 1fr 140px; gap: 12px; align-items: center;">
-            <div>
-              <label style="font-size: 0.8rem; color: #b45309; font-weight:700;">🥉 3rd Rank Winner</label>
-              <select id="m-rank3-winner" class="form-control"></select>
-            </div>
-            <div>
-              <label style="font-size: 0.8rem; color: var(--text-muted);">Grade</label>
-              <select id="m-rank3-grade" class="form-control">
-                <option value="A">Grade A</option>
-                <option value="B">Grade B</option>
-                <option value="C">Grade C</option>
-                <option value="">No Grade</option>
-              </select>
-            </div>
+            <div id="grade-only-rows" style="display: flex; flex-direction: column; gap: 10px;"></div>
           </div>
         </div>
 
-        <div style="margin-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="margin-top: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
           <button type="button" class="btn btn-outline btn-sm" onclick="unpublishCurrentProg()"><i class="fa-solid fa-eye-slash"></i> Unpublish</button>
           <div style="display: flex; gap: 10px;">
             <button type="button" class="btn btn-outline" onclick="closeMarkModal()">Cancel</button>
-            <button type="submit" class="btn btn-gold"><i class="fa-solid fa-check"></i> Publish Results</button>
+            <button type="submit" class="btn btn-gold"><i class="fa-solid fa-check"></i> Save & Publish Results</button>
           </div>
         </div>
       </form>
@@ -716,44 +752,183 @@
       `).join('') || `<div class="card text-center"><p class="text-muted">No programmes matching filter</p></div>`;
     }
 
+    function getParticipantOptionsHtml(prog, selectedId = "") {
+      const isGroup = (prog.type || '').toLowerCase() === 'group';
+      if (isGroup) {
+        const teams = ThanafusDB.db.teams || [];
+        return `<option value="">Select Team</option>` + teams.map(t => `<option value="${t.id}" ${t.id === selectedId ? 'selected' : ''}>${t.name}</option>`).join('');
+      } else {
+        const students = ThanafusDB.db.students || [];
+        const isGeneral = (prog.category || '').toLowerCase() === 'general';
+        let options = `<option value="">Select Student</option>`;
+        
+        if (isGeneral) {
+          options += students.map(s => {
+            const team = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+            return `<option value="${s.id}" ${s.id === selectedId ? 'selected' : ''}>#${s.chestNo || '—'} ${s.name} (${team ? team.name : 'No Team'} - ${s.category})</option>`;
+          }).join('');
+        } else {
+          const catStudents = students.filter(s => s.category === prog.category);
+          options += `<optgroup label="${prog.category} Students">` + catStudents.map(s => {
+            const team = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+            return `<option value="${s.id}" ${s.id === selectedId ? 'selected' : ''}>#${s.chestNo || '—'} ${s.name} (${team ? team.name : 'No Team'})</option>`;
+          }).join('') + `</optgroup>`;
+
+          const otherStudents = students.filter(s => s.category !== prog.category);
+          if (otherStudents.length > 0) {
+            options += `<optgroup label="Other Categories">` + otherStudents.map(s => {
+              const team = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+              return `<option value="${s.id}" ${s.id === selectedId ? 'selected' : ''}>#${s.chestNo || '—'} ${s.name} (${team ? team.name : 'No Team'} - ${s.category})</option>`;
+            }).join('') + `</optgroup>`;
+          }
+        }
+        return options;
+      }
+    }
+
+    function calculateRowPoints(prog, rank, grade) {
+      if (!rank && !grade) return 0;
+      return ThanafusDB.programmePoints(prog, rank, grade);
+    }
+
+    function updateMarksPointsPreview() {
+      const progId = document.getElementById("mark-prog-id").value;
+      const prog = ThanafusDB.db.programmes.find(p => String(p.id) === String(progId));
+      if (!prog) return;
+
+      const r1Winner = document.getElementById("m-rank1-winner").value;
+      const r1Grade = document.getElementById("m-rank1-grade").value;
+      const p1 = r1Winner ? calculateRowPoints(prog, 1, r1Grade) : 0;
+      document.getElementById("m-rank1-pts").innerText = r1Winner ? `${p1} PTS` : "—";
+
+      const r2Winner = document.getElementById("m-rank2-winner").value;
+      const r2Grade = document.getElementById("m-rank2-grade").value;
+      const p2 = r2Winner ? calculateRowPoints(prog, 2, r2Grade) : 0;
+      document.getElementById("m-rank2-pts").innerText = r2Winner ? `${p2} PTS` : "—";
+
+      const r3Winner = document.getElementById("m-rank3-winner").value;
+      const r3Grade = document.getElementById("m-rank3-grade").value;
+      const p3 = r3Winner ? calculateRowPoints(prog, 3, r3Grade) : 0;
+      document.getElementById("m-rank3-pts").innerText = r3Winner ? `${p3} PTS` : "—";
+
+      document.querySelectorAll('.grade-only-row').forEach(row => {
+        const sel = row.querySelector('.g-winner-select');
+        const grd = row.querySelector('.g-grade-select');
+        const ptsBadge = row.querySelector('.g-pts-badge');
+        const w = sel ? sel.value : "";
+        const g = grd ? grd.value : "";
+        if (w && g) {
+          const pts = calculateRowPoints(prog, null, g);
+          ptsBadge.innerText = `${pts} PTS`;
+        } else {
+          ptsBadge.innerText = "—";
+        }
+      });
+    }
+
+    function addGradeOnlyRow(selectedWinner = "", selectedGrade = "A") {
+      const progId = document.getElementById("mark-prog-id").value;
+      const prog = ThanafusDB.db.programmes.find(p => String(p.id) === String(progId));
+      if (!prog) return;
+
+      const container = document.getElementById("grade-only-rows");
+      const row = document.createElement("div");
+      row.className = "grade-only-row";
+      row.style.cssText = "display: grid; grid-template-columns: 1fr 150px 80px 40px; gap: 10px; align-items: center; background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 12px; border-radius: 10px;";
+      
+      row.innerHTML = `
+        <div>
+          <select class="form-control g-winner-select" onchange="updateMarksPointsPreview()">
+            ${getParticipantOptionsHtml(prog, selectedWinner)}
+          </select>
+        </div>
+        <div>
+          <select class="form-control g-grade-select" onchange="updateMarksPointsPreview()">
+            <option value="A" ${selectedGrade === 'A' ? 'selected' : ''}>Grade A (+5 PTS)</option>
+            <option value="B" ${selectedGrade === 'B' ? 'selected' : ''}>Grade B (+3 PTS)</option>
+            <option value="C" ${selectedGrade === 'C' ? 'selected' : ''}>Grade C (+1 PTS)</option>
+          </select>
+        </div>
+        <div style="text-align:center;">
+          <span class="grade-chip g-pts-badge" style="background:rgba(5,150,105,0.12); color:#059669; font-size:0.85rem; font-weight:800;">5 PTS</span>
+        </div>
+        <div>
+          <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.grade-only-row').remove(); updateMarksPointsPreview();" style="padding:8px 10px;" title="Remove"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      `;
+
+      container.appendChild(row);
+      updateMarksPointsPreview();
+    }
+
     function openMarkModal(progId) {
       const prog = ThanafusDB.db.programmes.find(p => String(p.id) === String(progId));
       if (!prog) return;
 
       document.getElementById("mark-prog-id").value = prog.id;
+      const isGroup = (prog.type || '').toLowerCase() === 'group';
+      const isGeneral = (prog.category || '').toLowerCase() === 'general';
+      const scorePattern = (isGroup || isGeneral)
+        ? `<strong>Group/General Scoring:</strong> 1st=10, 2nd=8, 3rd=6 | Grade A=5, B=3, C=1`
+        : `<strong>Individual Scoring:</strong> 1st=5, 2nd=3, 3rd=1 | Grade A=5, B=3, C=1`;
+
       document.getElementById("mark-prog-info").innerHTML = `
-        <strong>${prog.name}</strong> (${prog.category}) | Type: <strong>${prog.type}</strong>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div>
+            <span class="kala-cat-tag" style="margin-bottom:4px;">${prog.category}</span>
+            <div style="font-size:1.15rem; font-weight:800; color:#0f172a;">${prog.name}</div>
+          </div>
+          <span style="font-size:0.8rem; background:rgba(5,150,105,0.1); color:#059669; border:1px solid rgba(5,150,105,0.25); padding:3px 10px; border-radius:20px; font-weight:700;">
+            ${(prog.type || 'individual').toUpperCase()}
+          </span>
+        </div>
+        <div style="margin-top:8px; font-size:0.8rem; color:#475569; border-top:1px solid #e2e8f0; padding-top:6px;">
+          <i class="fa-solid fa-calculator text-gold"></i> ${scorePattern}
+        </div>
       `;
 
-      const isGroup = (prog.type || '').toLowerCase() === 'group' || (prog.category || '').toLowerCase() === 'general';
       const r1Select = document.getElementById("m-rank1-winner");
       const r2Select = document.getElementById("m-rank2-winner");
       const r3Select = document.getElementById("m-rank3-winner");
 
-      if (isGroup) {
-        const teams = ThanafusDB.db.teams || [];
-        const optionsHtml = `<option value="">Select Team Winner</option>` + teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
-        r1Select.innerHTML = optionsHtml;
-        r2Select.innerHTML = optionsHtml;
-        r3Select.innerHTML = optionsHtml;
-      } else {
-        const students = (ThanafusDB.db.students || []).filter(s => s.category === prog.category);
-        const optionsHtml = `<option value="">Select Student Winner</option>` + students.map(s => `<option value="${s.id}">#${s.chestNo || '—'} ${s.name}</option>`).join('');
-        r1Select.innerHTML = optionsHtml;
-        r2Select.innerHTML = optionsHtml;
-        r3Select.innerHTML = optionsHtml;
-      }
+      r1Select.innerHTML = getParticipantOptionsHtml(prog, "");
+      r2Select.innerHTML = getParticipantOptionsHtml(prog, "");
+      r3Select.innerHTML = getParticipantOptionsHtml(prog, "");
 
-      if (prog.resultsPublished && prog.results) {
+      document.getElementById("m-rank1-grade").value = "";
+      document.getElementById("m-rank2-grade").value = "";
+      document.getElementById("m-rank3-grade").value = "";
+
+      document.getElementById("grade-only-rows").innerHTML = "";
+
+      if (prog.resultsPublished && Array.isArray(prog.results)) {
         const r1 = prog.results.find(r => r.rank === 1);
         const r2 = prog.results.find(r => r.rank === 2);
         const r3 = prog.results.find(r => r.rank === 3);
 
-        if (r1) { r1Select.value = isGroup ? r1.teamId : r1.studentId; document.getElementById("m-rank1-grade").value = r1.grade || ""; }
-        if (r2) { r2Select.value = isGroup ? r2.teamId : r2.studentId; document.getElementById("m-rank2-grade").value = r2.grade || ""; }
-        if (r3) { r3Select.value = isGroup ? r3.teamId : r3.studentId; document.getElementById("m-rank3-grade").value = r3.grade || ""; }
+        if (r1) {
+          r1Select.value = isGroup ? r1.teamId : (r1.studentId || r1.teamId || "");
+          document.getElementById("m-rank1-grade").value = r1.grade || "";
+        }
+        if (r2) {
+          r2Select.value = isGroup ? r2.teamId : (r2.studentId || r2.teamId || "");
+          document.getElementById("m-rank2-grade").value = r2.grade || "";
+        }
+        if (r3) {
+          r3Select.value = isGroup ? r3.teamId : (r3.studentId || r3.teamId || "");
+          document.getElementById("m-rank3-grade").value = r3.grade || "";
+        }
+
+        const gradeOnlyWinners = prog.results.filter(r => !r.rank || r.rank > 3);
+        gradeOnlyWinners.forEach(g => {
+          const wId = isGroup ? g.teamId : (g.studentId || g.teamId);
+          if (wId) {
+            addGradeOnlyRow(wId, g.grade || "A");
+          }
+        });
       }
 
+      updateMarksPointsPreview();
       document.getElementById("mark-entry-modal").classList.add("active");
     }
 
@@ -767,24 +942,46 @@
       const prog = ThanafusDB.db.programmes.find(p => String(p.id) === String(progId));
       if (!prog) return;
 
-      const isGroup = (prog.type || '').toLowerCase() === 'group' || (prog.category || '').toLowerCase() === 'general';
+      const isGroup = (prog.type || '').toLowerCase() === 'group';
       const resultsArray = [];
 
-      const r1 = document.getElementById("m-rank1-winner").value;
-      const g1 = document.getElementById("m-rank1-grade").value;
-      if (r1) resultsArray.push({ rank: 1, [isGroup ? 'teamId' : 'studentId']: r1, grade: g1 });
+      const r1Winner = document.getElementById("m-rank1-winner").value;
+      const r1Grade = document.getElementById("m-rank1-grade").value;
+      if (r1Winner) {
+        resultsArray.push({ rank: 1, [isGroup ? 'teamId' : 'studentId']: r1Winner, grade: r1Grade || null });
+      }
 
-      const r2 = document.getElementById("m-rank2-winner").value;
-      const g2 = document.getElementById("m-rank2-grade").value;
-      if (r2) resultsArray.push({ rank: 2, [isGroup ? 'teamId' : 'studentId']: r2, grade: g2 });
+      const r2Winner = document.getElementById("m-rank2-winner").value;
+      const r2Grade = document.getElementById("m-rank2-grade").value;
+      if (r2Winner) {
+        resultsArray.push({ rank: 2, [isGroup ? 'teamId' : 'studentId']: r2Winner, grade: r2Grade || null });
+      }
 
-      const r3 = document.getElementById("m-rank3-winner").value;
-      const g3 = document.getElementById("m-rank3-grade").value;
-      if (r3) resultsArray.push({ rank: 3, [isGroup ? 'teamId' : 'studentId']: r3, grade: g3 });
+      const r3Winner = document.getElementById("m-rank3-winner").value;
+      const r3Grade = document.getElementById("m-rank3-grade").value;
+      if (r3Winner) {
+        resultsArray.push({ rank: 3, [isGroup ? 'teamId' : 'studentId']: r3Winner, grade: r3Grade || null });
+      }
+
+      document.querySelectorAll('.grade-only-row').forEach(row => {
+        const sel = row.querySelector('.g-winner-select');
+        const grd = row.querySelector('.g-grade-select');
+        const w = sel ? sel.value : "";
+        const g = grd ? grd.value : "";
+        if (w && g) {
+          resultsArray.push({ rank: null, [isGroup ? 'teamId' : 'studentId']: w, grade: g });
+        }
+      });
+
+      if (resultsArray.length === 0) {
+        showAlert("Please select at least one winner or grade recipient to publish results.", "warning");
+        return;
+      }
 
       ThanafusDB.publishResults(progId, resultsArray);
       closeMarkModal();
       renderProgsAdmin();
+      renderTeamsAdmin();
       showAlert(`Results published for ${prog.name}!`, "success");
     }
 
@@ -793,6 +990,7 @@
       ThanafusDB.unpublishResults(progId);
       closeMarkModal();
       renderProgsAdmin();
+      renderTeamsAdmin();
       showAlert("Results unpublished successfully", "warning");
     }
 

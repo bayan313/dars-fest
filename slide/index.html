@@ -777,16 +777,16 @@
 
         const rows = rankWinners.map(w => {
           let name = "—", teamName = "", pts = 0;
-          if ((prog.type || "").trim().toLowerCase() === "group" || (prog.category || "").trim().toLowerCase() === "general") {
-            const t = ThanafusDB.db.teams.find(tm => tm.id === (w.teamId || prog.teamId));
-            name = t ? t.name : "Team";
-            teamName = "Team Event";
-            pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
-          } else {
+          if (w.studentId) {
             const s = ThanafusDB.db.students.find(st => st.id === w.studentId);
             const t = s ? ThanafusDB.db.teams.find(tm => tm.id === s.teamId) : null;
             name = s ? s.name : "—";
             teamName = t ? t.name : "";
+            pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
+          } else {
+            const t = ThanafusDB.db.teams.find(tm => tm.id === (w.teamId || prog.teamId));
+            name = t ? t.name : "Team";
+            teamName = "Team Event";
             pts = ThanafusDB.programmePoints(prog, w.rank, w.grade);
           }
           return { rank: Number(w.rank), name: name || "—", teamName: teamName || "", pts: pts || 0, grade: w.grade || "" };

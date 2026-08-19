@@ -206,11 +206,7 @@
           let chest = "—";
           let teamName = "N/A";
 
-          if (isGroup) {
-            const t = ThanafusDB.db.teams.find(x => x.id === (res.teamId || prog.teamId));
-            name = t ? t.name : "Team";
-            teamName = t ? t.name : "Team";
-          } else {
+          if (res.studentId) {
             const s = ThanafusDB.db.students.find(x => x.id === res.studentId);
             if (s) {
               name = `<a href="#" onclick="viewStudentModal('${s.id}'); return false;" class="text-gold" style="font-weight:600;">${s.name}</a>`;
@@ -218,6 +214,10 @@
               const t = ThanafusDB.db.teams.find(x => x.id === s.teamId);
               teamName = t ? t.name : "Unassigned";
             }
+          } else if (res.teamId || prog.teamId) {
+            const t = ThanafusDB.db.teams.find(x => x.id === (res.teamId || prog.teamId));
+            name = t ? t.name : "Team";
+            teamName = t ? t.name : "Team";
           }
 
           const rankBadge = res.rank === 1 ? `<span class="rank-badge rank-1" style="width:28px;height:28px;font-size:0.9rem;">1</span>`

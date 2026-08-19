@@ -673,15 +673,23 @@ class Database {
         let team = null;
         let studentName = "";
 
-        if ((prog.type || '').trim().toLowerCase() === 'group' || (prog.category || '').trim().toLowerCase() === 'general') {
+        if ((prog.type || '').trim().toLowerCase() === 'group') {
           // Team event: score goes to the selected team directly
           team = this.db.teams.find(t => t.id === (res.teamId || prog.teamId));
           studentName = team ? team.name : "Team";
         } else {
-          const student = this.db.students.find(s => s.id === res.studentId);
-          if (!student) return;
-          team = this.db.teams.find(t => t.id === student.teamId);
-          studentName = student.name;
+          // Individual event:
+          if (res.studentId) {
+            const student = this.db.students.find(s => s.id === res.studentId);
+            if (student) {
+              team = this.db.teams.find(t => t.id === student.teamId);
+              studentName = student.name;
+            }
+          }
+          if (!team && res.teamId) {
+            team = this.db.teams.find(t => t.id === res.teamId);
+            studentName = team ? team.name : "Team";
+          }
         }
         if (!team) return;
 
@@ -1107,10 +1115,11 @@ class Database {
   publishResults(programmeId, resultsArray) {
     const prog = this.db.programmes.find(p => p && String(p.id) === String(programmeId));
     if (prog) {
-      prog.results = resultsArray.map(r => ({
-        rank: r.rank ? parseInt(r.rank) : null,
-        studentId: ((prog.type || '').trim().toLowerCase() === 'group' || (prog.category || '').trim().toLowerCase() === 'general') ? null : (r.studentId || null),
-        teamId: ((prog.type || '').trim().toLowerCase() === 'group' || (prog.category || '').trim().toLowerCase() === 'general') ? (r.teamId || r.studentId || null) : null,
+      const isGroupEvent = (prog.type || '').trim().toLowerCase() === 'group';
+      prog.results = (resultsArray || []).filter(r => r && (r.studentId || r.teamId)).map(r => ({
+        rank: (r.rank !== undefined && r.rank !== null && r.rank !== '' && parseInt(r.rank) > 0) ? parseInt(r.rank) : null,
+        studentId: isGroupEvent ? null : (r.studentId || null),
+        teamId: isGroupEvent ? (r.teamId || r.studentId || null) : (r.teamId || null),
         grade: r.grade ? r.grade.toUpperCase().trim() : null
       }));
       prog.resultsPublished = true;
