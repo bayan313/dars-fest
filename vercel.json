@@ -1,45 +1,12 @@
 {
-  "version": 2,
-  "routes": [
-    {
-      "src": "/api/all",
-      "dest": "/api/all.js"
-    },
-    {
-      "src": "/admin",
-      "dest": "/admin/admin.html"
-    },
-    {
-      "src": "/admin/",
-      "dest": "/admin/admin.html"
-    },
-    {
-      "src": "/results",
-      "dest": "/pages/results.html"
-    },
-    {
-      "src": "/results/",
-      "dest": "/pages/results.html"
-    },
-    {
-      "src": "/contact",
-      "dest": "/pages/contact.html"
-    },
-    {
-      "src": "/contact/",
-      "dest": "/pages/contact.html"
-    },
-    {
-      "src": "/slide",
-      "dest": "/slide.html"
-    },
-    {
-      "src": "/slide/",
-      "dest": "/slide.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
+  "rewrites": [
+    { "source": "/admin", "destination": "/admin/admin.html" },
+    { "source": "/admin/", "destination": "/admin/admin.html" },
+    { "source": "/results", "destination": "/pages/results.html" },
+    { "source": "/results/", "destination": "/pages/results.html" },
+    { "source": "/contact", "destination": "/pages/contact.html" },
+    { "source": "/contact/", "destination": "/pages/contact.html" },
+    { "source": "/slide", "destination": "/slide.html" },
+    { "source": "/slide/", "destination": "/slide.html" }
   ]
 }
