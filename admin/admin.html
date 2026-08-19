@@ -13,11 +13,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* Admin Specific Styling */
     .admin-layout {
       display: grid;
-      grid-template-columns: 260px 1fr;
-      gap: 30px;
+      grid-template-columns: 250px 1fr;
+      gap: 24px;
       min-height: calc(100vh - 160px);
       margin-top: 20px;
     }
@@ -26,11 +25,11 @@
       background: var(--bg-card);
       border: 1px solid var(--border-glass);
       border-radius: var(--radius-lg);
-      padding: 20px 14px;
+      padding: 16px 12px;
       display: flex;
       flex-direction: column;
       gap: 6px;
-
+      height: fit-content;
     }
 
     .admin-nav-item {
@@ -44,12 +43,11 @@
       font-size: 0.9rem;
       cursor: pointer;
       transition: all 0.2s ease;
-
     }
 
     .admin-nav-item:hover,
     .admin-nav-item.active {
-      background: rgba(245, 158, 11, 0.12);
+      background: rgba(245, 158, 11, 0.15);
       color: var(--accent-gold-light);
       font-weight: 600;
     }
@@ -70,6 +68,13 @@
       font-weight: 800;
       line-height: 1.1;
       margin-top: 4px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
     @media (max-width: 900px) {
@@ -102,6 +107,24 @@
     </div>
   </div>
 
+  <!-- RESET CONFIRMATION MODAL -->
+  <div class="modal-overlay" id="reset-confirm-modal">
+    <div class="modal-card" style="max-width: 450px;">
+      <div class="modal-header">
+        <h3 style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Confirm Database Reset</h3>
+        <button class="modal-close" onclick="closeResetModal()">&times;</button>
+      </div>
+      <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 16px;">
+        This action will reset the database to factory state! Please type <strong style="color:var(--accent-gold-light);">RESET</strong> to confirm.
+      </p>
+      <input type="text" id="reset-confirm-input" class="form-control" style="padding-left:14px; margin-bottom: 20px;" placeholder="Type RESET here...">
+      <div style="display: flex; gap: 12px; justify-content: flex-end;">
+        <button class="btn btn-outline" onclick="closeResetModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="executeDatabaseReset()"><i class="fa-solid fa-trash"></i> Confirm Reset</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Header -->
   <header>
     <nav class="navbar">
@@ -129,10 +152,10 @@
             <i class="fa-solid fa-gauge"></i> Dashboard
           </div>
           <div class="admin-nav-item" onclick="switchAdminTab('teams')" id="tab-btn-teams">
-            <i class="fa-solid fa-people-group"></i> Manage Teams
+            <i class="fa-solid fa-people-group"></i> Teams
           </div>
           <div class="admin-nav-item" onclick="switchAdminTab('students')" id="tab-btn-students">
-            <i class="fa-solid fa-user-graduate"></i> Manage Students
+            <i class="fa-solid fa-user-graduate"></i> Students
           </div>
           <div class="admin-nav-item" onclick="switchAdminTab('progs')" id="tab-btn-progs">
             <i class="fa-solid fa-trophy"></i> Programmes & Marks
@@ -142,9 +165,6 @@
           </div>
           <div class="admin-nav-item" onclick="switchAdminTab('notifs')" id="tab-btn-notifs">
             <i class="fa-solid fa-bullhorn"></i> Announcements
-          </div>
-          <div class="admin-nav-item" onclick="switchAdminTab('appeals')" id="tab-btn-appeals">
-            <i class="fa-solid fa-gavel"></i> Appeals Board
           </div>
           <div class="admin-nav-item" onclick="switchAdminTab('messages')" id="tab-btn-messages">
             <i class="fa-solid fa-envelope-open-text"></i> Visitor Messages
@@ -183,20 +203,12 @@
                 </div>
                 <i class="fa-solid fa-trophy fa-2x text-muted" style="opacity: 0.4;"></i>
               </div>
-              <div class="admin-stat-card">
-                <div>
-                  <span class="text-muted" style="font-size: 0.8rem;">Pending Appeals</span>
-                  <div id="stat-appeals" class="admin-stat-val" style="color:#ef4444;">0</div>
-                </div>
-                <i class="fa-solid fa-circle-exclamation fa-2x text-muted" style="opacity: 0.4;"></i>
-              </div>
             </div>
 
             <div class="card" style="margin-bottom: 24px;">
-              <h3 style="font-size: 1.2rem; margin-bottom: 14px;"><i class="fa-solid fa-bolt text-gold"></i> Quick Actions</h3>
+              <h3 style="font-size: 1.2rem; margin-bottom: 14px;"><i class="fa-solid fa-bolt text-gold"></i> Control Operations</h3>
               <div style="display: flex; gap: 14px; flex-wrap: wrap;">
-                <button onclick="confirmUnpublishAll()" class="btn btn-outline btn-sm"><i class="fa-solid fa-rotate-left"></i> Unpublish All Results</button>
-                <button onclick="confirmResetDB()" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i> Factory Reset DB</button>
+                <button onclick="promptResetDB()" class="btn btn-danger btn-sm"><i class="fa-solid fa-rotate-left"></i> Factory Reset Database</button>
               </div>
             </div>
           </div>
@@ -212,19 +224,52 @@
 
           <!-- TAB 3: MANAGE STUDENTS -->
           <div id="tab-sec-students" class="admin-tab-content" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
               <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-user-graduate text-gold"></i> Manage Students</h2>
               <button onclick="openStudentModal()" class="btn btn-gold btn-sm"><i class="fa-solid fa-plus"></i> Add Student</button>
             </div>
+
+            <!-- Filters -->
+            <div class="filter-row">
+              <select id="stud-cat-filter" class="form-control" style="width: 180px;" onchange="renderStudentsAdmin()">
+                <option value="ALL">All Categories</option>
+                <option value="Sub Junior">Sub Junior</option>
+                <option value="Junior">Junior</option>
+                <option value="Senior">Senior</option>
+              </select>
+
+              <select id="stud-team-filter" class="form-control" style="width: 180px;" onchange="renderStudentsAdmin()">
+                <option value="ALL">All Teams</option>
+              </select>
+            </div>
+
             <div id="students-admin-table" class="table-responsive"></div>
           </div>
 
           <!-- TAB 4: PROGRAMMES & MARKS -->
           <div id="tab-sec-progs" class="admin-tab-content" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
-              <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-trophy text-gold"></i> Programmes & Result Entry</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+              <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-trophy text-gold"></i> Programmes & Result Publishing</h2>
               <button onclick="openProgModal()" class="btn btn-gold btn-sm"><i class="fa-solid fa-plus"></i> Add Programme</button>
             </div>
+
+            <!-- Filters -->
+            <div class="filter-row">
+              <select id="prog-cat-filter" class="form-control" style="width: 180px;" onchange="renderProgsAdmin()">
+                <option value="ALL">All Categories</option>
+                <option value="Sub Junior">Sub Junior</option>
+                <option value="Junior">Junior</option>
+                <option value="Senior">Senior</option>
+                <option value="General">General</option>
+              </select>
+
+              <select id="prog-status-filter" class="form-control" style="width: 180px;" onchange="renderProgsAdmin()">
+                <option value="ALL">All Status</option>
+                <option value="PUBLISHED">Published</option>
+                <option value="PENDING">Pending</option>
+              </select>
+            </div>
+
             <div id="progs-admin-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
           </div>
 
@@ -246,19 +291,13 @@
             <div id="notifs-admin-table" class="table-responsive"></div>
           </div>
 
-          <!-- TAB 7: APPEALS BOARD -->
-          <div id="tab-sec-appeals" class="admin-tab-content" style="display: none;">
-            <h2 style="font-size: 1.6rem; margin-bottom: 20px;"><i class="fa-solid fa-gavel text-gold"></i> Appeals Board</h2>
-            <div id="appeals-admin-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
-          </div>
-
-          <!-- TAB 8: MESSAGES INBOX -->
+          <!-- TAB 7: MESSAGES INBOX -->
           <div id="tab-sec-messages" class="admin-tab-content" style="display: none;">
             <h2 style="font-size: 1.6rem; margin-bottom: 20px;"><i class="fa-solid fa-envelope-open-text text-gold"></i> Visitor Messages Inbox</h2>
             <div id="messages-admin-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
           </div>
 
-          <!-- TAB 9: SETTINGS -->
+          <!-- TAB 8: SETTINGS -->
           <div id="tab-sec-settings" class="admin-tab-content" style="display: none;">
             <h2 style="font-size: 1.6rem; margin-bottom: 20px;"><i class="fa-solid fa-sliders text-gold"></i> Portal Settings</h2>
             
@@ -281,8 +320,84 @@
     </div>
   </main>
 
-  <!-- MODALS FOR ADMIN CREATION -->
+  <!-- MODALS FOR ADMIN CREATION & MARK ENTRY -->
   
+  <!-- Mark Entry Modal -->
+  <div class="modal-overlay" id="mark-entry-modal">
+    <div class="modal-card" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3 id="mark-modal-title"><i class="fa-solid fa-award text-gold"></i> Publish Results</h3>
+        <button class="modal-close" onclick="closeMarkModal()">&times;</button>
+      </div>
+      <form onsubmit="saveMarks(event)">
+        <input type="hidden" id="mark-prog-id">
+        
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; font-size: 0.9rem;" id="mark-prog-info"></div>
+
+          <!-- 1st Rank -->
+          <div style="display: grid; grid-template-columns: 1fr 140px; gap: 12px; align-items: center;">
+            <div>
+              <label style="font-size: 0.8rem; color: var(--accent-gold-light); font-weight:700;">🥇 1st Rank Winner</label>
+              <select id="m-rank1-winner" class="form-control"></select>
+            </div>
+            <div>
+              <label style="font-size: 0.8rem; color: var(--text-muted);">Grade</label>
+              <select id="m-rank1-grade" class="form-control">
+                <option value="A">Grade A</option>
+                <option value="B">Grade B</option>
+                <option value="C">Grade C</option>
+                <option value="">No Grade</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 2nd Rank -->
+          <div style="display: grid; grid-template-columns: 1fr 140px; gap: 12px; align-items: center;">
+            <div>
+              <label style="font-size: 0.8rem; color: #94a3b8; font-weight:700;">🥈 2nd Rank Winner</label>
+              <select id="m-rank2-winner" class="form-control"></select>
+            </div>
+            <div>
+              <label style="font-size: 0.8rem; color: var(--text-muted);">Grade</label>
+              <select id="m-rank2-grade" class="form-control">
+                <option value="A">Grade A</option>
+                <option value="B">Grade B</option>
+                <option value="C">Grade C</option>
+                <option value="">No Grade</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 3rd Rank -->
+          <div style="display: grid; grid-template-columns: 1fr 140px; gap: 12px; align-items: center;">
+            <div>
+              <label style="font-size: 0.8rem; color: #b45309; font-weight:700;">🥉 3rd Rank Winner</label>
+              <select id="m-rank3-winner" class="form-control"></select>
+            </div>
+            <div>
+              <label style="font-size: 0.8rem; color: var(--text-muted);">Grade</label>
+              <select id="m-rank3-grade" class="form-control">
+                <option value="A">Grade A</option>
+                <option value="B">Grade B</option>
+                <option value="C">Grade C</option>
+                <option value="">No Grade</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="unpublishCurrentProg()"><i class="fa-solid fa-eye-slash"></i> Unpublish</button>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn btn-outline" onclick="closeMarkModal()">Cancel</button>
+            <button type="submit" class="btn btn-gold"><i class="fa-solid fa-check"></i> Publish Results</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Team Modal -->
   <div class="modal-overlay" id="team-modal">
     <div class="modal-card">
@@ -355,6 +470,47 @@
     </div>
   </div>
 
+  <!-- Programme Creation Modal -->
+  <div class="modal-overlay" id="prog-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="prog-modal-title">Add Programme</h3>
+        <button class="modal-close" onclick="closeProgModal()">&times;</button>
+      </div>
+      <form onsubmit="saveProg(event)">
+        <input type="hidden" id="edit-prog-id">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Programme Title</label>
+            <input type="text" id="p-title" class="form-control" style="padding-left:14px;" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label style="font-size: 0.85rem; color: var(--text-muted);">Category</label>
+              <select id="p-cat" class="form-control" required>
+                <option value="Sub Junior">Sub Junior</option>
+                <option value="Junior">Junior</option>
+                <option value="Senior">Senior</option>
+                <option value="General">General</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 0.85rem; color: var(--text-muted);">Type</label>
+              <select id="p-type" class="form-control" required>
+                <option value="individual">Individual</option>
+                <option value="group">Group</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-outline" onclick="closeProgModal()">Cancel</button>
+          <button type="submit" class="btn btn-gold">Save Programme</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer>
     <div class="container">
@@ -410,7 +566,15 @@
       document.getElementById("auth-overlay").classList.remove("active");
       document.getElementById("admin-panel-wrap").style.display = "grid";
       document.getElementById("admin-header-controls").style.display = "flex";
+      populateTeamFilters();
       renderAdminDash();
+    }
+
+    function populateTeamFilters() {
+      const select = document.getElementById("stud-team-filter");
+      if (!select) return;
+      const teams = ThanafusDB.db.teams || [];
+      select.innerHTML = `<option value="ALL">All Teams</option>` + teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
     }
 
     function handleAdminLogout() {
@@ -433,7 +597,6 @@
       if (tab === 'progs') renderProgsAdmin();
       if (tab === 'penalties') renderPenaltiesAdmin();
       if (tab === 'notifs') renderNotifsAdmin();
-      if (tab === 'appeals') renderAppealsAdmin();
       if (tab === 'messages') renderMessagesAdmin();
     }
 
@@ -441,8 +604,6 @@
       document.getElementById("stat-teams").innerText = ThanafusDB.db.teams?.length || 0;
       document.getElementById("stat-students").innerText = ThanafusDB.db.students?.length || 0;
       document.getElementById("stat-progs").innerText = ThanafusDB.db.programmes?.length || 0;
-      const pendingAppeals = (ThanafusDB.db.appeals || []).filter(a => a.status === 'Pending').length;
-      document.getElementById("stat-appeals").innerText = pendingAppeals;
     }
 
     function renderTeamsAdmin() {
@@ -451,7 +612,7 @@
       container.innerHTML = `
         <table class="table">
           <thead>
-            <tr><th>Name</th><th>Captain</th><th>Vice Captain</th><th>Points</th><th>Action</th></tr>
+            <tr><th>Name</th><th>Captain</th><th>Vice Captain</th><th>Points</th><th>Actions</th></tr>
           </thead>
           <tbody>
             ${teams.map(t => `
@@ -461,6 +622,7 @@
                 <td>${t.viceCaptain || '—'}</td>
                 <td style="font-weight:700; color:var(--accent-gold-light);">${t.totalScore} PTS</td>
                 <td>
+                  <button onclick="editTeamModal('${t.id}')" class="btn btn-gold btn-sm"><i class="fa-solid fa-pen"></i></button>
                   <button onclick="deleteTeam('${t.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
                 </td>
               </tr>
@@ -472,11 +634,19 @@
 
     function renderStudentsAdmin() {
       const container = document.getElementById("students-admin-table");
-      const students = ThanafusDB.db.students || [];
+      const catFilter = document.getElementById("stud-cat-filter").value;
+      const teamFilter = document.getElementById("stud-team-filter").value;
+
+      const students = (ThanafusDB.db.students || []).filter(s => {
+        if (catFilter !== 'ALL' && s.category !== catFilter) return false;
+        if (teamFilter !== 'ALL' && s.teamId !== teamFilter) return false;
+        return true;
+      });
+
       container.innerHTML = `
         <table class="table">
           <thead>
-            <tr><th>Chest</th><th>Name</th><th>Category</th><th>Team</th><th>Action</th></tr>
+            <tr><th>Chest</th><th>Name</th><th>Category</th><th>Team</th><th>Actions</th></tr>
           </thead>
           <tbody>
             ${students.map(s => {
@@ -488,6 +658,7 @@
                   <td>${s.category}</td>
                   <td>${team ? team.name : 'Unassigned'}</td>
                   <td>
+                    <button onclick="editStudentModal('${s.id}')" class="btn btn-gold btn-sm"><i class="fa-solid fa-pen"></i></button>
                     <button onclick="deleteStudent('${s.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
                   </td>
                 </tr>
@@ -500,22 +671,112 @@
 
     function renderProgsAdmin() {
       const container = document.getElementById("progs-admin-list");
-      const progs = ThanafusDB.db.programmes || [];
+      const catFilter = document.getElementById("prog-cat-filter").value;
+      const statusFilter = document.getElementById("prog-status-filter").value;
+
+      const progs = (ThanafusDB.db.programmes || []).filter(p => {
+        if (catFilter !== 'ALL' && p.category !== catFilter) return false;
+        if (statusFilter === 'PUBLISHED' && !p.resultsPublished) return false;
+        if (statusFilter === 'PENDING' && p.resultsPublished) return false;
+        return true;
+      });
+
       container.innerHTML = progs.map(p => `
         <div class="card">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
             <div>
               <span class="kala-cat-tag" style="margin-bottom:4px;">${p.category}</span>
               <h3>${p.name}</h3>
-              <p class="text-muted" style="font-size:0.8rem;">Type: ${p.type} | Published: ${p.resultsPublished ? 'YES' : 'NO'}</p>
+              <p class="text-muted" style="font-size:0.8rem;">Type: ${p.type} | Status: <strong style="color:${p.resultsPublished ? 'var(--primary-emerald)' : 'var(--accent-gold-light)'};">${p.resultsPublished ? 'Published' : 'Pending'}</strong></p>
             </div>
             <div style="display:flex; gap:8px;">
-              ${p.resultsPublished ? `<button onclick="unpublishProg('${p.id}')" class="btn btn-outline btn-sm">Unpublish</button>` : ''}
+              <button onclick="openMarkModal('${p.id}')" class="btn btn-gold btn-sm"><i class="fa-solid fa-award"></i> ${p.resultsPublished ? 'Edit Marks' : 'Publish Results'}</button>
               <button onclick="deleteProg('${p.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
             </div>
           </div>
         </div>
-      `).join('');
+      `).join('') || `<div class="card text-center"><p class="text-muted">No programmes matching filter</p></div>`;
+    }
+
+    function openMarkModal(progId) {
+      const prog = ThanafusDB.db.programmes.find(p => String(p.id) === String(progId));
+      if (!prog) return;
+
+      document.getElementById("mark-prog-id").value = prog.id;
+      document.getElementById("mark-prog-info").innerHTML = `
+        <strong>${prog.name}</strong> (${prog.category}) | Type: <strong>${prog.type}</strong>
+      `;
+
+      const isGroup = (prog.type || '').toLowerCase() === 'group' || (prog.category || '').toLowerCase() === 'general';
+      const r1Select = document.getElementById("m-rank1-winner");
+      const r2Select = document.getElementById("m-rank2-winner");
+      const r3Select = document.getElementById("m-rank3-winner");
+
+      if (isGroup) {
+        const teams = ThanafusDB.db.teams || [];
+        const optionsHtml = `<option value="">Select Team Winner</option>` + teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+        r1Select.innerHTML = optionsHtml;
+        r2Select.innerHTML = optionsHtml;
+        r3Select.innerHTML = optionsHtml;
+      } else {
+        const students = (ThanafusDB.db.students || []).filter(s => s.category === prog.category);
+        const optionsHtml = `<option value="">Select Student Winner</option>` + students.map(s => `<option value="${s.id}">#${s.chestNo || '—'} ${s.name}</option>`).join('');
+        r1Select.innerHTML = optionsHtml;
+        r2Select.innerHTML = optionsHtml;
+        r3Select.innerHTML = optionsHtml;
+      }
+
+      // Pre-fill existing results if published
+      if (prog.resultsPublished && prog.results) {
+        const r1 = prog.results.find(r => r.rank === 1);
+        const r2 = prog.results.find(r => r.rank === 2);
+        const r3 = prog.results.find(r => r.rank === 3);
+
+        if (r1) { r1Select.value = isGroup ? r1.teamId : r1.studentId; document.getElementById("m-rank1-grade").value = r1.grade || ""; }
+        if (r2) { r2Select.value = isGroup ? r2.teamId : r2.studentId; document.getElementById("m-rank2-grade").value = r2.grade || ""; }
+        if (r3) { r3Select.value = isGroup ? r3.teamId : r3.studentId; document.getElementById("m-rank3-grade").value = r3.grade || ""; }
+      }
+
+      document.getElementById("mark-entry-modal").classList.add("active");
+    }
+
+    function closeMarkModal() {
+      document.getElementById("mark-entry-modal").classList.remove("active");
+    }
+
+    function saveMarks(e) {
+      e.preventDefault();
+      const progId = document.getElementById("mark-prog-id").value;
+      const prog = ThanafusDB.db.programmes.find(p => String(p.id) === String(progId));
+      if (!prog) return;
+
+      const isGroup = (prog.type || '').toLowerCase() === 'group' || (prog.category || '').toLowerCase() === 'general';
+      const resultsArray = [];
+
+      const r1 = document.getElementById("m-rank1-winner").value;
+      const g1 = document.getElementById("m-rank1-grade").value;
+      if (r1) resultsArray.push({ rank: 1, [isGroup ? 'teamId' : 'studentId']: r1, grade: g1 });
+
+      const r2 = document.getElementById("m-rank2-winner").value;
+      const g2 = document.getElementById("m-rank2-grade").value;
+      if (r2) resultsArray.push({ rank: 2, [isGroup ? 'teamId' : 'studentId']: r2, grade: g2 });
+
+      const r3 = document.getElementById("m-rank3-winner").value;
+      const g3 = document.getElementById("m-rank3-grade").value;
+      if (r3) resultsArray.push({ rank: 3, [isGroup ? 'teamId' : 'studentId']: r3, grade: g3 });
+
+      ThanafusDB.publishResults(progId, resultsArray);
+      closeMarkModal();
+      renderProgsAdmin();
+      showAlert(`Results published for ${prog.name}!`, "success");
+    }
+
+    function unpublishCurrentProg() {
+      const progId = document.getElementById("mark-prog-id").value;
+      ThanafusDB.unpublishResults(progId);
+      closeMarkModal();
+      renderProgsAdmin();
+      showAlert("Results unpublished successfully", "warning");
     }
 
     function renderPenaltiesAdmin() {
@@ -534,7 +795,7 @@
                   <td>${team ? team.name : 'Unknown'}</td>
                   <td style="color:#ef4444; font-weight:700;">-${p.points} PTS</td>
                   <td>${p.reason}</td>
-                  <td><button onclick="deletePenalty('${p.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button></td>
+                  <td><button onclick="deletePenalty('${p.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i> Delete</button></td>
                 </tr>
               `;
             }).join('') || `<tr><td colspan="4" class="text-center text-muted">No penalty records</td></tr>`}
@@ -557,26 +818,12 @@
                 <td><strong>${n.title}</strong></td>
                 <td>${n.content}</td>
                 <td><span class="kala-cat-tag">${n.type}</span></td>
-                <td><button onclick="deleteNotif('${n.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button></td>
+                <td><button onclick="deleteNotif('${n.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i> Delete</button></td>
               </tr>
             `).join('')}
           </tbody>
         </table>
       `;
-    }
-
-    function renderAppealsAdmin() {
-      const container = document.getElementById("appeals-admin-list");
-      const appeals = ThanafusDB.db.appeals || [];
-      container.innerHTML = appeals.map(a => `
-        <div class="card">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h4>${a.studentName} (${a.team}) - ${a.programme}</h4>
-            <span class="grade-chip ${a.status === 'Approved' ? 'a' : 'c'}">${a.status}</span>
-          </div>
-          <p class="text-muted" style="font-size:0.85rem; margin:8px 0;">${a.description}</p>
-        </div>
-      `).join('') || `<div class="card text-center"><p class="text-muted">No submitted appeals</p></div>`;
     }
 
     function renderMessagesAdmin() {
@@ -593,41 +840,105 @@
       `).join('') || `<div class="card text-center"><p class="text-muted">No visitor messages</p></div>`;
     }
 
+    // Reset Prompt Safeguard
+    function promptResetDB() {
+      document.getElementById("reset-confirm-input").value = "";
+      document.getElementById("reset-confirm-modal").classList.add("active");
+    }
+
+    function closeResetModal() {
+      document.getElementById("reset-confirm-modal").classList.remove("active");
+    }
+
+    function executeDatabaseReset() {
+      const val = document.getElementById("reset-confirm-input").value.trim();
+      if (val !== 'RESET') {
+        showAlert("Confirmation word mismatch! Reset aborted.", "danger");
+        return;
+      }
+      ThanafusDB.reset();
+      closeResetModal();
+      renderAdminDash();
+      showAlert("Database reset successfully to clean state!", "success");
+    }
+
     // Modal Helpers & Operations
-    function openTeamModal() { document.getElementById("team-modal").classList.add("active"); }
+    function openTeamModal() {
+      document.getElementById("edit-team-id").value = "";
+      document.getElementById("t-name").value = "";
+      document.getElementById("t-captain").value = "";
+      document.getElementById("t-vice").value = "";
+      document.getElementById("team-modal").classList.add("active");
+    }
     function closeTeamModal() { document.getElementById("team-modal").classList.remove("active"); }
     function saveTeam(e) {
       e.preventDefault();
+      const id = document.getElementById("edit-team-id").value;
       const name = document.getElementById("t-name").value;
       const captain = document.getElementById("t-captain").value;
       const vice = document.getElementById("t-vice").value;
-      ThanafusDB.addTeam(name, captain, vice);
+
+      if (id) {
+        ThanafusDB.editTeam(id, name, captain, vice);
+      } else {
+        ThanafusDB.addTeam(name, captain, vice);
+      }
       closeTeamModal();
       renderTeamsAdmin();
-      showAlert("Team created successfully!", "success");
+      showAlert("Team saved successfully!", "success");
     }
     function deleteTeam(id) { ThanafusDB.deleteTeam(id); renderTeamsAdmin(); }
 
     function openStudentModal() {
       const select = document.getElementById("s-team");
       select.innerHTML = (ThanafusDB.db.teams || []).map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+      document.getElementById("edit-student-id").value = "";
+      document.getElementById("s-name").value = "";
+      document.getElementById("s-chest").value = "";
       document.getElementById("student-form-modal").classList.add("active");
     }
     function closeStudentFormModal() { document.getElementById("student-form-modal").classList.remove("active"); }
     function saveStudent(e) {
       e.preventDefault();
+      const id = document.getElementById("edit-student-id").value;
       const name = document.getElementById("s-name").value;
       const chest = document.getElementById("s-chest").value;
       const cat = document.getElementById("s-cat").value;
       const teamId = document.getElementById("s-team").value;
-      ThanafusDB.addStudent(name, teamId, cat, "", chest);
+
+      if (id) {
+        ThanafusDB.editStudent(id, name, teamId, cat, "", chest);
+      } else {
+        ThanafusDB.addStudent(name, teamId, cat, "", chest);
+      }
       closeStudentFormModal();
       renderStudentsAdmin();
-      showAlert("Student added successfully!", "success");
+      showAlert("Student saved successfully!", "success");
     }
     function deleteStudent(id) { ThanafusDB.deleteStudent(id); renderStudentsAdmin(); }
 
-    function unpublishProg(id) { ThanafusDB.unpublishResults(id); renderProgsAdmin(); }
+    function openProgModal() {
+      document.getElementById("edit-prog-id").value = "";
+      document.getElementById("p-title").value = "";
+      document.getElementById("prog-modal").classList.add("active");
+    }
+    function closeProgModal() { document.getElementById("prog-modal").classList.remove("active"); }
+    function saveProg(e) {
+      e.preventDefault();
+      const id = document.getElementById("edit-prog-id").value;
+      const title = document.getElementById("p-title").value;
+      const cat = document.getElementById("p-cat").value;
+      const type = document.getElementById("p-type").value;
+
+      if (id) {
+        ThanafusDB.editProgramme(id, title, cat, type);
+      } else {
+        ThanafusDB.addProgramme(title, cat, type);
+      }
+      closeProgModal();
+      renderProgsAdmin();
+      showAlert("Programme saved successfully!", "success");
+    }
     function deleteProg(id) { ThanafusDB.deleteProgramme(id); renderProgsAdmin(); }
     function deletePenalty(id) { ThanafusDB.deletePenalty(id); renderPenaltiesAdmin(); }
     function deleteNotif(id) { ThanafusDB.deleteNotification(id); renderNotifsAdmin(); }
@@ -638,20 +949,6 @@
       ThanafusDB.updateSettings({ adminPassword: newPass });
       showAlert("Admin access password updated!", "success");
       document.getElementById("new-admin-pass").value = "";
-    }
-
-    function confirmUnpublishAll() {
-      if (confirm("Are you sure you want to unpublish ALL program results?")) {
-        ThanafusDB.unpublishAllResults();
-        showAlert("All results unpublished", "warning");
-      }
-    }
-
-    function confirmResetDB() {
-      if (confirm("WARNING: This will reset all database scores to defaults! Proceed?")) {
-        ThanafusDB.reset();
-        showAlert("Database reset to factory default state", "warning");
-      }
     }
   </script>
 </body>
