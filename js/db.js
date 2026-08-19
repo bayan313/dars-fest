@@ -2,27 +2,118 @@
 
 const DEFAULT_DB = {
   teams: [
-    { id: "team-1", name: "Al Fath", captain: "Ahmad Riza", viceCaptain: "Basim K.P.", members: ["Ahmad Riza", "Faris Rahman", "Zayd Ali", "Yousuf Hasan", "Basim K.P."], totalScore: 0, rank: 1, grades: { A: 0, B: 0, C: 0 }, wins: [] },
-    { id: "team-2", name: "Al Buruj", captain: "Safwan K.", viceCaptain: "Dilshad", members: ["Safwan K.", "Shamil V.P.", "Adnan Shah", "Raihan Ali", "Dilshad"], totalScore: 0, rank: 2, grades: { A: 0, B: 0, C: 0 }, wins: [] },
-    { id: "team-3", name: "Al Najm", captain: "Minhaj Uddin", viceCaptain: "Anas K.", members: ["Minhaj Uddin", "Nuaim P.", "Ajmal K.T.", "Jasir M.", "Anas K."], totalScore: 0, rank: 3, grades: { A: 0, B: 0, C: 0 }, wins: [] },
-    { id: "team-4", name: "Al Qalam", captain: "Luqmanul Hakeem", viceCaptain: "Sahal", members: ["Luqmanul Hakeem", "Ashraf Ali", "Ramil K.", "Hisham P.", "Sahal"], totalScore: 0, rank: 4, grades: { A: 0, B: 0, C: 0 }, wins: [] }
+    { id: "team-1", name: "Sabha", captain: "ഉനൈസ്", viceCaptain: "മുക്താർ", members: ["ഉനൈസ്", "മുക്താർ", "ഷാഹിൻ അലി", "അഷറഫ്", "സദീദ്", "ആദിൽ"], totalScore: 0, rank: 1, grades: { A: 0, B: 0, C: 0 }, wins: [] },
+    { id: "team-2", name: "Lizaz", captain: "Adnan", viceCaptain: "Rasmil", members: ["Adnan", "Rasmil", "Basith", "Marvan", "Amjad", "Nihad"], totalScore: 0, rank: 2, grades: { A: 0, B: 0, C: 0 }, wins: [] },
+    { id: "team-3", name: "Laheef", captain: "Sinan vp", viceCaptain: "Syd mushab", members: ["Sinan vp", "Syd mushab", "Muheenudheen", "Ajmal nasim", "Rasheq", "Rashid p"], totalScore: 0, rank: 3, grades: { A: 0, B: 0, C: 0 }, wins: [] },
+    { id: "team-4", name: "Murthajiz", captain: "Rishad MP", viceCaptain: "Junaid", members: ["Rishad MP", "Junaid", "Nashan", "Sayyid Dilshan", "Jamal", "Sayyid Shafeeh", "Shabeeb"], totalScore: 0, rank: 4, grades: { A: 0, B: 0, C: 0 }, wins: [] }
   ],
   students: [
-    // Sub Junior
-    { id: "stud-1", name: "Faris Rahman", teamId: "team-1", category: "Sub Junior", photo: "" },
-    { id: "stud-2", name: "Shamil V.P.", teamId: "team-2", category: "Sub Junior", photo: "" },
-    { id: "stud-3", name: "Nuaim P.", teamId: "team-3", category: "Sub Junior", photo: "" },
-    { id: "stud-4", name: "Ashraf Ali", teamId: "team-4", category: "Sub Junior", photo: "" },
-    // Junior
-    { id: "stud-5", name: "Zayd Ali", teamId: "team-1", category: "Junior", photo: "" },
-    { id: "stud-6", name: "Adnan Shah", teamId: "team-2", category: "Junior", photo: "" },
-    { id: "stud-7", name: "Ajmal K.T.", teamId: "team-3", category: "Junior", photo: "" },
-    { id: "stud-8", name: "Ramil K.", teamId: "team-4", category: "Junior", photo: "" },
-    // Senior
-    { id: "stud-9", name: "Yousuf Hasan", teamId: "team-1", category: "Senior", photo: "" },
-    { id: "stud-10", name: "Raihan Ali", teamId: "team-2", category: "Senior", photo: "" },
-    { id: "stud-11", name: "Jasir M.", teamId: "team-3", category: "Senior", photo: "" },
-    { id: "stud-12", name: "Hisham P.", teamId: "team-4", category: "Senior", photo: "" }
+    // --- TEAM 1: SABHA ---
+    // Senior (101-106)
+    { id: "stud-101", chestNo: "101", name: "ഉനൈസ്", teamId: "team-1", category: "Senior", photo: "" },
+    { id: "stud-102", chestNo: "102", name: "മുക്താർ", teamId: "team-1", category: "Senior", photo: "" },
+    { id: "stud-103", chestNo: "103", name: "ഷാഹിൻ അലി", teamId: "team-1", category: "Senior", photo: "" },
+    { id: "stud-104", chestNo: "104", name: "അഷറഫ്", teamId: "team-1", category: "Senior", photo: "" },
+    { id: "stud-105", chestNo: "105", name: "സദീദ്", teamId: "team-1", category: "Senior", photo: "" },
+    { id: "stud-106", chestNo: "106", name: "ആദിൽ", teamId: "team-1", category: "Senior", photo: "" },
+    // Junior (107-116)
+    { id: "stud-107", chestNo: "107", name: "ഷുഹൈബ്", teamId: "team-1", category: "Junior", photo: "" },
+    { id: "stud-108", chestNo: "108", name: "ഫർഹാൻ ch", teamId: "team-1", category: "Junior", photo: "" },
+    { id: "stud-109", chestNo: "109", name: "ഫർഹാൻ pk", teamId: "team-1", category: "Junior", photo: "" },
+    { id: "stud-110", chestNo: "110", name: "ഷബീബ് m", teamId: "team-1", category: "Junior", photo: "" },
+    { id: "stud-111", chestNo: "111", name: "അ : ബാസിത്ത്", teamId: "team-1", category: "Junior", photo: "" },
+    { id: "stud-112", chestNo: "112", name: "സുഹൈൽ", teamId: "team-1", category: "Junior", photo: "" },
+    { id: "stud-113", chestNo: "113", name: "സഹദ്", teamId: "team-1", category: "Junior", photo: "" },
+    { id: "stud-114", chestNo: "114", name: "അഹ്നഫ്", teamId: "team-1", category: "Junior", photo: "" },
+    { id: "stud-115", chestNo: "115", name: "അൽ ആമീൻ", teamId: "team-1", category: "Junior", photo: "" },
+    { id: "stud-116", chestNo: "116", name: "മിദ്ലാജ് k", teamId: "team-1", category: "Junior", photo: "" },
+    // Sub Junior (117-122)
+    { id: "stud-117", chestNo: "117", name: "തഹസീൻ", teamId: "team-1", category: "Sub Junior", photo: "" },
+    { id: "stud-118", chestNo: "118", name: "അ : സഈദ്", teamId: "team-1", category: "Sub Junior", photo: "" },
+    { id: "stud-119", chestNo: "119", name: "റാസി", teamId: "team-1", category: "Sub Junior", photo: "" },
+    { id: "stud-120", chestNo: "120", name: "മഹമൂദ്", teamId: "team-1", category: "Sub Junior", photo: "" },
+    { id: "stud-121", chestNo: "121", name: "ശഫാസ്", teamId: "team-1", category: "Sub Junior", photo: "" },
+    { id: "stud-122", chestNo: "122", name: "റഹ്മാൻ", teamId: "team-1", category: "Sub Junior", photo: "" },
+
+    // --- TEAM 2: LIZAZ ---
+    // Senior (201-206)
+    { id: "stud-201", chestNo: "201", name: "Adnan", teamId: "team-2", category: "Senior", photo: "" },
+    { id: "stud-202", chestNo: "202", name: "Rasmil", teamId: "team-2", category: "Senior", photo: "" },
+    { id: "stud-203", chestNo: "203", name: "Basith", teamId: "team-2", category: "Senior", photo: "" },
+    { id: "stud-204", chestNo: "204", name: "Marvan", teamId: "team-2", category: "Senior", photo: "" },
+    { id: "stud-205", chestNo: "205", name: "Amjad", teamId: "team-2", category: "Senior", photo: "" },
+    { id: "stud-206", chestNo: "206", name: "Nihad", teamId: "team-2", category: "Senior", photo: "" },
+    // Junior (207-215)
+    { id: "stud-207", chestNo: "207", name: "Muheenudheen km", teamId: "team-2", category: "Junior", photo: "" },
+    { id: "stud-209", chestNo: "209", name: "Hisham", teamId: "team-2", category: "Junior", photo: "" },
+    { id: "stud-210", chestNo: "210", name: "Jamshiyas", teamId: "team-2", category: "Junior", photo: "" },
+    { id: "stud-211", chestNo: "211", name: "Shamveel", teamId: "team-2", category: "Junior", photo: "" },
+    { id: "stud-212", chestNo: "212", name: "Muhaimin", teamId: "team-2", category: "Junior", photo: "" },
+    { id: "stud-213", chestNo: "213", name: "Mishal", teamId: "team-2", category: "Junior", photo: "" },
+    { id: "stud-214", chestNo: "214", name: "Fayas", teamId: "team-2", category: "Junior", photo: "" },
+    { id: "stud-215", chestNo: "215", name: "Swalih", teamId: "team-2", category: "Junior", photo: "" },
+    // Sub Junior (216-222)
+    { id: "stud-216", chestNo: "216", name: "Shibili .p.", teamId: "team-2", category: "Sub Junior", photo: "" },
+    { id: "stud-217", chestNo: "217", name: "Sahad . N", teamId: "team-2", category: "Sub Junior", photo: "" },
+    { id: "stud-218", chestNo: "218", name: "Ishan . Pn", teamId: "team-2", category: "Sub Junior", photo: "" },
+    { id: "stud-219", chestNo: "219", name: "Muhammadali", teamId: "team-2", category: "Sub Junior", photo: "" },
+    { id: "stud-220", chestNo: "220", name: "Yaseen", teamId: "team-2", category: "Sub Junior", photo: "" },
+    { id: "stud-221", chestNo: "221", name: "Shaheem", teamId: "team-2", category: "Sub Junior", photo: "" },
+    { id: "stud-222", chestNo: "222", name: "Abdul hadi", teamId: "team-2", category: "Sub Junior", photo: "" },
+
+    // --- TEAM 3: LAHEEF ---
+    // Senior (301-306)
+    { id: "stud-301", chestNo: "301", name: "Sinan vp", teamId: "team-3", category: "Senior", photo: "" },
+    { id: "stud-302", chestNo: "302", name: "Syd mushab", teamId: "team-3", category: "Senior", photo: "" },
+    { id: "stud-303", chestNo: "303", name: "Muheenudheen", teamId: "team-3", category: "Senior", photo: "" },
+    { id: "stud-304", chestNo: "304", name: "Ajmal nasim", teamId: "team-3", category: "Senior", photo: "" },
+    { id: "stud-305", chestNo: "305", name: "Rasheq", teamId: "team-3", category: "Senior", photo: "" },
+    { id: "stud-306", chestNo: "306", name: "Rashid p", teamId: "team-3", category: "Senior", photo: "" },
+    // Junior (307-316)
+    { id: "stud-307", chestNo: "307", name: "Irshad vp", teamId: "team-3", category: "Junior", photo: "" },
+    { id: "stud-308", chestNo: "308", name: "Muhsin pv", teamId: "team-3", category: "Junior", photo: "" },
+    { id: "stud-309", chestNo: "309", name: "Swalahudheen ayyoobi", teamId: "team-3", category: "Junior", photo: "" },
+    { id: "stud-310", chestNo: "310", name: "Anshif", teamId: "team-3", category: "Junior", photo: "" },
+    { id: "stud-311", chestNo: "311", name: "Naveed", teamId: "team-3", category: "Junior", photo: "" },
+    { id: "stud-312", chestNo: "312", name: "Yaseen", teamId: "team-3", category: "Junior", photo: "" },
+    { id: "stud-313", chestNo: "313", name: "Salim", teamId: "team-3", category: "Junior", photo: "" },
+    { id: "stud-314", chestNo: "314", name: "Hashir", teamId: "team-3", category: "Junior", photo: "" },
+    { id: "stud-315", chestNo: "315", name: "Abdu rhman", teamId: "team-3", category: "Junior", photo: "" },
+    { id: "stud-316", chestNo: "316", name: "Salman N", teamId: "team-3", category: "Junior", photo: "" },
+    // Sub Junior (317-322)
+    { id: "stud-317", chestNo: "317", name: "Ibrahim", teamId: "team-3", category: "Sub Junior", photo: "" },
+    { id: "stud-318", chestNo: "318", name: "Rizvan", teamId: "team-3", category: "Sub Junior", photo: "" },
+    { id: "stud-319", chestNo: "319", name: "Fahad", teamId: "team-3", category: "Sub Junior", photo: "" },
+    { id: "stud-320", chestNo: "320", name: "Ameen", teamId: "team-3", category: "Sub Junior", photo: "" },
+    { id: "stud-321", chestNo: "321", name: "Abdulla umar", teamId: "team-3", category: "Sub Junior", photo: "" },
+    { id: "stud-322", chestNo: "322", name: "Aadil", teamId: "team-3", category: "Sub Junior", photo: "" },
+
+    // --- TEAM 4: MURTHAJIZ ---
+    // Senior (401-407)
+    { id: "stud-401", chestNo: "401", name: "Rishad MP", teamId: "team-4", category: "Senior", photo: "" },
+    { id: "stud-402", chestNo: "402", name: "Junaid", teamId: "team-4", category: "Senior", photo: "" },
+    { id: "stud-403", chestNo: "403", name: "Nashan", teamId: "team-4", category: "Senior", photo: "" },
+    { id: "stud-404", chestNo: "404", name: "Sayyid Dilshan", teamId: "team-4", category: "Senior", photo: "" },
+    { id: "stud-405", chestNo: "405", name: "Jamal", teamId: "team-4", category: "Senior", photo: "" },
+    { id: "stud-406", chestNo: "406", name: "Sayyid Shafeeh", teamId: "team-4", category: "Senior", photo: "" },
+    { id: "stud-407", chestNo: "407", name: "Shabeeb", teamId: "team-4", category: "Senior", photo: "" },
+    // Junior (408-415)
+    { id: "stud-408", chestNo: "408", name: "Bishr", teamId: "team-4", category: "Junior", photo: "" },
+    { id: "stud-409", chestNo: "409", name: "Ajsal", teamId: "team-4", category: "Junior", photo: "" },
+    { id: "stud-410", chestNo: "410", name: "Sinan kk", teamId: "team-4", category: "Junior", photo: "" },
+    { id: "stud-411", chestNo: "411", name: "Nishan", teamId: "team-4", category: "Junior", photo: "" },
+    { id: "stud-412", chestNo: "412", name: "Sadiq ali", teamId: "team-4", category: "Junior", photo: "" },
+    { id: "stud-413", chestNo: "413", name: "Rabeeh", teamId: "team-4", category: "Junior", photo: "" },
+    { id: "stud-414", chestNo: "414", name: "Arshad", teamId: "team-4", category: "Junior", photo: "" },
+    { id: "stud-415", chestNo: "415", name: "Uvais", teamId: "team-4", category: "Junior", photo: "" },
+    // Sub Junior (416-422)
+    { id: "stud-416", chestNo: "416", name: "Shadin", teamId: "team-4", category: "Sub Junior", photo: "" },
+    { id: "stud-417", chestNo: "417", name: "Fasmil", teamId: "team-4", category: "Sub Junior", photo: "" },
+    { id: "stud-418", chestNo: "418", name: "Muhyidheen ct", teamId: "team-4", category: "Sub Junior", photo: "" },
+    { id: "stud-419", chestNo: "419", name: "Shahid", teamId: "team-4", category: "Sub Junior", photo: "" },
+    { id: "stud-420", chestNo: "420", name: "Arshad", teamId: "team-4", category: "Sub Junior", photo: "" },
+    { id: "stud-421", chestNo: "421", name: "Saeed K", teamId: "team-4", category: "Sub Junior", photo: "" },
+    { id: "stud-422", chestNo: "422", name: "Anas", teamId: "team-4", category: "Sub Junior", photo: "" }
   ],
   programmes: [
     { id: "prog-1", name: "Quran Recitation", category: "Sub Junior", type: "individual", venue: "Imam Bukhari Stage", judge: "Usthad Hamza Musliyar", resultsPublished: false, results: [] },
