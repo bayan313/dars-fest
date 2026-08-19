@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THANAFUS Dars Fest 2026 | Live Projector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ============================================================
+       THANAFUS SLIDE PROJECTOR - Full Responsive
+       Works on: Mobile, Tablet, Laptop, Desktop, Projector, Smart TV
+    ============================================================ */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+      background: #060713; color: #fff;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    }
+
+    #slide-stage {
+      position: fixed; inset: 0; width: 100vw; height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      padding: 3vh 4vw 8vh;
+      background: linear-gradient(135deg, #090b1c 0%, #111435 55%, #060713 100%);
+      animation: slideFade 0.8s ease;
+      overflow: hidden;
+    }
+    .slide.active { display: flex; }
+    @keyframes slideFade { from { opacity: 0; } to { opacity: 1; } }
+
+    .slide::before, .slide::after {
+      content: ''; position: absolute; border-radius: 50%; opacity: 0.35; z-index: 0; pointer-events: none;
+    }
+    .slide::before { width: 50vmin; height: 50vmin; background: radial-gradient(circle, #4f46e5 0%, transparent 70%); top: -15vmin; left: -15vmin; }
+    .slide::after { width: 45vmin; height: 45vmin; background: radial-gradient(circle, #7c3aed 0%, transparent 70%); bottom: -15vmin; right: -15vmin; }
+    .slide > * { position: relative; z-index: 1; }
+
+    .slide-logo {
+      font-size: clamp(0.75rem, 1.3vw, 1.2rem); letter-spacing: 4px; color: #a5b4fc;
+      text-transform: uppercase; margin-bottom: 0.8vh; text-align: center;
+      font-weight: 600;
+    }
+    .slide-heading {
+      font-size: clamp(1.6rem, 3.8vw, 3.2rem); font-weight: 800; text-align: center;
+      background: linear-gradient(90deg, #ffffff, #fbbf24, #ffffff);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 0.8vh;
+      text-shadow: 0 0 30px rgba(251, 191, 36, 0.15);
+    }
+    .slide-sub {
+      color: #c7d2fe; font-size: clamp(0.8rem, 1.7vw, 1.4rem); text-align: center;
+      margin-bottom: 3vh; opacity: 0.95; font-weight: 500;
+    }
+
+    #title-slide .hero-title-big {
+      font-size: clamp(2.8rem, 9.5vw, 8.5rem); font-weight: 900; text-align: center; line-height: 1.05;
+      background: linear-gradient(90deg, #ffffff, #fbbf24, #f472b6);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 2vh;
+      filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.2));
+    }
+    #title-slide .hero-motto {
+      font-size: clamp(0.9rem, 2.4vw, 2rem); color: #c7d2fe; text-align: center; margin-bottom: 3vh;
+      font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    #title-slide .live-badge {
+      display: inline-flex; align-items: center; gap: 10px; padding: 0.8vh 2.5vw; border-radius: 40px;
+      background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.5);
+      font-size: clamp(0.75rem, 1.5vw, 1.2rem); color: #fbbf24; font-weight: 600;
+      box-shadow: 0 0 15px rgba(251,191,36,0.25);
+    }
+    .live-dot { width: 12px; height: 12px; border-radius: 50%; background: #10b981; animation: pulse 1.4s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; transform: scale(1); } 50% { opacity:0.3; transform: scale(0.8); } }
+
+    .team-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2.2vh 2.2vw; width: min(85vw, 1300px); }
+    .team-tile {
+      display: flex; align-items: center; gap: 1.5vw; padding: 2vh 2vw; border-radius: 18px;
+      background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(8px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      transition: all 0.3s ease;
+    }
+    .team-rank-box {
+      width: clamp(52px, 5.2vw, 85px); height: clamp(52px, 5.2vw, 85px); border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: clamp(1.5rem, 2.6vw, 2.4rem); font-weight: 900; flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .team-tile:nth-child(1) { border-color: rgba(251, 191, 36, 0.4); }
+    .team-tile:nth-child(1) .team-rank-box { background: linear-gradient(135deg, #fbbf24, #d97706); color: #060713; }
+    .team-tile:nth-child(2) .team-rank-box { background: linear-gradient(135deg, #f1f5f9, #94a3b8); color: #060713; }
+    .team-tile:nth-child(3) .team-rank-box { background: linear-gradient(135deg, #ea580c, #9a3412); color: #ffffff; }
+    .team-tile:nth-child(n+4) .team-rank-box { background: rgba(99,102,241,0.45); color: #ffffff; border: 1px solid rgba(255,255,255,0.1); }
+    
+    .team-info { flex: 1; min-width: 0; }
+    .team-name { font-size: clamp(1rem, 2.4vw, 2rem); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+    .team-captain { font-size: clamp(0.7rem, 1.3vw, 1.1rem); color: #cbd5e1; font-weight: 500; }
+    .team-score { font-size: clamp(1.4rem, 3.2vw, 2.8rem); font-weight: 900; color: #fbbf24; text-align: right; flex-shrink: 0; }
+    .team-score small { font-size: 0.55em; font-weight: 600; color: #cbd5e1; display: block; }
+
+    .podium { display: flex; align-items: flex-end; justify-content: center; gap: 1.5vw; width: min(85vw, 1200px); }
+    .podium-team { text-align: center; flex: 1; max-width: 250px; }
+    .podium-team .podium-name { font-size: clamp(0.9rem, 2.2vw, 1.8rem); font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+    .podium-team .podium-captain { color: #cbd5e1; font-size: clamp(0.65rem, 1.3vw, 1.05rem); margin-top: 0.3vh; font-weight: 500; }
+    .podium-team .podium-score { font-size: clamp(0.95rem, 2vw, 1.7rem); font-weight: 800; color: #fbbf24; margin: 0.5vh 0; }
+    .podium-block {
+      width: 100%; border-radius: 14px 14px 0 0; position: relative;
+      display: flex; align-items: flex-start; justify-content: center; padding-top: 1vh;
+      color: #060713; font-size: clamp(1.3rem, 2.6vw, 2.4rem); font-weight: 900;
+      box-shadow: 0 -8px 30px rgba(0,0,0,0.4);
+    }
+    .podium-team.ord-1 { order: 2; }
+    .podium-team.ord-2 { order: 1; }
+    .podium-team.ord-3 { order: 3; }
+    .podium-team.ord-4 { order: 4; }
+    .podium-block.rank-1 { height: clamp(110px, 19vh, 250px); background: linear-gradient(180deg, #fbbf24, #ea580c); font-size: clamp(1.9rem, 3.2vw, 3rem); box-shadow: 0 0 20px rgba(251,191,36,0.25); }
+    .podium-block.rank-2 { height: clamp(80px, 15vh, 190px); background: linear-gradient(180deg, #f8fafc, #64748b); }
+    .podium-block.rank-3 { height: clamp(60px, 11vh, 140px); background: linear-gradient(180deg, #ea580c, #7c2d12); color: #fff; }
+    .podium-block.rank-n { height: clamp(45px, 9vh, 110px); background: rgba(99,102,241,0.45); color: #ffffff; border: 1px solid rgba(255,255,255,0.1); }
+
+    .cat-group { display: grid; grid-template-columns: 1fr 1fr; gap: 3vw; width: min(90vw, 1300px); }
+    .cat-group-col { text-align: center; }
+    .cat-group-title {
+      display: inline-block; padding: 0.6vh 2vw; border-radius: 30px; margin-bottom: 2vh;
+      font-size: clamp(0.8rem, 1.5vw, 1.25rem); font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      background: rgba(124,58,237,0.25); border: 1px solid rgba(139,92,246,0.6); color: #ddd6fe;
+      box-shadow: 0 0 10px rgba(139,92,246,0.15);
+    }
+    .cat-group-col .team-grid { grid-template-columns: 1fr; width: 100%; gap: 0.8vh; }
+    .cat-group-col .medal-row { margin-bottom: 0.6vh; }
+
+    .latest-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5vh 2vw;
+      width: min(92vw, 1350px);
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .latest-prog-card {
+      border-radius: 16px; padding: 1.6vh 1.6vw;
+      background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(8px);
+      min-width: 0; max-width: 100%; overflow: hidden; box-sizing: border-box;
+      display: flex; flex-direction: column; justify-content: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .latest-prog-head { display: flex; align-items: center; gap: 0.8vw; margin-bottom: 0.8vh; min-width: 0; }
+    .latest-prog-num {
+      flex-shrink: 0; font-weight: 800; font-size: clamp(0.55rem, 0.9vw, 0.85rem); letter-spacing: 1px;
+      color: #fbbf24; background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.45);
+      padding: 0.3vh 0.7vw; border-radius: 20px; white-space: nowrap;
+    }
+    .latest-prog-name { font-size: clamp(0.8rem, 1.35vw, 1.2rem); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; color: #fff; }
+    .latest-prog-cat { margin-left: auto; font-size: clamp(0.55rem, 0.85vw, 0.82rem); color: #c7d2fe; flex-shrink: 0; white-space: nowrap; background: rgba(99,102,241,0.25); border: 1px solid rgba(99,102,241,0.4); padding: 0.2vh 0.6vw; border-radius: 12px; }
+
+    .medal-row {
+      display: flex; align-items: center; gap: 0.8vw; padding: 0.7vh 1vw; border-radius: 10px; margin-bottom: 0.5vh;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); min-width: 0; max-width: 100%; box-sizing: border-box;
+    }
+    .medal { font-size: clamp(0.9rem, 1.5vw, 1.4rem); flex-shrink: 0; width: 1.8em; text-align: center; }
+    .medal-half { flex: 1; min-width: 0; display: flex; align-items: center; gap: 0.6vw; }
+    .medal-name {
+      flex: 1; min-width: 0; font-size: clamp(0.75rem, 1.2vw, 1.05rem); font-weight: 800; line-height: 1.25;
+      white-space: normal; word-break: break-word; color: #ffffff;
+    }
+    .medal-sub { font-size: clamp(0.55rem, 0.85vw, 0.8rem); color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; max-width: 30%; font-weight: 500; }
+    .medal-bar { flex: 0 0 auto; width: clamp(25px, 5vw, 60px); height: clamp(6px, 1vh, 10px); border-radius: 8px; background: rgba(255,255,255,0.08); overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+    .medal-row.rank-1 .bar-fill { background: linear-gradient(90deg, #fbbf24, #ea580c); }
+    .medal-row.rank-2 .bar-fill { background: linear-gradient(90deg, #f8fafc, #94a3b8); }
+    .medal-row.rank-3 .bar-fill { background: linear-gradient(90deg, #ea580c, #7c2d12); }
+    .medal-row.rank-n .bar-fill { background: linear-gradient(90deg, #818cf8, #4f46e5); }
+    .medal-pts { flex-shrink: 0; color: #fbbf24; font-weight: 800; font-size: clamp(0.65rem, 1.1vw, 0.95rem); text-align: right; }
+
+    .kala-grid {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.8vw;
+      width: min(94vw, 1500px);
+      height: calc(100vh - 22vh); max-height: 720px; min-height: 300px;
+      align-items: stretch;
+    }
+    .kala-card {
+      text-align: left; padding: 2vh 2vw; border-radius: 20px;
+      background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(8px);
+      display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .kala-cat {
+      font-size: clamp(0.8rem, 1.5vw, 1.25rem); color: #f0abfc; letter-spacing: 2px;
+      text-transform: uppercase; font-weight: 800; margin-bottom: 1.5vh; flex-shrink: 0;
+      text-align: center; border-bottom: 2px solid rgba(240, 171, 252, 0.15); padding-bottom: 0.8vh;
+    }
+
+    .kala-rows { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: flex-start; gap: 0.8vh; }
+    .kala-card .medal-row { flex-shrink: 0; padding: 0.8vh 1vw; gap: 0.8vw; margin-bottom: 0; }
+    .kala-card .medal { width: 2.2em; font-size: clamp(0.85rem, 1.4vw, 1.2rem); }
+    .kala-card .medal-name { font-size: clamp(0.75rem, 1.1vw, 1rem); white-space: normal; word-break: break-word; }
+    .kala-card .medal-sub { font-size: clamp(0.55rem, 0.85vw, 0.78rem); }
+    .kala-card .medal-bar { flex: 0 0 auto; width: clamp(25px, 4.5vw, 55px); height: clamp(6px, 0.9vh, 9px); }
+    .kala-card .medal-pts { font-size: clamp(0.65rem, 1.1vw, 0.95rem); }
+
+    .slide-footer {
+      position: absolute; bottom: 0; left: 0; right: 0; z-index: 5;
+      padding: 1.2vh 3vw;
+      display: flex; align-items: center; justify-content: center; gap: 2vw; flex-wrap: wrap;
+      color: #a5b4fc; font-size: clamp(0.55rem, 1.1vw, 0.95rem); letter-spacing: 1px;
+      background: rgba(6, 7, 19, 0.8); backdrop-filter: blur(6px);
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .dot-nav { display: flex; gap: 0.6vw; }
+    .dot { width: clamp(6px, 0.8vw, 10px); height: clamp(6px, 0.8vw, 10px); border-radius: 50%; background: rgba(165,180,252,0.3); transition: 0.3s; cursor: pointer; }
+    .dot.active { background: #fbbf24; transform: scale(1.3); box-shadow: 0 0 8px #fbbf24; }
+  </style>
+</head>
+<body>
+
+  <div id="slide-stage">
+    <!-- SLIDE 1: TITLE -->
+    <section class="slide active" id="title-slide">
+      <div class="slide-logo">THANAFUS Dars Fest 2026</div>
+      <h1 class="hero-title-big">DARS FEST<br>2026</h1>
+      <p class="hero-motto">"Cultivating Knowledge, Ethics, and Islamic Artistry"</p>
+      <div class="live-badge"><span class="live-dot"></span> LIVE RESULTS DISPLAY</div>
+    </section>
+
+    <!-- SLIDE 2: OVERALL STANDINGS -->
+    <section class="slide" id="standings-slide">
+      <div class="slide-logo">Live Leaderboard</div>
+      <h2 class="slide-heading">Team Standings</h2>
+      <p class="slide-sub">Real-time standings from published results</p>
+      <div class="podium" id="slide-standings"></div>
+    </section>
+
+    <!-- SLIDE 3: KALAPRATHIBHA -->
+    <section class="slide" id="kalaprathibha-slide">
+      <div class="slide-logo">Individual Excellence</div>
+      <h2 class="slide-heading">Current Kalaprathibha</h2>
+      <p class="slide-sub">Leading achievers across categories</p>
+      <div class="kala-grid" id="slide-kalaprathibha"></div>
+    </section>
+
+    <!-- SLIDE: TEAM PENALTIES -->
+    <section class="slide" id="penalties-slide">
+      <div class="slide-logo">Team Rules &amp; Discipline</div>
+      <h2 class="slide-heading">Minus Marks / Penalties</h2>
+      <p class="slide-sub">Deductions due to rules violations or penalties</p>
+      <div class="team-grid" id="slide-penalties" style="grid-template-columns: 1fr 1fr; width: min(85vw, 1300px); max-height: 60vh; overflow-y: auto; gap: 2vh 2vw;"></div>
+    </section>
+
+    <div class="slide-footer">
+      <span>THANAFUS DARS FEST 2026</span>
+      <span id="slide-updated" style="color:#fbbf24;"></span>
+      <span class="dot-nav" id="dot-nav"></span>
+      <span id="slide-clock"></span>
+    </div>
+  </div>
+
+  <script src="../js/db.js"></script>
+  <script>
+    const CATEGORIES = ["Sub Junior", "Junior", "Senior", "General"];
+    let slideEls = [];
+    let currentSlide = 0;
+    let slideTimer = null;
+    const SLIDE_DURATION = 10000;
+
+    async function initSlidePage() {
+      await ThanafusDB.ready();
+      buildSlides();
+    }
+
+    function buildSlides() {
+      const stage = document.getElementById("slide-stage");
+      stage.querySelectorAll(".slide[data-generated]").forEach(el => el.remove());
+
+      const secA = document.createElement("section");
+      secA.className = "slide";
+      secA.setAttribute("data-generated", "1");
+      secA.innerHTML = `
+        <div class="slide-logo">Category Standings</div>
+        <h2 class="slide-heading">Sub Junior &amp; Junior</h2>
+        <p class="slide-sub">Team points from published Sub Junior &amp; Junior results</p>
+        <div class="cat-group">
+          <div class="cat-group-col"><div class="cat-group-title">Sub Junior</div><div class="team-grid" data-catgrid="Sub Junior"></div></div>
+          <div class="cat-group-col"><div class="cat-group-title">Junior</div><div class="team-grid" data-catgrid="Junior"></div></div>
+        </div>
+      `;
+      stage.insertBefore(secA, document.querySelector(".slide-footer"));
+
+      const secB = document.createElement("section");
+      secB.className = "slide";
+      secB.setAttribute("data-generated", "1");
+      secB.innerHTML = `
+        <div class="slide-logo">Category Standings</div>
+        <h2 class="slide-heading">Senior &amp; General</h2>
+        <p class="slide-sub">Team points from published Senior &amp; General results</p>
+        <div class="cat-group">
+          <div class="cat-group-col"><div class="cat-group-title">Senior</div><div class="team-grid" data-catgrid="Senior"></div></div>
+          <div class="cat-group-col"><div class="cat-group-title">General</div><div class="team-grid" data-catgrid="General"></div></div>
+        </div>
+      `;
+      stage.insertBefore(secB, document.querySelector(".slide-footer"));
+
+      renderCategorySlides();
+      slideEls = [...stage.querySelectorAll(".slide")];
+      buildDotNav();
+      showSlide(0);
+    }
+
+    function renderCategorySlides() {
+      document.querySelectorAll("[data-catgrid]").forEach(grid => {
+        const cat = grid.getAttribute("data-catgrid");
+        const items = ThanafusDB.getCategoryTeamPoints(cat);
+        let body;
+        if (items.length > 0) {
+          const maxPts = Math.max(1, ...items.map(i => i.points));
+          const rows = items.filter(i => i.points > 0).map(item => ({
+            rank: item.rank, name: item.team.name, sub: item.team.captain || "", pts: item.points
+          }));
+          body = rows.length > 0 ? medalRowsHTML(rows, maxPts) : `<div style="grid-column:1/-1;text-align:center;color:#a5b4fc;padding:20px;">No points yet</div>`;
+        } else {
+          body = `<div style="grid-column:1/-1;text-align:center;color:#a5b4fc;padding:20px;">No teams</div>`;
+        }
+        grid.innerHTML = body;
+      });
+    }
+
+    function medalRowsHTML(rows, maxPts) {
+      const medal = ["🥇", "🥈", "🥉"];
+      return rows.map(r => {
+        const rankCls = r.rank === 1 ? "rank-1" : r.rank === 2 ? "rank-2" : r.rank === 3 ? "rank-3" : "rank-n";
+        const m = (r.rank >= 1 && r.rank <= 3) ? medal[r.rank - 1] : (r.rank > 0 ? `#${r.rank}` : "•");
+        const pct = Math.max(8, Math.round((r.pts / maxPts) * 100));
+        return `
+          <div class="medal-row ${rankCls}">
+            <div class="medal">${m}</div>
+            <div class="medal-half">
+              <div class="medal-name" title="${r.name}">${r.name}</div>
+              ${r.sub ? `<div class="medal-sub">${r.sub}</div>` : ""}
+              <div class="medal-bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+              <div class="medal-pts">${r.pts} pts</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function buildDotNav() {
+      const container = document.getElementById("dot-nav");
+      if (!container) return;
+      container.innerHTML = slideEls.map((_, i) => `<span class="dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></span>`).join('');
+    }
+
+    function showSlide(idx) {
+      if (!slideEls.length) return;
+      slideEls.forEach((el, i) => el.classList.toggle("active", i === idx));
+      currentSlide = idx;
+      document.querySelectorAll(".dot").forEach((dot, i) => dot.classList.toggle("active", i === idx));
+      resetTimer();
+    }
+
+    function nextSlide() { showSlide((currentSlide + 1) % slideEls.length); }
+    function goToSlide(idx) { showSlide(idx); }
+    function resetTimer() { clearInterval(slideTimer); slideTimer = setInterval(nextSlide, SLIDE_DURATION); }
+
+    document.addEventListener("DOMContentLoaded", initSlidePage);
+  </script>
+</body>
+</html>
