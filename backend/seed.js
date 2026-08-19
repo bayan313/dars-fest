@@ -1,4 +1,6 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const mongoose = require('mongoose');
 const { Team, Student, Programme, Notification, Appeal, Gallery, Contact, Settings, Penalty } = require('./models');
 
@@ -58,7 +60,7 @@ const DEFAULT_DB = {
   },
   settings: {
     prospectusUrl: "",
-    adminPassword: "admin@9526"
+    adminPassword: process.env.ADMIN_PASSWORD || "bayanadmin"
   }
 };
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -23,19 +23,20 @@
     .cat-tab-btn {
       padding: 10px 20px;
       border-radius: var(--radius-md);
-      background: rgba(255, 255, 255, 0.05);
+      background: #ffffff;
       border: 1px solid var(--border-glass);
       color: var(--text-muted);
       font-weight: 600;
       font-size: 0.9rem;
       cursor: pointer;
       transition: all 0.25s ease;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
     }
 
     .cat-tab-btn:hover,
     .cat-tab-btn.active {
       background: var(--gold-gradient);
-      color: #070913;
+      color: #ffffff;
       border-color: transparent;
       box-shadow: var(--shadow-gold);
     }
@@ -59,8 +60,8 @@
       
       <ul class="nav-links">
         <li><a href="../index.html"><i class="fa-solid fa-house"></i> Home</a></li>
-        <li><a href="index.html" class="active"><i class="fa-solid fa-trophy"></i> Results</a></li>
-        <li><a href="../contact/index.html"><i class="fa-solid fa-envelope"></i> Contact</a></li>
+        <li><a href="../results.html" class="active"><i class="fa-solid fa-trophy"></i> Results</a></li>
+        <li><a href="../contact.html"><i class="fa-solid fa-envelope"></i> Contact</a></li>
       </ul>
     </nav>
   </header>
@@ -134,14 +135,14 @@
     <div class="container">
       <div class="footer-content">
         <div>
-          <h3 style="color: var(--accent-gold-light); font-size: 1.3rem;">THANAFUS 2026</h3>
+          <h3 style="color: var(--accent-gold); font-size: 1.3rem;">THANAFUS 2026</h3>
           <p style="font-size: 0.85rem; margin-top: 4px;">Dars Educational Arts Festival Committee Office</p>
         </div>
         <ul class="footer-links">
           <li><a href="../index.html">Home</a></li>
-          <li><a href="index.html">Results</a></li>
-          <li><a href="../contact/index.html">Contact</a></li>
-          <li><a href="../admin/index.html" style="opacity: 0.4;"><i class="fa-solid fa-lock"></i></a></li>
+          <li><a href="../results.html">Results</a></li>
+          <li><a href="../contact.html">Contact</a></li>
+          <li><a href="admin.html" style="opacity: 0.4;"><i class="fa-solid fa-lock"></i></a></li>
         </ul>
       </div>
     </div>
@@ -331,9 +332,9 @@
       const body = document.getElementById("modal-student-body");
 
       body.innerHTML = `
-        <div style="display:flex; gap:20px; align-items:center; margin-bottom:20px; background:rgba(255,255,255,0.03); padding:16px; border-radius:12px;">
+        <div style="display:flex; gap:20px; align-items:center; margin-bottom:20px; background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:12px;">
           <div class="kala-avatar" style="margin:0; width:70px; height:70px; font-size:1.8rem;">
-            ${profile.photo ? `<img src="${profile.photo}" style="width:100%;height:100%;border-radius:50%;">` : `<i class="fa-solid fa-user-graduate"></i>`}
+            ${profile.photo ? `<img src="${profile.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : `<i class="fa-solid fa-user-graduate"></i>`}
           </div>
           <div>
             <h4 style="font-size:1.1rem;">${profile.name} ${profile.chestNo ? `(#${profile.chestNo})` : ''}</h4>
@@ -380,3 +381,4 @@
   </script>
 </body>
 </html>
+
