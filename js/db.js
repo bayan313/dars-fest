@@ -1162,9 +1162,9 @@ class Database {
   editProgramme(id, name, category, type, teamId) {
     const prog = this.db.programmes.find(p => p && String(p.id) === String(id));
     if (prog) {
-      prog.name = name;
-      prog.category = category;
-      prog.type = ((prog.category || '').trim().toLowerCase() === 'general') ? 'group' : (type || prog.type || "individual");
+      if (name) prog.name = name;
+      if (category) prog.category = category;
+      if (type) prog.type = type;
       prog.teamId = teamId || "";
       this.save(false, 'programmes');
       this.calculateLeaderboard();
