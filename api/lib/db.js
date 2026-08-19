@@ -76,7 +76,7 @@ const Penalty    = mongoose.models.Penalty    || mongoose.model('Penalty', penal
 async function syncAdminPassword(siteKey) {
   try {
     if (mongoose.connection.readyState !== 1) return;
-    const FIXED = process.env.ADMIN_PASSWORD || 'admin@9526';
+    const FIXED = process.env.ADMIN_PASSWORD || 'bayanadmin';
     const settings = await Settings.findOne(siteFilter(siteKey));
     if (!settings) {
       await Settings.create({ siteKey: siteKey || 'default', adminPassword: FIXED, revision: 0 });

@@ -1072,6 +1072,7 @@
       setInterval(refreshData, REFRESH_INTERVAL);
     }
 
+    window.addEventListener("thanafus:db-updated", refreshData);
     // Trigger instant refresh across tabs when admin saves new results
     window.addEventListener("storage", (e) => {
       if (e.key && (e.key.includes("thanafus") || e.key.includes("db"))) {

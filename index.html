@@ -152,6 +152,11 @@
     document.addEventListener("DOMContentLoaded", async () => {
       await ThanafusDB.ready();
       renderHomeContent();
+      
+      window.addEventListener("thanafus:db-updated", () => renderHomeContent());
+      window.addEventListener("focus", () => renderHomeContent());
+      window.addEventListener("storage", () => renderHomeContent());
+      setInterval(renderHomeContent, 5000);
     });
 
     function renderHomeContent() {

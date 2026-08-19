@@ -285,7 +285,10 @@ class Database {
     this._ensureDbDefaults();
 
     this._loadPromise = this.load();
-    this._loadPromise.then(() => this.calculateLeaderboard());
+    this._loadPromise.then(() => {
+      this.calculateLeaderboard();
+      this.startAutoSync(6000);
+    });
   }
 
   _ensureDbDefaults() {
@@ -580,6 +583,42 @@ class Database {
       clearTimeout(timeoutId);
       return null;
     }
+  startAutoSync(intervalMs = 6000) {
+    if (typeof window === 'undefined') return;
+    if (this._syncTimer) clearInterval(this._syncTimer);
+    
+    this._syncTimer = setInterval(async () => {
+      // Don't poll while saving or dirty
+      if (this._saving || this._dirty) return;
+      try {
+        const fresh = await this._fetchFresh();
+        if (fresh && typeof fresh === 'object' && !fresh.isOffline) {
+          const freshRev = typeof fresh.revision === 'number' ? fresh.revision : 0;
+          const currentRev = typeof this.db.revision === 'number' ? this.db.revision : 0;
+          
+          if (freshRev !== currentRev || !this.loadedFromServer) {
+            const protectedCols = this._activeLocalCollections();
+            const mergedData = { ...fresh };
+            protectedCols.forEach(col => {
+              if (col === 'contact' || col === 'settings') {
+                if (this.db[col] !== undefined) mergedData[col] = this.db[col];
+              } else if (Array.isArray(this.db[col])) {
+                mergedData[col] = this._mergeDocs(fresh[col], this.db[col]);
+              }
+            });
+            this.db = mergedData;
+            this._ensureDbDefaults();
+            this.loadedFromServer = true;
+            this.calculateLeaderboard();
+            this._persistLocal();
+            
+            window.dispatchEvent(new CustomEvent('thanafus:db-updated', { detail: { source: 'auto-sync', revision: freshRev } }));
+          }
+        }
+      } catch (e) {
+        // silent background sync failure
+      }
+    }, intervalMs);
   }
 
   reset() {

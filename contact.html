@@ -155,6 +155,11 @@
     document.addEventListener("DOMContentLoaded", async () => {
       await ThanafusDB.ready();
       renderContactDetails();
+      
+      window.addEventListener("thanafus:db-updated", renderContactDetails);
+      window.addEventListener("focus", renderContactDetails);
+      window.addEventListener("storage", renderContactDetails);
+      setInterval(renderContactDetails, 8000);
     });
 
     function renderContactDetails() {

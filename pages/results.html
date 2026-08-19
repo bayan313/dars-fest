@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -158,6 +158,16 @@
       await ThanafusDB.ready();
       populateFilters();
       filterResults();
+      
+      const refreshResultsUI = () => {
+        populateFilters();
+        filterResults();
+      };
+
+      window.addEventListener("thanafus:db-updated", refreshResultsUI);
+      window.addEventListener("focus", refreshResultsUI);
+      window.addEventListener("storage", refreshResultsUI);
+      setInterval(refreshResultsUI, 5000);
     });
 
     function setCategoryFilter(cat, btnEl) {
@@ -381,4 +391,3 @@
   </script>
 </body>
 </html>
-

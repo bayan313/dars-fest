@@ -584,6 +584,22 @@
       if (sessionStorage.getItem('thanafus_admin_auth') === 'true') {
         showAdminPanel();
       }
+      
+      const refreshAdminTables = () => {
+        if (sessionStorage.getItem('thanafus_admin_auth') === 'true' && !document.querySelector('.modal-overlay.active')) {
+          renderAdminDash();
+          renderTeamsAdmin();
+          renderStudentsAdmin();
+          renderProgsAdmin();
+          renderPenaltiesAdmin();
+          renderNotifsAdmin();
+        }
+      };
+
+      window.addEventListener("thanafus:db-updated", refreshAdminTables);
+      window.addEventListener("focus", refreshAdminTables);
+      window.addEventListener("storage", refreshAdminTables);
+      setInterval(refreshAdminTables, 6000);
     });
 
     function togglePassVisibility() {
