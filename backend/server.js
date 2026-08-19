@@ -449,7 +449,7 @@ app.post('/api/settings', async (req, res) => {
 });
 
 // SPA Fallback: Unknown frontend GET routes serve index.html
-app.get('*', (req, res) => {
+app.get('/*splat', (req, res) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'Endpoint not found' });
   }

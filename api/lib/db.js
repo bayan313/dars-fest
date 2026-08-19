@@ -50,14 +50,14 @@ function siteFilter(siteKey) {
 }
 
 const teamSchema = new mongoose.Schema({
-  siteKey: String, id: String, name: String, captain: String, viceCaptain: String,
+  siteKey: String, id: String, name: String, captain: String, viceCaptain: String, photo: String,
   members: [String], totalScore: { type: Number, default: 0 },
   rank: { type: Number, default: 0 },
   grades: { A: { type: Number, default: 0 }, B: { type: Number, default: 0 }, C: { type: Number, default: 0 } },
   wins: [mongoose.Schema.Types.Mixed]
 });
 const studentSchema = new mongoose.Schema({ siteKey: String, id: String, name: String, chestNo: String, teamId: String, category: String, photo: String });
-const resultSchema = new mongoose.Schema({ rank: Number, studentId: String, teamId: String, grade: String }, { _id: false });
+const resultSchema = new mongoose.Schema({ rank: Number, studentId: String, teamId: String, grade: String, marks: Number, type: String }, { _id: false });
 const programmeSchema = new mongoose.Schema({ siteKey: String, id: String, name: String, category: String, venue: String, judge: String, type: String, teamId: String, resultsPublished: Boolean, resultsPublishedAt: String, results: [resultSchema] });
 const notificationSchema = new mongoose.Schema({ siteKey: String, id: String, title: String, content: String, type: String, date: String });
 const appealSchema = new mongoose.Schema({ siteKey: String, id: String, studentName: String, team: String, category: String, programme: String, phoneNumber: String, description: String, fee: { type: Number, default: 50 }, status: String, response: String, date: String });
