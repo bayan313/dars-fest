@@ -6,8 +6,7 @@
   "scripts": {
     "start": "node backend/server.js",
     "dev": "node backend/server.js",
-    "seed": "node backend/seed.js",
-    "build": "echo 'Static site - no build step required'"
+    "seed": "node backend/seed.js"
   },
   "dependencies": {
     "cors": "^2.8.6",

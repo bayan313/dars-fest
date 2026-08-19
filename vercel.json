@@ -1,10 +1,43 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "rewrites": [
-    { "source": "/results", "destination": "/results.html" },
-    { "source": "/contact", "destination": "/contact.html" },
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/slide", "destination": "/slide.html" }
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "**/*.{html,css,js,png,jpg,jpeg,gif,svg,ico,woff,woff2,ttf,eot}",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/all",
+      "dest": "/api/all.js"
+    },
+    {
+      "src": "/admin",
+      "dest": "/admin.html"
+    },
+    {
+      "src": "/results",
+      "dest": "/results.html"
+    },
+    {
+      "src": "/contact",
+      "dest": "/contact.html"
+    },
+    {
+      "src": "/slide",
+      "dest": "/slide.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
   ]
 }
