@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>THANAFUS Dars Fest 2026 | Results Portal</title>
+  <title>THANAFUS Dars Fest 2026 | Official Results</title>
   
-  <!-- Poppins Font & Stylesheets -->
+  <!-- Fonts & Stylesheets -->
   <link rel="stylesheet" href="../style.css">
-<link rel="stylesheet" href="../mobile.css">
+  <link rel="stylesheet" href="../mobile.css">
   
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-  <!-- Header & Navigation -->
+  <!-- Navigation Bar -->
   <header>
     <nav class="navbar">
       <a href="../index.html" class="logo-container">
@@ -25,850 +25,404 @@
       </a>
       
       <button class="hamburger" aria-label="Toggle Navigation">
-        <span></span>
-        <span></span>
-        <span></span>
+        <i class="fa-solid fa-bars"></i>
       </button>
       
       <ul class="nav-links">
-        <li><a href="../index.html">Home</a></li>
-        <li><a href="results.html">Results</a></li>
-        <li><a href="gallery.html">Gallery</a></li>
-        <li><a href="appeal.html">Appeal Panel</a></li>
-        <li><a href="contact.html">Contact</a></li>
+        <li><a href="../index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="results.html" class="active"><i class="fa-solid fa-trophy"></i> Results</a></li>
+        <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> Contact</a></li>
       </ul>
     </nav>
   </header>
 
   <main>
-    <section class="section" style="padding-top: 40px;">
-      <div class="text-center">
-        <h1 class="section-title">Results Portal</h1>
-        <p class="section-subtitle" id="portal-sub">Choose a category to browse program, student, or team scores</p>
+    <!-- Header Title Section -->
+    <section class="section" style="padding: 40px 0 20px;">
+      <div class="container">
+        <div class="section-header">
+          <h1 class="section-title">Official Results Portal</h1>
+          <p class="section-subtitle">Search results by student name, chest number, category, or programme</p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="results-filter-bar">
+          <div class="search-input-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="search-student" class="form-control" placeholder="Search student name or chest no..." onkeyup="handleStudentSearch()">
+          </div>
+
+          <div style="min-width: 180px;">
+            <select id="filter-category" class="form-control" onchange="filterResults()">
+              <option value="ALL">All Categories</option>
+              <option value="Sub Junior">Sub Junior</option>
+              <option value="Junior">Junior</option>
+              <option value="Senior">Senior</option>
+              <option value="General">General / Group</option>
+            </select>
+          </div>
+
+          <div style="min-width: 220px;">
+            <select id="filter-programme" class="form-control" onchange="filterResults()">
+              <option value="ALL">All Programmes</option>
+            </select>
+          </div>
+
+          <button onclick="openAppealModal()" class="btn btn-gold btn-sm" style="height: 46px;">
+            <i class="fa-solid fa-gavel"></i> File Appeal
+          </button>
+        </div>
       </div>
+    </section>
 
-      <!-- Category Selector (Stage 1) -->
-      <div class="category-select-wrapper" id="category-picker">
-        <div class="category-card-btn" onclick="selectCategory('Sub Junior')">
-          <h3>Sub Junior</h3>
-          <p>Browse Sub Junior events</p>
-          <div class="btn btn-primary btn-sm" style="margin-top: 15px;">Enter Category</div>
-        </div>
-        <div class="category-card-btn" onclick="selectCategory('Junior')">
-          <h3>Junior</h3>
-          <p>Browse Junior events</p>
-          <div class="btn btn-primary btn-sm" style="margin-top: 15px;">Enter Category</div>
-        </div>
-        <div class="category-card-btn" onclick="selectCategory('Senior')">
-          <h3>Senior</h3>
-          <p>Browse Senior events</p>
-          <div class="btn btn-primary btn-sm" style="margin-top: 15px;">Enter Category</div>
-        </div>
-        <div class="category-card-btn" onclick="selectCategory('General')">
-          <h3>General</h3>
-          <p>Browse General team events</p>
-          <div class="btn btn-primary btn-sm" style="margin-top: 15px;">Enter Category</div>
-        </div>
-      </div>
-
-      <!-- Results Interface Dashboard (Stage 2 - Hidden initially) -->
-      <div id="results-dashboard" style="display: none;">
-        <!-- Category switcher header -->
-        <div class="flex-between" style="border-bottom: 1px solid #cbd5e1; padding-bottom: 15px; margin-bottom: 25px;">
-          <h2 style="color: var(--primary-emerald);">Category: <span id="current-category-name" style="color: var(--accent-gold-dark);">Sub Junior</span></h2>
-          <button class="btn btn-outline btn-sm" onclick="showCategoryPicker()"><i class="fa-solid fa-rotate-left"></i> Change Category</button>
+    <!-- Results Listing Section -->
+    <section class="section" style="padding-top: 0;">
+      <div class="container">
+        <!-- Live Search Results Container -->
+        <div id="search-results-container" style="display: none; margin-bottom: 30px;">
+          <h3 style="margin-bottom: 16px; font-size: 1.2rem;"><i class="fa-solid fa-user-check text-gold"></i> Search Matches</h3>
+          <div id="search-results-list" class="table-responsive"></div>
         </div>
 
-        <!-- Sub-navigation tabs -->
-        <div class="sub-menu-tabs">
-          <div class="tab-btn active" onclick="switchTab('program')" id="tab-program">Programme Results</div>
-          <div class="tab-btn" onclick="switchTab('student')" id="tab-student">Student Results</div>
-          <div class="tab-btn" onclick="switchTab('team')" id="tab-team">Team Results</div>
-        </div>
-
-        <!-- Results Content area -->
-        <div class="results-content-area">
-          
-          <!-- TAB 1: PROGRAMME RESULTS -->
-          <div id="panel-program" class="tab-panel">
-            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px;" class="results-split-layout">
-              <!-- Left: Search & Program List -->
-              <div>
-                <div class="search-wrapper" style="margin-bottom: 20px;">
-                  <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                  <input type="text" class="search-input" id="search-prog" placeholder="Search programmes..." onkeyup="filterProgramList()">
-                </div>
-                <div class="prog-list-grid" id="programme-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 500px; overflow-y: auto;">
-                  <!-- Dynamic programme items -->
-                </div>
-              </div>
-              
-              <!-- Right: Selected Programme Detail -->
-              <div id="programme-detail-container">
-                <div class="card text-center" style="padding: 50px 20px;">
-                  <i class="fa-solid fa-bullhorn" style="font-size: 3rem; color: var(--text-gray); margin-bottom: 15px;"></i>
-                  <h3>Select a Programme</h3>
-                  <p style="color: var(--text-gray);">Choose a programme from the list to view detailed result standings, podium placements, and scores.</p>
-                </div>
-              </div>
-            </div>
+        <!-- Main Programmes Results Container -->
+        <div id="programmes-results-list" style="display: flex; flex-direction: column; gap: 24px;">
+          <div class="card text-center" style="padding: 40px;">
+            <p class="text-muted"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Loading Published Results...</p>
           </div>
-
-          <!-- TAB 2: STUDENT RESULTS -->
-          <div id="panel-student" class="tab-panel" style="display: none;">
-            <div class="search-wrapper">
-              <i class="fa-solid fa-magnifying-glass search-icon"></i>
-              <input type="text" class="search-input" id="search-student" placeholder="Search student name..." onkeyup="handleStudentSearch(this.value)">
-              <div id="student-suggestions" style="position: absolute; width: 100%; background: white; border-radius: 8px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); z-index: 10; max-height: 200px; overflow-y: auto; margin-top: 5px; display: none;">
-                <!-- Suggestions -->
-              </div>
-            </div>
-            
-            <div id="student-profile-container">
-              <div class="card text-center" style="padding: 50px 20px; max-width: 700px; margin: 0 auto;">
-                <i class="fa-solid fa-user-graduate" style="font-size: 3.5rem; color: var(--text-gray); margin-bottom: 15px;"></i>
-                <h3>Search Student Profile</h3>
-                <p style="color: var(--text-gray);">Type a student's name above to see their detailed profile, score breakdown, overall position, and participation list.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB 3: TEAM RESULTS -->
-          <div id="panel-team" class="tab-panel" style="display: none;">
-            <div class="grid-4" id="teams-grid-container" style="margin-bottom: 30px;">
-              <!-- Dynamic Team scorecards -->
-            </div>
-            
-            <div id="selected-team-detail-container">
-              <div class="card text-center" style="padding: 40px 20px;">
-                <i class="fa-solid fa-people-group" style="font-size: 3.5rem; color: var(--text-gray); margin-bottom: 15px;"></i>
-                <h3>Select a Team Above</h3>
-                <p style="color: var(--text-gray);">Click any team card above to view a complete breakdown of points, team members, grade counts, and winning events.</p>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
     </section>
   </main>
 
+  <!-- Student Profile Modal -->
+  <div class="modal-overlay" id="student-modal">
+    <div class="modal-card" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 id="modal-student-name" style="font-size: 1.4rem;">Student Profile</h3>
+        <button class="modal-close" onclick="closeStudentModal()">&times;</button>
+      </div>
+      <div id="modal-student-body"></div>
+    </div>
+  </div>
+
+  <!-- Appeal Submission Modal -->
+  <div class="modal-overlay" id="appeal-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-gavel text-gold"></i> Submit Evaluation Appeal</h3>
+        <button class="modal-close" onclick="closeAppealModal()">&times;</button>
+      </div>
+      <form onsubmit="handleAppealSubmit(event)">
+        <div style="display: flex; flex-direction: column; gap: 14px; text-align: left;">
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Student Name</label>
+            <input type="text" id="app-name" class="form-control" style="padding-left:14px;" placeholder="Full name..." required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label style="font-size: 0.85rem; color: var(--text-muted);">Team</label>
+              <select id="app-team" class="form-control" required>
+                <option value="">Select Team</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 0.85rem; color: var(--text-muted);">Category</label>
+              <select id="app-cat" class="form-control" required>
+                <option value="Sub Junior">Sub Junior</option>
+                <option value="Junior">Junior</option>
+                <option value="Senior">Senior</option>
+                <option value="General">General</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Programme</label>
+            <input type="text" id="app-prog" class="form-control" style="padding-left:14px;" placeholder="Programme name..." required>
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Phone Number</label>
+            <input type="tel" id="app-phone" class="form-control" style="padding-left:14px;" placeholder="10-digit mobile number..." required>
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Reason / Description</label>
+            <textarea id="app-desc" class="form-control" style="padding-left:14px; height:80px; resize:none;" placeholder="Detail your appeal reason..." required></textarea>
+          </div>
+        </div>
+        <div style="margin-top: 20px; display: flex; gap: 12px; justify-content: flex-end;">
+          <button type="button" class="btn btn-outline" onclick="closeAppealModal()">Cancel</button>
+          <button type="submit" class="btn btn-gold"><i class="fa-solid fa-paper-plane"></i> Submit Appeal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer>
-    <div class="footer-bottom">
-      <p>&copy; 2026 THANAFUS Dars Fest. All Rights Reserved. | Powered by <strong>THANAFUS IT Team</strong></p>
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3 style="color: var(--accent-gold-light); font-size: 1.3rem;">THANAFUS 2026</h3>
+          <p style="font-size: 0.85rem; margin-top: 4px;">Dars Educational Arts Festival Committee Office</p>
+        </div>
+        <ul class="footer-links">
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="results.html">Results</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="../admin/admin.html" style="opacity: 0.4;"><i class="fa-solid fa-lock"></i></a></li>
+        </ul>
+      </div>
     </div>
   </footer>
 
   <!-- Scripts -->
   <script src="../js/db.js"></script>
   <script src="../js/main.js"></script>
-
   <script>
-    let currentCategory = "";
-    let activeTab = "program";
-
     document.addEventListener("DOMContentLoaded", async () => {
       await ThanafusDB.ready();
+      populateFilters();
+      filterResults();
     });
 
-    function selectCategory(category) {
-      currentCategory = category;
-      document.getElementById("category-picker").style.display = "none";
-      document.getElementById("results-dashboard").style.display = "block";
-      document.getElementById("current-category-name").innerText = category;
-      document.getElementById("portal-sub").innerText = `Browsing result records for ${category} category`;
-      
-      // Initialize view
-      switchTab(activeTab);
+    function populateFilters() {
+      const progSelect = document.getElementById("filter-programme");
+      const teamSelect = document.getElementById("app-team");
+      if (!progSelect || !teamSelect) return;
+
+      const progs = ThanafusDB.db.programmes || [];
+      progSelect.innerHTML = `<option value="ALL">All Programmes</option>` + progs.map(p => `<option value="${p.id}">${p.name} (${p.category})</option>`).join('');
+
+      const teams = ThanafusDB.db.teams || [];
+      teamSelect.innerHTML = `<option value="">Select Team</option>` + teams.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
     }
 
-    function showCategoryPicker() {
-      document.getElementById("category-picker").style.display = "grid";
-      document.getElementById("results-dashboard").style.display = "none";
-      document.getElementById("portal-sub").innerText = "Choose a category to browse program, student, or team scores";
-      
-      // Clear detail content
-      document.getElementById("programme-detail-container").innerHTML = `
-        <div class="card text-center" style="padding: 50px 20px;">
-          <i class="fa-solid fa-bullhorn" style="font-size: 3rem; color: var(--text-gray); margin-bottom: 15px;"></i>
-          <h3>Select a Programme</h3>
-          <p style="color: var(--text-gray);">Choose a programme from the list to view detailed result standings, podium placements, and scores.</p>
-        </div>
-      `;
-      document.getElementById("student-profile-container").innerHTML = `
-        <div class="card text-center" style="padding: 50px 20px; max-width: 700px; margin: 0 auto;">
-          <i class="fa-solid fa-user-graduate" style="font-size: 3.5rem; color: var(--text-gray); margin-bottom: 15px;"></i>
-          <h3>Search Student Profile</h3>
-          <p style="color: var(--text-gray);">Type a student's name above to see their detailed profile, score breakdown, overall position, and participation list.</p>
-        </div>
-      `;
-      document.getElementById("selected-team-detail-container").innerHTML = `
-        <div class="card text-center" style="padding: 40px 20px;">
-          <i class="fa-solid fa-people-group" style="font-size: 3.5rem; color: var(--text-gray); margin-bottom: 15px;"></i>
-          <h3>Select a Team Above</h3>
-          <p style="color: var(--text-gray);">Click any team card above to view a complete breakdown of points, team members, grade counts, and winning events.</p>
-        </div>
-      `;
-      document.getElementById("search-student").value = "";
-      document.getElementById("search-prog").value = "";
-    }
+    function filterResults() {
+      const cat = document.getElementById("filter-category").value;
+      const progId = document.getElementById("filter-programme").value;
+      const container = document.getElementById("programmes-results-list");
 
-    function switchTab(tab) {
-      activeTab = tab;
-      
-      // Update active classes
-      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-      document.getElementById(`tab-${tab}`).classList.add("active");
-      
-      // Hide all panels
-      document.querySelectorAll(".tab-panel").forEach(panel => panel.style.display = "none");
-      document.getElementById(`panel-${tab}`).style.display = "block";
-
-      if (tab === "program") {
-        loadProgrammes();
-      } else if (tab === "student") {
-        // General has no individual students
-        if (currentCategory === "General") {
-          const sContainer = document.getElementById("student-profile-container");
-          sContainer.innerHTML = `
-            <div class="card text-center" style="padding: 50px 20px; max-width: 700px; margin: 0 auto;">
-              <i class="fa-solid fa-people-group" style="font-size: 3.5rem; color: var(--text-gray); margin-bottom: 15px;"></i>
-              <h3>General Events are Team-Based</h3>
-              <p style="color: var(--text-gray);">General category events score whole teams. Use the Programme or Team tabs to browse results.</p>
-            </div>
-          `;
-          document.getElementById("search-student").value = "";
-          document.getElementById("student-suggestions").style.display = "none";
-        }
-      } else if (tab === "team") {
-        loadTeams();
-      }
-    }
-
-    /* ===================================================
-       PROGRAMME RESULTS MODULE
-    =================================================== */
-    function loadProgrammes() {
-      const listContainer = document.getElementById("programme-list");
-      const programmes = ThanafusDB.db.programmes.filter(p => p.category === currentCategory);
-
-      if (programmes.length === 0) {
-        listContainer.innerHTML = "<p class='text-center'>No programmes found in this category.</p>";
-        return;
-      }
-
-      let html = "";
-      programmes.forEach(p => {
-        const isTeamEvent = (p.type || '').trim().toLowerCase() === 'group' || (p.category || '').trim().toLowerCase() === 'general';
-        const publishStatus = p.resultsPublished 
-          ? `<span style="font-size:0.75rem;color:#10b981;font-weight:600;"><i class="fa-solid fa-circle-check"></i> Published</span>` 
-          : `<span style="font-size:0.75rem;color:var(--text-gray);"><i class="fa-regular fa-clock"></i> Pending</span>`;
-          
-        html += `
-          <div class="prog-item-card" onclick="viewProgrammeDetails('${p.id}')" data-name="${p.name.toLowerCase()}">
-            <h4>${p.name}</h4>
-            <div class="flex-between" style="margin-top: 5px; margin-bottom: 0;">
-              <span class="venue"><i class="fa-solid fa-people-group"></i> ${isTeamEvent ? (ThanafusDB.db.teams.find(t => t.id === p.teamId) ? ThanafusDB.db.teams.find(t => t.id === p.teamId).name : 'Team event') : (p.venue || 'Venue TBA')}</span>
-              ${publishStatus}
-            </div>
-          </div>
-        `;
+      const published = (ThanafusDB.db.programmes || []).filter(p => {
+        if (!p.resultsPublished) return false;
+        if (cat !== 'ALL' && p.category !== cat) return false;
+        if (progId !== 'ALL' && String(p.id) !== String(progId)) return false;
+        return true;
       });
-      listContainer.innerHTML = html;
-    }
 
-    function filterProgramList() {
-      const val = document.getElementById("search-prog").value.toLowerCase();
-      const items = document.querySelectorAll("#programme-list .prog-item-card");
-      items.forEach(item => {
-        const name = item.getAttribute("data-name");
-        if (name.includes(val)) {
-          item.style.display = "block";
-        } else {
-          item.style.display = "none";
-        }
-      });
-    }
-
-    function viewProgrammeDetails(id) {
-      const container = document.getElementById("programme-detail-container");
-      const prog = ThanafusDB.db.programmes.find(p => p.id === id);
-      if (!prog) return;
-      const isTeamEvent = (prog.type || '').trim().toLowerCase() === 'group' || (prog.category || '').trim().toLowerCase() === 'general';
-
-      if (!prog.resultsPublished) {
+      if (published.length === 0) {
         container.innerHTML = `
-          <div class="card text-center" style="padding: 50px 20px;">
-            <i class="fa-solid fa-hourglass-half" style="font-size: 3.5rem; color: var(--accent-gold); margin-bottom: 15px;"></i>
-            <h2>${prog.name}</h2>
-            ${isTeamEvent 
-              ? `<p class="prog-meta-badge" style="display:inline-block; margin-bottom:15px;">Team Event</p>`
-              : `<p class="prog-meta-badge" style="display:inline-block; margin-bottom:15px;">Venue: ${prog.venue} | Judge: ${prog.judge}</p>`}
-            <h3 style="color: var(--text-gray); margin-top:10px;">Results Pending</h3>
-            <p style="color: var(--text-gray);">The evaluations for this programme are currently in progress. Standard rankings will be shown once uploaded by the coordinator.</p>
+          <div class="card text-center" style="padding: 40px;">
+            <i class="fa-solid fa-clipboard-list fa-3x text-muted" style="margin-bottom: 14px;"></i>
+            <h3>No Published Results Found</h3>
+            <p class="text-muted" style="font-size:0.9rem;">Results for selected parameters are pending official announcement.</p>
           </div>
         `;
         return;
       }
 
-      // Group winners by rank for multi-winner / shared-rank support
-      const rank1Winners = prog.results.filter(r => Number(r.rank) === 1);
-      const rank2Winners = prog.results.filter(r => Number(r.rank) === 2);
-      const rank3Winners = prog.results.filter(r => Number(r.rank) === 3);
+      container.innerHTML = published.map(prog => {
+        const results = prog.results || [];
+        const isGroup = (prog.type || '').toLowerCase() === 'group' || (prog.category || '').toLowerCase() === 'general';
 
-      const renderRankCard = (rankNum, winners, rankClass, medalIconClass, fillClass, medalEmoji, rankTitle) => {
-        if (!winners || winners.length === 0) return "";
-
-        let rows = "";
-        winners.forEach(res => {
-          let name = "Unknown";
+        const rowsHtml = results.map(res => {
+          let name = "N/A";
+          let chest = "—";
           let teamName = "N/A";
-          
-          if (isTeamEvent) {
-            const team = ThanafusDB.db.teams.find(t => t.id === (res.teamId || prog.teamId));
-            name = team ? team.name : "Team";
-            teamName = "Team Event";
+
+          if (isGroup) {
+            const t = ThanafusDB.db.teams.find(x => x.id === (res.teamId || prog.teamId));
+            name = t ? t.name : "Team";
+            teamName = t ? t.name : "Team";
           } else {
-            const stud = ThanafusDB.db.students.find(s => s.id === res.studentId);
-            const team = stud ? ThanafusDB.db.teams.find(t => t.id === stud.teamId) : null;
-            name = stud ? stud.name : "Unknown Student";
-            teamName = team ? team.name : "N/A";
+            const s = ThanafusDB.db.students.find(x => x.id === res.studentId);
+            if (s) {
+              name = `<a href="#" onclick="viewStudentModal('${s.id}'); return false;" class="text-gold" style="font-weight:600;">${s.name}</a>`;
+              chest = s.chestNo || "—";
+              const t = ThanafusDB.db.teams.find(x => x.id === s.teamId);
+              teamName = t ? t.name : "Unassigned";
+            }
           }
 
-          const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
-          const maxPts = isTeamEvent ? 15 : 10;
-          const barPct = Math.min(100, Math.max(25, (pts / maxPts) * 100));
-          const gradeClass = res.grade === 'A' ? 'grade-pill-a' : res.grade === 'B' ? 'grade-pill-b' : 'grade-pill-c';
-          const gradeHtml = res.grade ? `<span class="grade-pill-tag ${gradeClass}">Grade ${res.grade}</span>` : '';
+          const rankBadge = res.rank === 1 ? `<span class="rank-badge rank-1" style="width:28px;height:28px;font-size:0.9rem;">1</span>`
+            : res.rank === 2 ? `<span class="rank-badge rank-2" style="width:28px;height:28px;font-size:0.9rem;">2</span>`
+            : res.rank === 3 ? `<span class="rank-badge rank-3" style="width:28px;height:28px;font-size:0.9rem;">3</span>`
+            : `<span class="text-muted">—</span>`;
 
-          rows += `
-            <div class="rank-participant-row">
-              <div class="participant-info">
-                <h4 class="participant-name">
-                  <i class="fa-solid fa-user-graduate" style="font-size:0.9rem; color:var(--primary-emerald); opacity:0.85;"></i>
-                  ${name}
-                </h4>
-                <span class="participant-team"><i class="fa-solid fa-people-group" style="font-size:0.8rem;"></i> ${teamName}</span>
-              </div>
-              <div class="participant-score-box">
-                ${gradeHtml}
-                <div class="score-bar-track">
-                  <div class="score-bar-fill ${fillClass}" style="width: ${barPct}%;"></div>
-                </div>
-                <span class="participant-pts">${pts} pts</span>
-              </div>
-            </div>
+          const gradeBadge = res.grade ? `<span class="grade-chip ${res.grade.toLowerCase()}">${res.grade}</span>` : '—';
+          const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
+
+          return `
+            <tr>
+              <td>${rankBadge}</td>
+              <td>${chest}</td>
+              <td>${name}</td>
+              <td>${teamName}</td>
+              <td>${gradeBadge}</td>
+              <td style="font-family:'Outfit'; font-weight:700; color:var(--primary-emerald);">${pts} PTS</td>
+            </tr>
           `;
-        });
+        }).join('');
 
         return `
-          <div class="rank-winner-card ${rankClass}">
-            <div class="rank-badge-col" data-rank-title="${rankTitle}">
-              <div class="rank-medal-icon ${medalIconClass}">
-                ${medalEmoji}
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+              <div>
+                <span class="kala-cat-tag" style="margin-bottom:6px;">${prog.category}</span>
+                <h3 style="font-size:1.3rem;">${prog.name}</h3>
+                <p class="text-muted" style="font-size:0.8rem;">Venue: ${prog.venue || 'Main Stage'} | Evaluator: ${prog.judge || 'Official Panel'}</p>
               </div>
-            </div>
-            <div class="rank-participants-group">
-              ${rows}
-            </div>
-          </div>
-        `;
-      };
-
-      const winnersHtml = `
-        <div class="rank-winners-list">
-          ${renderRankCard(1, rank1Winners, 'rank-card-1', 'rank-medal-1', 'fill-rank-1', '🥇', '1st Place')}
-          ${renderRankCard(2, rank2Winners, 'rank-card-2', 'rank-medal-2', 'fill-rank-2', '🥈', '2nd Place')}
-          ${renderRankCard(3, rank3Winners, 'rank-card-3', 'rank-medal-3', 'fill-rank-3', '🥉', '3rd Place')}
-        </div>
-      `;
-
-      // 2. GRADE ACHIEVERS (Grade-only participants without 1st, 2nd, or 3rd place)
-      const gradeOnlyParticipants = prog.results.filter(r => (!r.rank || (r.rank !== 1 && r.rank !== 2 && r.rank !== 3)) && r.grade);
-      const gradeAWinners = gradeOnlyParticipants.filter(r => r.grade === 'A');
-      const gradeBWinners = gradeOnlyParticipants.filter(r => r.grade === 'B');
-      const gradeCWinners = gradeOnlyParticipants.filter(r => r.grade === 'C');
-
-      const renderGradeCard = (gradeLetter, winners, cardClass, fillClass, emojiIcon) => {
-        if (!winners || winners.length === 0) return "";
-        let rows = "";
-        winners.forEach(res => {
-          let name = "Unknown";
-          let teamName = "N/A";
-          if (isTeamEvent) {
-            const team = ThanafusDB.db.teams.find(t => t.id === (res.teamId || prog.teamId));
-            name = team ? team.name : "Team";
-            teamName = "Team Event";
-          } else {
-            const stud = ThanafusDB.db.students.find(s => s.id === res.studentId);
-            const team = stud ? ThanafusDB.db.teams.find(t => t.id === stud.teamId) : null;
-            name = stud ? stud.name : "Unknown Student";
-            teamName = team ? team.name : "N/A";
-          }
-          const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
-          const maxPts = isTeamEvent ? 15 : 10;
-          const barPct = Math.min(100, Math.max(25, (pts / maxPts) * 100));
-          rows += `
-            <div class="rank-participant-row">
-              <div class="participant-info">
-                <h4 class="participant-name">
-                  <i class="fa-solid fa-award" style="font-size:0.9rem; color:#10b981;"></i>
-                  ${name}
-                </h4>
-                <span class="participant-team"><i class="fa-solid fa-people-group" style="font-size:0.8rem;"></i> ${teamName}</span>
-              </div>
-              <div class="participant-score-box">
-                <span class="grade-pill-tag grade-pill-${gradeLetter.toLowerCase()}">Grade ${gradeLetter}</span>
-                <div class="score-bar-track">
-                  <div class="score-bar-fill ${fillClass}" style="width: ${barPct}%;"></div>
-                </div>
-                <span class="participant-pts">${pts} pts</span>
-              </div>
-            </div>
-          `;
-        });
-        return `
-          <div class="rank-winner-card ${cardClass}">
-            <div class="rank-badge-col" data-rank-title="Grade ${gradeLetter}">
-              <div class="rank-medal-icon" style="background:#e0f2fe; color:#0284c7; font-size:1.1rem;">
-                ${emojiIcon}
-              </div>
-            </div>
-            <div class="rank-participants-group">
-              ${rows}
-            </div>
-          </div>
-        `;
-      };
-
-      let gradeSectionHtml = "";
-      if (gradeOnlyParticipants.length > 0) {
-        gradeSectionHtml = `
-          <h4 style="color:var(--primary-emerald); margin-top:28px; margin-bottom:12px; font-size:1.1rem;">
-            <i class="fa-solid fa-ribbon" style="color:#10b981;"></i> Grade Achievers (ഗ്രേഡ് ജേതാക്കൾ)
-          </h4>
-          <div class="rank-winners-list" style="margin-top:10px;">
-            ${renderGradeCard('A', gradeAWinners, 'grade-card-a', 'fill-grade-a', '🌟')}
-            ${renderGradeCard('B', gradeBWinners, 'grade-card-b', 'fill-grade-b', '⭐')}
-            ${renderGradeCard('C', gradeCWinners, 'grade-card-c', 'fill-grade-c', '✨')}
-          </div>
-        `;
-      }
-
-      // Create participants table list - STRICT HIERARCHY: RANK FIRST, THEN GRADE
-      let rowsHtml = "";
-      const sortedParticipants = [...prog.results].sort((a, b) => {
-        const aRank = a.rank ? Number(a.rank) : 999;
-        const bRank = b.rank ? Number(b.rank) : 999;
-        if (aRank !== bRank) return aRank - bRank; // Rank 1, 2, 3 always first
-
-        // For same rank or no rank, sort by Grade: A -> B -> C -> None
-        const gradeWeight = g => g === 'A' ? 3 : g === 'B' ? 2 : g === 'C' ? 1 : 0;
-        const gDiff = gradeWeight(b.grade) - gradeWeight(a.grade);
-        if (gDiff !== 0) return gDiff;
-
-        // Points desc
-        const aPts = ThanafusDB.programmePoints(prog, a.rank, a.grade);
-        const bPts = ThanafusDB.programmePoints(prog, b.rank, b.grade);
-        return bPts - aPts;
-      });
-
-      sortedParticipants.forEach(res => {
-        let studName = "Unknown";
-        let teamName = "N/A";
-        if (isTeamEvent) {
-          const t = ThanafusDB.db.teams.find(tm => tm.id === (res.teamId || prog.teamId));
-          if (t) { studName = t.name; teamName = "Team Event"; }
-        } else {
-          const stud = ThanafusDB.db.students.find(s => s.id === res.studentId);
-          const teamObj = stud ? ThanafusDB.db.teams.find(t => t.id === stud.teamId) : null;
-          if (stud) studName = stud.name;
-          if (teamObj) teamName = teamObj.name;
-        }
-        const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
-        
-        rowsHtml += `
-          <tr>
-            <td data-label="Rank"><strong>${res.rank ? res.rank + (res.rank === 1 ? 'st' : res.rank === 2 ? 'nd' : res.rank === 3 ? 'rd' : 'th') + ' Place' : 'Participation'}</strong></td>
-            <td data-label="Student">${studName}</td>
-            <td data-label="Team">${teamName}</td>
-            <td data-label="Grade"><span class="prog-meta-badge" style="background-color:${res.grade === 'A' ? '#e2fdf2' : res.grade === 'B' ? '#fffbeb' : '#f1f5f9'}; color:${res.grade === 'A' ? '#10b981' : res.grade === 'B' ? '#d97706' : '#64748b'};">${res.grade ? 'Grade ' + res.grade : 'N/A'}</span></td>
-            <td data-label="Points"><strong>${pts} pts</strong></td>
-          </tr>
-        `;
-      });
-
-      container.innerHTML = `
-        <div class="prog-detail-view" style="margin-top:0;">
-          <div class="prog-header-info">
-            <div>
-              <h2 style="color:var(--primary-emerald);">${prog.name}</h2>
-              <p style="color:var(--text-gray);font-size:0.9rem;margin-top:2px;">
-                ${isTeamEvent 
-                  ? `<i class="fa-solid fa-people-group"></i> Team Event &nbsp;|&nbsp; <i class="fa-solid fa-users"></i> Whole Team Scoring`
-                  : `<i class="fa-solid fa-location-dot"></i> ${prog.venue} &nbsp;|&nbsp; <i class="fa-solid fa-user-tie"></i> Judge: ${prog.judge}`}
-              </p>
-            </div>
-            <span class="prog-meta-badge" style="background:#10b981; color:white;"><i class="fa-solid fa-circle-check"></i> Published</span>
-          </div>
-
-          <!-- 1. RANK PLACEMENTS (🥇 1st, 🥈 2nd, 🥉 3rd - Supports Multiple / Ties per Rank) -->
-          <h3 style="color:var(--primary-emerald); margin-bottom:12px;"><i class="fa-solid fa-trophy" style="color:var(--accent-gold);"></i> Official Rank Winners (റാങ്ക് ജേതാക്കൾ)</h3>
-          ${winnersHtml}
-
-          <!-- 2. GRADE ACHIEVERS (Grade A, Grade B, Grade C) -->
-          ${gradeSectionHtml}
-
-          <!-- 3. DETAILED TABLE EVALUATION -->
-          <h3 style="color:var(--primary-emerald); margin-bottom:15px; margin-top:35px;"><i class="fa-solid fa-list-ol"></i> Complete Result Evaluation (മുഴുവൻ ഫലങ്ങൾ)</h3>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Student / Team</th>
-                  <th>Team</th>
-                  <th>Grade</th>
-                  <th>Points</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${rowsHtml}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    /* ===================================================
-       STUDENT RESULTS MODULE
-    =================================================== */
-    function handleStudentSearch(val) {
-      const suggestions = document.getElementById("student-suggestions");
-      if (!val || val.trim().length === 0) {
-        suggestions.style.display = "none";
-        return;
-      }
-
-      // Find students in current category
-      const matched = ThanafusDB.searchStudents(val).filter(s => s.category === currentCategory);
-
-      if (matched.length === 0) {
-        suggestions.innerHTML = `<div style="padding:10px;color:var(--text-gray);font-size:0.9rem;">No students found in ${currentCategory}</div>`;
-        suggestions.style.display = "block";
-        return;
-      }
-
-      let html = "";
-      matched.forEach(s => {
-        html += `
-          <div style="padding:10px 15px;cursor:pointer;border-bottom:1px solid #f1f5f9;font-size:0.95rem;transition:0.2s;" 
-               class="student-suggest-item" 
-               onclick="selectStudent('${s.id}')">
-            <strong>${s.name}</strong> &mdash; <span style="font-size:0.85rem;color:var(--text-gray);">${s.teamName}</span>
-          </div>
-        `;
-      });
-      suggestions.innerHTML = html;
-      suggestions.style.display = "block";
-
-      // hover style helper
-      const items = suggestions.querySelectorAll(".student-suggest-item");
-      items.forEach(el => {
-        el.addEventListener("mouseenter", () => el.style.background = "#e2ede8");
-        el.addEventListener("mouseleave", () => el.style.background = "white");
-      });
-    }
-
-    function selectStudent(id) {
-      document.getElementById("student-suggestions").style.display = "none";
-      const profileContainer = document.getElementById("student-profile-container");
-      
-      const profile = ThanafusDB.getStudentProfile(id);
-      if (!profile) return;
-
-      const photoUrl = profile.photo || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop";
-
-      let participationsHtml = "";
-      if (profile.participations.length === 0) {
-        participationsHtml = `<tr><td colspan="5" class="text-center" style="color:var(--text-gray);">No participations or published results found for this student.</td></tr>`;
-      } else {
-        profile.participations.forEach(p => {
-          participationsHtml += `
-            <tr>
-              <td data-label="Programme"><strong>${p.programmeName}</strong></td>
-              <td data-label="Venue">${p.venue}</td>
-              <td data-label="Rank">${p.rank ? `<span style="color:var(--accent-gold-dark);font-weight:bold;">${p.rank + (p.rank === 1 ? 'st' : p.rank === 2 ? 'nd' : p.rank === 3 ? 'rd' : 'th')} Place</span>` : 'Participation'}</td>
-              <td data-label="Grade"><span class="prog-meta-badge" style="background-color:${p.grade === 'A' ? '#e2fdf2' : p.grade === 'B' ? '#fffbeb' : '#f1f5f9'}; color:${p.grade === 'A' ? '#10b981' : p.grade === 'B' ? '#d97706' : '#64748b'};">${p.grade ? 'Grade ' + p.grade : 'N/A'}</span></td>
-              <td data-label="Points"><strong>${p.points} pts</strong></td>
-            </tr>
-          `;
-        });
-      }
-
-      profileContainer.innerHTML = `
-        <div class="student-profile-card">
-          <div class="student-profile-header">
-            <img src="${photoUrl}" class="student-large-avatar" alt="${profile.name}">
-            <div class="student-info-meta">
-              <h3>${profile.name}</h3>
-              <p style="color:var(--text-gray);font-weight:500;">Team: <span style="color:var(--primary-emerald);">${profile.teamName}</span></p>
-              <p style="color:var(--text-gray);font-size:0.9rem;">Category: ${profile.category}</p>
-              
-              <div class="student-stats-row">
-                <div class="student-stat-pill">
-                  <span>Overall Rank</span>
-                  <strong>#${profile.position}</strong>
-                </div>
-                <div class="student-stat-pill">
-                  <span>Total Score</span>
-                  <strong>${profile.totalScore} pts</strong>
-                </div>
-                <div class="student-stat-pill">
-                  <span>Total wins (1st/2nd/3rd)</span>
-                  <strong>${profile.rankCount[1] + profile.rankCount[2] + profile.rankCount[3]}</strong>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <h3 style="color:var(--primary-emerald); margin-bottom:15px; margin-top:40px;">Programmes Participated</h3>
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Programme</th>
-                  <th>Venue</th>
-                  <th>Rank</th>
-                  <th>Grade</th>
-                  <th>Points</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${participationsHtml}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      `;
-
-      // Set input value to name
-      document.getElementById("search-student").value = profile.name;
-    }
-
-    /* ===================================================
-       TEAM RESULTS MODULE
-    =================================================== */
-    function loadTeams() {
-      const grid = document.getElementById("teams-grid-container");
-      const teams = ThanafusDB.db.teams;
-
-      // Sort by rank ascending
-      const sortedTeams = [...teams].sort((a, b) => a.rank - b.rank);
-
-      let html = "";
-      sortedTeams.forEach(team => {
-        let medal = "";
-        if (team.rank === 1) medal = "🥇";
-        else if (team.rank === 2) medal = "🥈";
-        else if (team.rank === 3) medal = "🥉";
-        else medal = "🎗️";
-
-        html += `
-          <div class="card standings-card rank-${team.rank}" style="cursor:pointer;" onclick="selectTeam('${team.id}')">
-            <div class="team-rank-badge">${medal}</div>
-            <h3>${team.name}</h3>
-            <p class="details">Captain: ${team.captain}</p>
-            <div class="score">${team.totalScore} <span style="font-size:0.9rem;font-weight:normal;color:var(--text-gray);">Points</span></div>
-          </div>
-        `;
-      });
-      grid.innerHTML = html;
-    }
-
-    function selectTeam(id) {
-      const container = document.getElementById("selected-team-detail-container");
-      const team = ThanafusDB.db.teams.find(t => t.id === id);
-      if (!team) return;
-
-      // Get members tags
-      let membersHtml = "";
-      team.members.forEach(m => {
-        membersHtml += `<span class="team-member-chip">${m}</span>`;
-      });
-
-      // Get team wins
-      // We filter wins by the currentCategory to show category-specific wins or all?
-      // The prompt says: "Team Results: Show Team Name, Captain, Members, Total Score, Overall Rank, Programme-wise Points, Grade Count, Winning Programmes"
-      // Show details matching this category first, but listing overall is fine. Let's filter team wins for this category
-      const catWins = team.wins.filter(w => w.category === currentCategory);
-      let winsHtml = "";
-      if (catWins.length === 0) {
-        winsHtml = "<p style='color:var(--text-gray);font-size:0.9rem;'>No winning placements in this category yet.</p>";
-      } else {
-        winsHtml += `<div class="table-wrapper"><table><thead><tr><th>Programme</th><th>Student</th><th>Rank</th><th>Grade</th><th>Points</th></tr></thead><tbody>`;
-        catWins.forEach(win => {
-          winsHtml += `
-            <tr>
-              <td data-label="Programme"><strong>${win.programmeName}</strong></td>
-              <td data-label="Student">${win.studentName}</td>
-              <td data-label="Rank">${win.rank ? win.rank + (win.rank === 1 ? 'st' : win.rank === 2 ? 'nd' : win.rank === 3 ? 'rd' : 'th') + ' Place' : 'Participation'}</td>
-              <td data-label="Grade"><span class="prog-meta-badge" style="background-color:${win.grade === 'A' ? '#e2fdf2' : win.grade === 'B' ? '#fffbeb' : '#f1f5f9'}; color:${win.grade === 'A' ? '#10b981' : win.grade === 'B' ? '#d97706' : '#64748b'};">${win.grade ? 'Grade ' + win.grade : 'N/A'}</span></td>
-              <td data-label="Points"><strong>${win.points} pts</strong></td>
-            </tr>
-          `;
-        });
-        winsHtml += `</tbody></table></div>`;
-      }
-
-      // Programme wise points breakdown in this category
-      // We check all programmes in this category, and if team has got points in it
-      let breakdownHtml = "";
-      const catProgrammes = ThanafusDB.db.programmes.filter(p => p.category === currentCategory && p.resultsPublished);
-      let pointsBreakdownList = [];
-
-      catProgrammes.forEach(prog => {
-        let progPts = 0;
-        let studentsWithPts = [];
-
-        const isTeamEvent = (prog.type || '').trim().toLowerCase() === 'group' || (prog.category || '').trim().toLowerCase() === 'general';
-        if (isTeamEvent) {
-          // Team event: check if this teamId matches
-          prog.results.forEach(res => {
-            if ((res.teamId || prog.teamId) === id) {
-              const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
-              progPts += pts;
-              studentsWithPts.push(`${team.name} (${res.rank ? res.rank + ' Place' : ''}${res.grade ? ' ' + res.grade : ''}: ${pts}pts)`);
-            }
-          });
-        } else {
-          prog.results.forEach(res => {
-            const student = ThanafusDB.db.students.find(s => s.id === res.studentId);
-            if (student && student.teamId === id) {
-              const pts = ThanafusDB.programmePoints(prog, res.rank, res.grade);
-              progPts += pts;
-              studentsWithPts.push(`${student.name} (${res.rank ? res.rank + ' Place' : ''}${res.grade ? ' ' + res.grade : ''}: ${pts}pts)`);
-            }
-          });
-        }
-
-        if (progPts > 0) {
-          pointsBreakdownList.push({
-            progName: prog.name,
-            points: progPts,
-            details: studentsWithPts.join(", ")
-          });
-        }
-      });
-
-      if (pointsBreakdownList.length === 0) {
-        breakdownHtml = "<tr><td colspan='3' class='text-center' style='color:var(--text-gray);'>No points earned in this category yet.</td></tr>";
-      } else {
-        pointsBreakdownList.forEach(item => {
-          breakdownHtml += `
-            <tr>
-              <td data-label="Programme"><strong>${item.progName}</strong></td>
-              <td data-label="Scoring Students">${item.details}</td>
-              <td data-label="Points"><strong>${item.points} pts</strong></td>
-            </tr>
-          `;
-        });
-      }
-
-      // Get all penalties for this team
-      ThanafusDB.db.penalties = ThanafusDB.db.penalties || [];
-      const teamPenalties = ThanafusDB.db.penalties.filter(pen => pen.teamId === id);
-      let penaltiesHtml = "";
-      if (teamPenalties.length > 0) {
-        penaltiesHtml = `
-          <h3 style="color:#ef4444; margin-bottom:15px; margin-top:30px;"><i class="fa-solid fa-triangle-exclamation"></i> Deductions &amp; Penalties</h3>
-          <div class="table-wrapper" style="border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; overflow: hidden;">
-            <table>
-              <thead>
-                <tr style="background: rgba(239, 68, 68, 0.05);">
-                  <th style="color:#ef4444;">Deduction</th>
-                  <th style="color:#ef4444;">Reason / Description</th>
-                  <th style="color:#ef4444;">Points Deducted</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${teamPenalties.map(pen => {
-                  const prog = ThanafusDB.db.programmes.find(pr => pr.id === pen.programmeId);
-                  const progLabel = prog ? `${prog.name} (${prog.category})` : "General Penalty";
-                  return `
-                    <tr>
-                      <td data-label="Deduction" style="color:#f87171; font-weight:700;">${progLabel}</td>
-                      <td data-label="Reason">${pen.reason}</td>
-                      <td data-label="Points Deducted" style="color:#ef4444; font-weight:800;">-${pen.points} pts</td>
-                    </tr>
-                  `;
-                }).join("")}
-              </tbody>
-            </table>
-          </div>
-        `;
-      }
-
-      container.innerHTML = `
-        <div class="team-results-card">
-          <div class="team-header-flex">
-            <div>
-              <h2 style="color:var(--primary-emerald);">${team.name} <span style="font-size:1.1rem;font-weight:normal;color:var(--text-gray);">Position: #${team.rank}</span></h2>
-              <p style="color:var(--text-gray);font-weight:500;">Captain: ${team.captain}</p>
+              <span style="font-size:0.8rem; color:var(--text-dim);"><i class="fa-solid fa-clock"></i> Published</span>
             </div>
             
-            <div class="student-stats-row" style="margin-top: 0;">
-              <div class="student-stat-pill">
-                <span>Total Score</span>
-                <strong>${team.totalScore} pts</strong>
-              </div>
-              <div class="student-stat-pill">
-                <span>A Grades</span>
-                <strong>${team.grades.A || 0}</strong>
-              </div>
-              <div class="student-stat-pill">
-                <span>B Grades</span>
-                <strong>${team.grades.B || 0}</strong>
-              </div>
-              <div class="student-stat-pill">
-                <span>C Grades</span>
-                <strong>${team.grades.C || 0}</strong>
-              </div>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Chest</th>
+                    <th>Name</th>
+                    <th>Team</th>
+                    <th>Grade</th>
+                    <th>Points</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rowsHtml || `<tr><td colspan="6" class="text-center text-muted">No result records available</td></tr>`}
+                </tbody>
+              </table>
             </div>
           </div>
+        `;
+      }).join('');
+    }
 
-          <h4 style="color:var(--primary-emerald); margin-bottom:10px;">Team Members</h4>
-          <div class="team-members-list" style="margin-bottom:30px;">
-            ${membersHtml}
+    function handleStudentSearch() {
+      const q = document.getElementById("search-student").value.trim().toLowerCase();
+      const wrap = document.getElementById("search-results-container");
+      const list = document.getElementById("search-results-list");
+
+      if (!q) {
+        wrap.style.display = "none";
+        return;
+      }
+
+      const matches = (ThanafusDB.db.students || []).filter(s => 
+        (s.name && s.name.toLowerCase().includes(q)) || 
+        (s.chestNo && s.chestNo.toLowerCase().includes(q))
+      );
+
+      if (matches.length === 0) {
+        list.innerHTML = `<div class="card text-center"><p class="text-muted">No matching student found for "${q}"</p></div>`;
+      } else {
+        list.innerHTML = `
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Chest</th>
+                <th>Student Name</th>
+                <th>Category</th>
+                <th>Team</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${matches.map(s => {
+                const team = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+                return `
+                  <tr>
+                    <td>#${s.chestNo || '—'}</td>
+                    <td><strong>${s.name}</strong></td>
+                    <td>${s.category}</td>
+                    <td>${team ? team.name : 'N/A'}</td>
+                    <td>
+                      <button onclick="viewStudentModal('${s.id}')" class="btn btn-gold btn-sm"><i class="fa-solid fa-eye"></i> View Profile</button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+      wrap.style.display = "block";
+    }
+
+    function viewStudentModal(studentId) {
+      const profile = ThanafusDB.getStudentProfile(studentId);
+      if (!profile) return;
+
+      document.getElementById("modal-student-name").innerText = profile.name;
+      const body = document.getElementById("modal-student-body");
+
+      body.innerHTML = `
+        <div style="display:flex; gap:20px; align-items:center; margin-bottom:20px; background:rgba(255,255,255,0.03); padding:16px; border-radius:12px;">
+          <div class="kala-avatar" style="margin:0; width:70px; height:70px; font-size:1.8rem;">
+            ${profile.photo ? `<img src="${profile.photo}" style="width:100%;height:100%;border-radius:50%;">` : `<i class="fa-solid fa-user-graduate"></i>`}
           </div>
-
-          <h3 style="color:var(--primary-emerald); margin-bottom:15px; margin-top:30px;">Winning Programmes (${currentCategory})</h3>
-          <div style="margin-bottom:30px;">
-            ${winsHtml}
+          <div>
+            <h4 style="font-size:1.1rem;">${profile.name} ${profile.chestNo ? `(#${profile.chestNo})` : ''}</h4>
+            <p class="text-muted" style="font-size:0.85rem;">Team: <strong>${profile.teamName}</strong> | Category: <strong>${profile.category}</strong></p>
+            <p style="font-size:0.9rem; color:var(--primary-emerald); font-weight:700; margin-top:4px;">
+              Total Score: ${profile.totalScore} PTS | Category Rank: #${profile.position}
+            </p>
           </div>
+        </div>
 
-          <h3 style="color:var(--primary-emerald); margin-bottom:15px;">Programme-wise Points Breakdown (${currentCategory})</h3>
-          <div class="table-wrapper" style="margin-bottom:30px;">
-            <table>
-              <thead>
+        <h4 style="margin-bottom:12px; font-size:1rem;">Programme Participations</h4>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Programme</th>
+                <th>Rank</th>
+                <th>Grade</th>
+                <th>Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${profile.participations.map(p => `
                 <tr>
-                  <th>Programme</th>
-                  <th>Scoring Students</th>
-                  <th>Points</th>
+                  <td>${p.programmeName}</td>
+                  <td>${p.rank ? `#${p.rank}` : '—'}</td>
+                  <td>${p.grade ? `<span class="grade-chip ${p.grade.toLowerCase()}">${p.grade}</span>` : '—'}</td>
+                  <td style="font-weight:700; color:var(--primary-emerald);">${p.points} PTS</td>
                 </tr>
-              </thead>
-              <tbody>
-                ${breakdownHtml}
-              </tbody>
-            </table>
-          </div>
-
-          ${penaltiesHtml}
+              `).join('') || `<tr><td colspan="4" class="text-center text-muted">No published event records</td></tr>`}
+            </tbody>
+          </table>
         </div>
       `;
+
+      document.getElementById("student-modal").classList.add("active");
     }
+
+    function closeStudentModal() {
+      document.getElementById("student-modal").classList.remove("active");
+    }
+
+    function openAppealModal() {
+      document.getElementById("appeal-modal").classList.add("active");
+    }
+
+    function closeAppealModal() {
+      document.getElementById("appeal-modal").classList.remove("active");
+    }
+
+    function handleAppealSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById("app-name").value;
+      const team = document.getElementById("app-team").value;
+      const cat = document.getElementById("app-cat").value;
+      const prog = document.getElementById("app-prog").value;
+      const phone = document.getElementById("app-phone").value;
+      const desc = document.getElementById("app-desc").value;
+
+      ThanafusDB.addAppeal(name, team, cat, prog, phone, desc);
+      closeAppealModal();
+      showAlert("Appeal submitted successfully! The control committee will review your request.", "success");
+      e.target.reset();
+    }
+
+    window.loadProgrammes = filterResults;
   </script>
 </body>
 </html>

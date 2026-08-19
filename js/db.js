@@ -62,7 +62,7 @@ const DEFAULT_DB = {
   messages: [],
   settings: {
     prospectusUrl: "", // Base64 or standard URL
-    adminPassword: "admin@9526"
+    adminPassword: "bayanadmin"
   }
 };
 
@@ -103,7 +103,7 @@ class Database {
     this.db.penalties = Array.isArray(this.db.penalties) ? this.db.penalties : [];
     this.db.contact = (this.db.contact && typeof this.db.contact === 'object') ? this.db.contact : JSON.parse(JSON.stringify(DEFAULT_DB.contact));
     this.db.settings = (this.db.settings && typeof this.db.settings === 'object') ? this.db.settings : JSON.parse(JSON.stringify(DEFAULT_DB.settings));
-    if (!this.db.settings.adminPassword) this.db.settings.adminPassword = "admin@9526";
+    if (!this.db.settings.adminPassword) this.db.settings.adminPassword = "bayanadmin";
   }
 
   async load() {

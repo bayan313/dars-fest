@@ -3,20 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Official results portal of THANAFUS Dars Fest 2026. Striving for Excellence in Dars Education.">
-  <title>THANAFUS Dars Fest 2026 | Home</title>
+  <title>THANAFUS Dars Fest 2026 | Official Portal</title>
   
-  <!-- Poppins Font & Stylesheets -->
+  <!-- Modern Fonts & Stylesheets -->
   <link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="kalaprathibha.css">
   <link rel="stylesheet" href="mobile.css">
   
-  <!-- FontAwesome Icons (Free CDN) -->
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-  <!-- Header & Navigation -->
+  <!-- Navigation Bar -->
   <header>
     <nav class="navbar">
       <a href="index.html" class="logo-container">
@@ -27,17 +25,13 @@
       </a>
       
       <button class="hamburger" aria-label="Toggle Navigation">
-        <span></span>
-        <span></span>
-        <span></span>
+        <i class="fa-solid fa-bars"></i>
       </button>
       
       <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="pages/results.html">Results</a></li>
-        <li><a href="pages/gallery.html">Gallery</a></li>
-        <li><a href="pages/appeal.html">Appeal Panel</a></li>
-        <li><a href="pages/contact.html">Contact</a></li>
+        <li><a href="index.html" class="active"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="pages/results.html"><i class="fa-solid fa-trophy"></i> Results</a></li>
+        <li><a href="pages/contact.html"><i class="fa-solid fa-envelope"></i> Contact</a></li>
       </ul>
     </nav>
   </header>
@@ -45,502 +39,243 @@
   <main>
     <!-- Hero Section -->
     <section class="hero">
-      <span class="hero-shape hero-orb-1"></span>
-      <span class="hero-shape hero-orb-2"></span>
-      <span class="hero-shape hero-ring"></span>
-      <span class="hero-shape hero-diamond"></span>
-      <span class="hero-shape hero-square"></span>
+      <div class="container">
+        <div class="hero-badge">
+          <i class="fa-solid fa-star text-gold"></i> Biennial Arts & Cultural Fest
+        </div>
+        <h1 class="hero-title">THANAFUS <span>DARS FEST 2026</span></h1>
+        <p class="hero-motto">"Cultivating Knowledge, Ethics, and Islamic Artistry in Dars Education"</p>
+        <div class="hero-actions">
+          <a href="pages/results.html" class="btn btn-gold btn-lg">
+            <i class="fa-solid fa-trophy"></i> Live Results Portal
+          </a>
+          <button onclick="openProspectusModal()" class="btn btn-outline btn-lg">
+            <i class="fa-solid fa-file-pdf"></i> View Prospectus
+          </button>
+        </div>
+      </div>
+    </section>
 
-      <div class="hero-content">
-        <p class="hero-subtitle">THANAFUS</p>
-        <h1 class="hero-title">DARS FEST <span>2026</span></h1>
-        <p class="hero-motto">"Cultivating Knowledge, Ethics, and Islamic Artistry"</p>
-        <a href="pages/results.html" class="btn btn-gold">
-          <i class="fa-solid fa-trophy"></i> View Results
+    <!-- Live Team Standings Section -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Live Team Standings</h2>
+          <p class="section-subtitle">Real-time leaderboard updates from published stage and off-stage events</p>
+        </div>
+
+        <div class="standings-grid" id="standings-leaderboard">
+          <div class="card text-center" style="grid-column: 1 / -1; padding: 40px;">
+            <p class="text-muted"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Fetching Live Standings...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Kalaprathibha Section -->
+    <section class="section" style="background: rgba(15, 23, 42, 0.4); border-top: 1px solid var(--border-glass); border-bottom: 1px solid var(--border-glass);">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Category Champions</h2>
+          <p class="section-subtitle">Leading individual Kalaprathibha contenders across categories</p>
+        </div>
+
+        <div class="kala-grid" id="kalaprathibha-container">
+          <div class="card text-center" style="grid-column: 1 / -1; padding: 40px;">
+            <p class="text-muted"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Loading Champions...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notifications & Announcements -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Announcements & Notices</h2>
+          <p class="section-subtitle">Official notifications from the fest control committee</p>
+        </div>
+
+        <div class="notif-list" id="notif-list">
+          <div class="card text-center" style="padding: 30px;">
+            <p class="text-muted"><i class="fa-solid fa-spinner fa-spin"></i> Loading Notifications...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Prospectus Viewer Modal -->
+  <div class="modal-overlay" id="prospectus-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-size: 1.3rem;"><i class="fa-solid fa-file-pdf text-gold"></i> Festival Prospectus</h3>
+        <button class="modal-close" onclick="closeProspectusModal()">&times;</button>
+      </div>
+      <p class="text-muted" style="margin-bottom: 20px; font-size: 0.9rem;">
+        Download or inspect the official handbook containing fest guidelines, category point rules, and event schedules.
+      </p>
+      <div id="pdf-container" style="min-height: 200px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: var(--radius-md); margin-bottom: 20px; padding: 20px;">
+        <p class="text-muted">Prospectus document viewer loading...</p>
+      </div>
+      <div style="display: flex; gap: 12px; justify-content: flex-end;">
+        <button class="btn btn-outline" onclick="closeProspectusModal()">Close</button>
+        <a id="btn-download-pdf-modal" href="#" download="THANAFUS_Prospectus_2026.pdf" class="btn btn-gold">
+          <i class="fa-solid fa-download"></i> Download PDF
         </a>
       </div>
-    </section>
-
-    <!-- Live Standings (4 Teams) -->
-    <section class="section">
-      <div class="text-center">
-        <h2 class="section-title">Live Team Standings</h2>
-        <p class="section-subtitle">Real-time leaderboard updates from published programs</p>
-      </div>
-      
-      <div class="grid-4" id="standings-leaderboard">
-        <!-- Dynamic loading of exactly 4 teams -->
-        <div class="card text-center" style="grid-column: 1 / -1;">
-          <p><i class="fa-solid fa-spinner fa-spin"></i> Loading Leaderboard Standings...</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Current Kalaprathibha Section -->
-    <section class="section" style="background-color: rgba(79, 70, 229, 0.03); border-top: 1px solid rgba(79, 70, 229, 0.05); border-bottom: 1px solid rgba(79, 70, 229, 0.05);">
-      <div class="text-center">
-        <h2 class="section-title">Current Kalaprathibha</h2>
-        <p class="section-subtitle">Leading individual achievers of Dars Fest 2026</p>
-      </div>
-
-      <!-- Carousel wrapper -->
-      <div class="kala-carousel-wrapper">
-        <button class="kala-arrow kala-arrow-left" id="kala-prev" aria-label="Previous">&#8249;</button>
-        <div class="kala-carousel-track-outer">
-          <div class="kala-carousel-track" id="kalaprathibha-container">
-            <div class="card text-center" style="min-width:280px;">
-              <p><i class="fa-solid fa-spinner fa-spin"></i> Loading...</p>
-            </div>
-          </div>
-        </div>
-        <button class="kala-arrow kala-arrow-right" id="kala-next" aria-label="Next">&#8250;</button>
-      </div>
-      <!-- Dot indicators -->
-      <div class="kala-dots" id="kala-dots"></div>
-    </section>
-
-    <!-- Notifications & Prospectus Grid -->
-    <section class="section">
-      <div style="display: grid; grid-template-columns: 3fr 2fr; gap: 40px; align-items: start;" class="notif-prospectus-wrapper">
-        
-        <!-- Latest Notifications -->
-        <div>
-          <h2 class="section-title" style="margin-bottom: 15px; font-size: 1.8rem;">Latest Notifications</h2>
-          <div class="notification-container" id="notif-list">
-            <!-- Dynamic notifications loading -->
-          </div>
-          <button class="btn btn-outline btn-sm" id="view-all-notif-btn">View All Announcements</button>
-        </div>
-
-        <!-- Prospectus Card -->
-        <div>
-          <h2 class="section-title" style="margin-bottom: 15px; font-size: 1.8rem;">Festival Prospectus</h2>
-          <div class="prospectus-section" style="margin-top: 0; padding: 35px 20px;">
-            <div class="prospectus-container">
-              <div class="prospectus-icon">
-                <i class="fa-solid fa-file-pdf"></i>
-              </div>
-              <h3>Official Prospectus</h3>
-              <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 8px; margin-bottom: 20px;">
-                Download the official THANAFUS Dars Fest 2026 handbook for rules, event schedule, stage details, and guidelines.
-              </p>
-              <div class="prospectus-buttons">
-                <button class="btn btn-gold btn-sm" id="btn-view-pdf">
-                  <i class="fa-solid fa-eye"></i> View PDF
-                </button>
-                <button class="btn btn-primary btn-sm" id="btn-download-pdf">
-                  <i class="fa-solid fa-download"></i> Download PDF
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-  </main>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer>
-    <div class="footer-content">
-      <div class="footer-brand">
-        <h3>THANAFUS 2026</h3>
-        <p style="opacity: 0.8; font-size: 0.9rem; margin-top: 10px;">
-          The biennial arts and cultural festival celebrating educational excellence, creative expression, and spiritual values of Dars students.
-        </p>
-        <div class="social-icons">
-          <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-          <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-          <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
-          <a href="#" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3 style="color: var(--accent-gold-light); font-size: 1.3rem;">THANAFUS 2026</h3>
+          <p style="font-size: 0.85rem; margin-top: 4px;">Dars Educational Arts Festival Committee Office</p>
         </div>
-      </div>
-      
-      <div class="footer-links">
-        <h4>Navigation Links</h4>
-        <ul>
+        <ul class="footer-links">
           <li><a href="index.html">Home</a></li>
-          <li><a href="pages/results.html">Results Portal</a></li>
-          <li><a href="pages/gallery.html">Media Gallery</a></li>
-          <li><a href="pages/appeal.html">Appeal Panel</a></li>
-          <li><a href="pages/contact.html">Contact Us</a></li>
+          <li><a href="pages/results.html">Results</a></li>
+          <li><a href="pages/contact.html">Contact</a></li>
+          <li><a href="admin/admin.html" style="opacity: 0.4;" title="Control Portal"><i class="fa-solid fa-lock"></i></a></li>
         </ul>
       </div>
-
-      <div class="footer-contact" id="footer-contact-info">
-        <h4>Contact Information</h4>
-        <!-- Contact details populated from JS -->
-      </div>
-    </div>
-    
-    <div class="footer-bottom">
-      <p>&copy; 2026 THANAFUS Dars Fest. All Rights Reserved. | Powered by <strong>THANAFUS IT Team</strong></p>
     </div>
   </footer>
 
-  <!-- View All Notifications Modal -->
-  <div class="modal-overlay" id="notif-modal">
-    <div class="modal-card" style="max-height: 80vh; display: flex; flex-direction: column;">
-      <button class="modal-close-btn" id="notif-modal-close">&times;</button>
-      <h3 style="color: var(--primary-emerald); margin-bottom: 20px;">All Notifications & Announcements</h3>
-      <div style="overflow-y: auto; flex-grow: 1; padding-right: 10px;" id="all-notif-modal-list">
-        <!-- Populate list -->
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: PROSPECTUS VIEWER (Mobile Optimized) -->
-  <div class="modal-overlay" id="prospectus-modal" style="display: none; z-index: 9999;">
-    <div class="modal-card" style="max-width: 850px; width: 95%; max-height: 90vh; padding: 20px; display: flex; flex-direction: column;">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px;">
-        <h3 style="color: var(--primary-emerald); margin: 0; display: flex; align-items: center; gap: 8px;">
-          <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> THANAFUS 2026 Prospectus
-        </h3>
-        <button class="modal-close-btn" style="position: static; font-size: 1.6rem;" onclick="closeProspectusModal()">&times;</button>
-      </div>
-
-      <div id="prospectus-modal-body" style="flex: 1; overflow-y: auto; min-height: 250px;">
-        <!-- Injected dynamically -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Shared JavaScript Files -->
+  <!-- Scripts -->
   <script src="js/db.js"></script>
   <script src="js/main.js"></script>
-
-  <!-- Page Logic -->
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
       await ThanafusDB.ready();
-      loadLeaderboard();
-      loadKalaprathibha();
-      loadNotifications();
-      loadContactDetails();
-      setupProspectus();
+      renderHomeContent();
     });
 
-    // Populate Leaderboard
-    function loadLeaderboard() {
-      const container = document.getElementById("standings-leaderboard");
-      const teams = ThanafusDB.db.teams; // loaded and rank calculated
-      
-      // Sort teams by rank ascending
-      const sortedTeams = [...teams].sort((a, b) => a.rank - b.rank).slice(0, 4);
-
-      let html = "";
-      sortedTeams.forEach(team => {
-        let medal = "";
-        if (team.rank === 1) medal = "🥇";
-        else if (team.rank === 2) medal = "🥈";
-        else if (team.rank === 3) medal = "🥉";
-        else medal = "🎗️";
-
-        html += `
-          <div class="card standings-card rank-${team.rank}">
-            <div class="team-rank-badge">${medal}</div>
-            <h3>${team.name}</h3>
-            <p class="details">Captain: ${team.captain}</p>
-            <div class="score">${team.totalScore} <span style="font-size:0.9rem;font-weight:normal;color:var(--text-gray);">Points</span></div>
-            <p class="details" style="margin-top: 5px;">
-              A: ${(team.grades && team.grades.A) || 0} | B: ${(team.grades && team.grades.B) || 0} | C: ${(team.grades && team.grades.C) || 0}
-            </p>
-          </div>
-        `;
-      });
-      container.innerHTML = html;
+    function renderHomeContent() {
+      renderLeaderboard();
+      renderKalaprathibha();
+      renderNotifications();
     }
 
-    // Populate Kalaprathibha – Carousel
-    function loadKalaprathibha() {
-      const container = document.getElementById("kalaprathibha-container");
-      const dotsEl   = document.getElementById("kala-dots");
-      const categories = ["Sub Junior", "Junior", "Senior"];
-      let html = "";
+    function renderLeaderboard() {
+      const container = document.getElementById("standings-leaderboard");
+      if (!container) return;
 
-      // Find max points for progress bar scaling
-      const allPoints = categories.map(cat => ThanafusDB.getKalaprathibha(cat).points);
-      const maxPoints = Math.max(...allPoints, 1);
+      const sortedTeams = [...ThanafusDB.db.teams].sort((a, b) => b.totalScore - a.totalScore);
+      const maxScore = Math.max(...sortedTeams.map(t => t.totalScore), 1);
 
-      categories.forEach(cat => {
-        const champ = ThanafusDB.getKalaprathibha(cat);
-        const isAwaiting = champ.points === 0;
-        const photoUrl = (!isAwaiting && champ.student && champ.student.photo)
-          ? champ.student.photo
-          : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop";
+      container.innerHTML = sortedTeams.map((t, idx) => {
+        const rank = t.rank || (idx + 1);
+        const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-4';
+        const percent = Math.min(100, Math.round((t.totalScore / maxScore) * 100));
 
-        // Show full name, or 'Awaiting Results' if no data
-        let displayName = "Awaiting Results";
-        if (!isAwaiting && champ.student && champ.student.name) {
-          displayName = champ.student.name;
-        }
-        const displayTeam = isAwaiting ? "Evaluations In Progress" : (champ.teamName || "");
-        const pct = Math.round((champ.points / maxPoints) * 100);
-
-        const catColors = { "Sub Junior": "#f59e0b", "Junior": "#10b981", "Senior": "#6366f1" };
-        const barColor = catColors[cat] || "#f59e0b";
-
-        html += `
-          <div class="kala-slide">
-            <div class="card kalaprathibha-card">
-              <span class="cat-badge">${cat}</span>
-              <div class="student-avatar-container">
-                <span class="crown-icon">👑</span>
-                <img src="${photoUrl}" alt="${displayName}" class="student-avatar" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop'">
+        return `
+          <div class="card team-card">
+            <div>
+              <div class="team-card-header">
+                <div class="rank-badge ${rankClass}">#${rank}</div>
+                <div class="grade-badges">
+                  <span class="grade-chip a">A: ${t.grades?.A || 0}</span>
+                  <span class="grade-chip b">B: ${t.grades?.B || 0}</span>
+                  <span class="grade-chip c">C: ${t.grades?.C || 0}</span>
+                </div>
               </div>
-              <h4 class="kala-initials">${displayName}</h4>
-              <p class="team-name">${displayTeam}</p>
-              <div class="kala-score-row">
-                <span class="kala-score-num">${champ.points}</span>
+              <h3 class="team-name">${t.name}</h3>
+              <p class="text-muted" style="font-size:0.8rem;">Captain: ${t.captain || 'N/A'}</p>
+            </div>
+            
+            <div style="margin-top: 20px;">
+              <div class="team-score">
+                ${t.totalScore} <span class="team-score-unit">PTS</span>
               </div>
-              <div class="kala-progress-track">
-                <div class="kala-progress-fill" style="width:${pct}%;background:${barColor};"></div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: ${percent}%;"></div>
               </div>
             </div>
           </div>
         `;
-      });
-
-      container.innerHTML = html;
-
-      // Dots
-      dotsEl.innerHTML = categories.map((_, i) =>
-        `<span class="kala-dot${i===0?' active':''}" data-idx="${i}"></span>`
-      ).join("");
-
-      // Carousel logic
-      let current = 0;
-      const slides = container.querySelectorAll(".kala-slide");
-      const dots   = dotsEl.querySelectorAll(".kala-dot");
-
-      function goTo(idx) {
-        current = (idx + slides.length) % slides.length;
-        const slideW = slides[0].offsetWidth;
-        container.style.transform = `translateX(-${current * slideW}px)`;
-        dots.forEach((d,i) => d.classList.toggle("active", i === current));
-      }
-
-      document.getElementById("kala-prev").addEventListener("click", () => goTo(current - 1));
-      document.getElementById("kala-next").addEventListener("click", () => goTo(current + 1));
-      dots.forEach(d => d.addEventListener("click", () => goTo(+d.dataset.idx)));
-
-      // Auto-rotate every 4 s
-      setInterval(() => goTo(current + 1), 4000);
-
-      // Re-calc on resize
-      window.addEventListener("resize", () => goTo(current));
+      }).join('');
     }
 
-    // Populate Notifications
-    function loadNotifications() {
-      const notifList = document.getElementById("notif-list");
-      const allNotifModalList = document.getElementById("all-notif-modal-list");
-      const notifs = ThanafusDB.db.notifications;
+    function renderKalaprathibha() {
+      const container = document.getElementById("kalaprathibha-container");
+      if (!container) return;
 
-      if (notifs.length === 0) {
-        notifList.innerHTML = "<p>No notifications found.</p>";
+      const categories = ["Sub Junior", "Junior", "Senior"];
+      container.innerHTML = categories.map(cat => {
+        const champ = ThanafusDB.getKalaprathibha(cat);
+        const student = champ.student || { name: "Pending", photo: "" };
+        const avatarHtml = student.photo 
+          ? `<img src="${student.photo}" class="kala-avatar" alt="${student.name}">`
+          : `<div class="kala-avatar"><i class="fa-solid fa-user-graduate"></i></div>`;
+
+        return `
+          <div class="card kala-card">
+            <span class="kala-cat-tag">${cat}</span>
+            ${avatarHtml}
+            <h3 class="kala-name">${student.name}</h3>
+            <p class="kala-meta">${champ.teamName} ${student.chestNo ? `| Chest: #${student.chestNo}` : ''}</p>
+            <div class="kala-points">${champ.points} <span style="font-size:0.9rem; font-weight:500;">Points</span></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderNotifications() {
+      const container = document.getElementById("notif-list");
+      if (!container) return;
+
+      const list = ThanafusDB.db.notifications || [];
+      if (list.length === 0) {
+        container.innerHTML = `<div class="card text-center"><p class="text-muted">No announcements posted yet.</p></div>`;
         return;
       }
 
-      // Display top 3 notifications
-      let shortHtml = "";
-      notifs.slice(0, 3).forEach(n => {
-        shortHtml += createNotifCard(n);
-      });
-      notifList.innerHTML = shortHtml;
+      container.innerHTML = list.slice(0, 5).map(n => {
+        const typeClass = n.type === 'success' ? 'notif-success' : n.type === 'warning' ? 'notif-warning' : n.type === 'danger' ? 'notif-danger' : 'notif-info';
+        const iconClass = n.type === 'success' ? 'fa-circle-check' : n.type === 'warning' ? 'fa-triangle-exclamation' : n.type === 'danger' ? 'fa-circle-exclamation' : 'fa-bullhorn';
 
-      // Modal Full List
-      let modalHtml = "";
-      notifs.forEach(n => {
-        modalHtml += createNotifCard(n);
-      });
-      allNotifModalList.innerHTML = modalHtml;
-
-      // Setup Modal Controls
-      const modal = document.getElementById("notif-modal");
-      const openBtn = document.getElementById("view-all-notif-btn");
-      const closeBtn = document.getElementById("notif-modal-close");
-
-      openBtn.addEventListener("click", () => {
-        modal.style.display = "flex";
-      });
-      closeBtn.addEventListener("click", () => {
-        modal.style.display = "none";
-      });
-      modal.addEventListener("click", (e) => {
-        if (e.target === modal) modal.style.display = "none";
-      });
-    }
-
-    function createNotifCard(n) {
-      return `
-        <div class="notif-card ${n.type}">
-          <div class="notif-body">
-            <h4 class="notif-title">${n.title}</h4>
-            <p class="notif-desc">${n.content}</p>
-            <p class="notif-time"><i class="fa-regular fa-clock"></i> ${formatDate(n.date)}</p>
+        return `
+          <div class="notif-item">
+            <div class="notif-icon ${typeClass}">
+              <i class="fa-solid ${iconClass}"></i>
+            </div>
+            <div class="notif-content">
+              <h4>${n.title}</h4>
+              <p>${n.content}</p>
+              <div class="notif-date">${n.date ? new Date(n.date).toLocaleString() : ''}</div>
+            </div>
           </div>
-        </div>
-      `;
-    }
-
-    // Populate Contact Details in Footer
-    function loadContactDetails() {
-      const container = document.getElementById("footer-contact-info");
-      const contact = ThanafusDB.db.contact;
-      
-      container.innerHTML = `
-        <h4>Contact Information</h4>
-        <p><i class="fa-solid fa-user-tie"></i> <span><strong>Coordinator:</strong> ${contact.coordinatorName}</span></p>
-        <p><i class="fa-solid fa-phone"></i> <span><strong>Phone:</strong> <a href="tel:${contact.coordinatorPhone}">${contact.coordinatorPhone}</a></span></p>
-        <p><i class="fa-solid fa-headset"></i> <span><strong>Tech Support:</strong> ${contact.techSupportPhone}</span></p>
-        <p><i class="fa-solid fa-envelope"></i> <span><strong>Email:</strong> <a href="mailto:${contact.email}">${contact.email}</a></span></p>
-        <p><i class="fa-solid fa-location-dot"></i> <span><strong>Office:</strong> ${contact.address}</span></p>
-      `;
-    }
-
-    // Helper: Convert Base64 data URI to Blob for mobile PDF rendering
-    function base64ToBlob(dataUri) {
-      if (!dataUri) return null;
-      try {
-        if (dataUri.startsWith("data:")) {
-          const parts = dataUri.split(',');
-          const mimeMatch = parts[0].match(/:(.*?);/);
-          const mime = mimeMatch ? mimeMatch[1] : 'application/pdf';
-          const bstr = atob(parts[1]);
-          let n = bstr.length;
-          const u8arr = new Uint8Array(n);
-          while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-          }
-          return new Blob([u8arr], { type: mime });
-        }
-        return null;
-      } catch (e) {
-        console.error("Base64 conversion failed:", e);
-        return null;
-      }
+        `;
+      }).join('');
     }
 
     function openProspectusModal() {
       const modal = document.getElementById("prospectus-modal");
-      const body = document.getElementById("prospectus-modal-body");
-      const rawUrl = ThanafusDB.db.settings && ThanafusDB.db.settings.prospectusUrl;
+      const pdfContainer = document.getElementById("pdf-container");
+      const downloadBtn = document.getElementById("btn-download-pdf-modal");
+      const url = ThanafusDB.db.settings?.prospectusUrl || "";
 
-      if (rawUrl) {
-        const blob = base64ToBlob(rawUrl);
-        const pdfUrl = blob ? URL.createObjectURL(blob) : rawUrl;
-
-        body.innerHTML = `
-          <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-            <a href="${pdfUrl}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" style="flex: 1; justify-content: center; min-width: 140px;">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Full Screen
-            </a>
-            <a href="${pdfUrl}" download="THANAFUS_Dars_Fest_2026_Prospectus.pdf" class="btn btn-gold btn-sm" style="flex: 1; justify-content: center; min-width: 140px;">
-              <i class="fa-solid fa-download"></i> Download PDF
-            </a>
-          </div>
-          <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #525659; min-height: 55vh;">
-            <iframe src="${pdfUrl}#toolbar=0" style="width: 100%; height: 60vh; border: none; display: block;">
-              <div style="padding:30px 15px; color:white; text-align:center;">
-                <p style="margin-bottom:15px;">PDF Preview is not supported inside this browser window.</p>
-                <a href="${pdfUrl}" target="_blank" class="btn btn-gold"><i class="fa-solid fa-file-pdf"></i> Tap Here to Open / View PDF</a>
-              </div>
-            </iframe>
-          </div>
-        `;
+      if (url) {
+        pdfContainer.innerHTML = `<iframe src="${url}" style="width:100%; height:350px; border:none; border-radius:8px;"></iframe>`;
+        downloadBtn.href = url;
       } else {
-        // Fallback: Full official handbook and guidelines
-        body.innerHTML = `
-          <div style="line-height: 1.7; color: var(--text-dark); padding: 5px;">
-            <div style="background: rgba(16, 185, 129, 0.08); border-left: 4px solid var(--primary-emerald); padding: 12px 16px; border-radius: 6px; margin-bottom: 20px;">
-              <h4 style="color: var(--primary-emerald); margin-bottom: 4px;">THANAFUS Dars Fest 2026 — Official Handbook</h4>
-              <p style="font-size: 0.85rem; color: var(--text-gray); margin: 0;">Comprehensive Rules, Scoring System & General Regulations</p>
-            </div>
-
-            <h4 style="color: var(--primary-emerald); margin-top: 15px;"><i class="fa-solid fa-trophy" style="color:var(--accent-gold);"></i> 1. Scoring & Point System</h4>
-            <div class="table-wrapper" style="margin: 10px 0 20px 0;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Position / Rank</th>
-                    <th>Individual Events</th>
-                    <th>Group / General Events</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td><strong>1st Place + Grade A</strong></td><td><strong>10 Points</strong></td><td><strong>15 Points</strong></td></tr>
-                  <tr><td><strong>1st Place + Grade B</strong></td><td><strong>8 Points</strong></td><td><strong>13 Points</strong></td></tr>
-                  <tr><td><strong>1st Place + Grade C</strong></td><td><strong>6 Points</strong></td><td><strong>11 Points</strong></td></tr>
-                  <tr><td><strong>2nd Place + Grade A</strong></td><td><strong>8 Points</strong></td><td><strong>13 Points</strong></td></tr>
-                  <tr><td><strong>2nd Place + Grade B</strong></td><td><strong>6 Points</strong></td><td><strong>11 Points</strong></td></tr>
-                  <tr><td><strong>2nd Place + Grade C</strong></td><td><strong>4 Points</strong></td><td><strong>9 Points</strong></td></tr>
-                  <tr><td><strong>3rd Place + Grade A</strong></td><td><strong>6 Points</strong></td><td><strong>11 Points</strong></td></tr>
-                  <tr><td><strong>3rd Place + Grade B</strong></td><td><strong>4 Points</strong></td><td><strong>9 Points</strong></td></tr>
-                  <tr><td><strong>3rd Place + Grade C</strong></td><td><strong>2 Points</strong></td><td><strong>7 Points</strong></td></tr>
-                  <tr><td><strong>Grade A (No Rank)</strong></td><td><strong>5 Points</strong></td><td><strong>5 Points</strong></td></tr>
-                  <tr><td><strong>Grade B (No Rank)</strong></td><td><strong>3 Points</strong></td><td><strong>3 Points</strong></td></tr>
-                  <tr><td><strong>Grade C (No Rank)</strong></td><td><strong>1 Point</strong></td><td><strong>1 Point</strong></td></tr>
-                </tbody>
-              </table>
-            </div>
-
-            <h4 style="color: var(--primary-emerald); margin-top: 15px;"><i class="fa-solid fa-layer-group"></i> 2. Categories</h4>
-            <ul style="padding-left: 20px; margin-bottom: 20px; font-size: 0.95rem;">
-              <li><strong>Sub Junior</strong>: Foundation & Junior Primary dars students.</li>
-              <li><strong>Junior</strong>: Upper Primary & Preparatory students.</li>
-              <li><strong>Senior</strong>: Higher Secondary & Advanced Dars scholars.</li>
-              <li><strong>General</strong>: Common Group & Team Events (Whole team scoring).</li>
-            </ul>
-
-            <h4 style="color: var(--primary-emerald); margin-top: 15px;"><i class="fa-solid fa-scale-balanced"></i> 3. Appeals & Verdicts</h4>
-            <p style="font-size: 0.95rem; margin-bottom: 10px;">
-              Appeals must be submitted via the official online <strong>Appeal Panel</strong> within <strong>1 hour</strong> of publishing the results along with a fee of <strong>Rs. 50</strong>. The decision of the Grand Jury committee is final and binding.
-            </p>
-          </div>
-        `;
+        pdfContainer.innerHTML = `<p class="text-muted"><i class="fa-solid fa-circle-info"></i> Official Prospectus PDF has not been uploaded yet.</p>`;
+        downloadBtn.removeAttribute("href");
       }
-
-      modal.style.display = "flex";
+      modal.classList.add("active");
     }
 
     function closeProspectusModal() {
-      document.getElementById("prospectus-modal").style.display = "none";
+      document.getElementById("prospectus-modal").classList.remove("active");
     }
 
-    // Setup Prospectus Actions
-    function setupProspectus() {
-      const btnView = document.getElementById("btn-view-pdf");
-      const btnDownload = document.getElementById("btn-download-pdf");
-
-      if (btnView) btnView.addEventListener("click", openProspectusModal);
-
-      if (btnDownload) {
-        btnDownload.addEventListener("click", () => {
-          const rawUrl = ThanafusDB.db.settings && ThanafusDB.db.settings.prospectusUrl;
-          if (!rawUrl) {
-            openProspectusModal();
-            return;
-          }
-
-          const blob = base64ToBlob(rawUrl);
-          const downloadUrl = blob ? URL.createObjectURL(blob) : rawUrl;
-
-          const link = document.createElement("a");
-          link.href = downloadUrl;
-          link.download = "THANAFUS_Dars_Fest_2026_Prospectus.pdf";
-          link.target = "_blank";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-
-          if (blob) {
-            setTimeout(() => URL.revokeObjectURL(downloadUrl), 5000);
-          }
-        });
-      }
-    }
+    // Connect DB auto refresh window hooks
+    window.loadLeaderboard = renderLeaderboard;
+    window.loadKalaprathibha = renderKalaprathibha;
   </script>
 </body>
 </html>

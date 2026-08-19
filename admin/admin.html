@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THANAFUS Dars Fest 2026 | Control Portal</title>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../mobile.css">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* Admin Specific Styling */
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 30px;
+      min-height: calc(100vh - 160px);
+      margin-top: 20px;
+    }
+
+    .admin-sidebar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-lg);
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+    }
+
+    .admin-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+    }
+
+    .admin-nav-item:hover,
+    .admin-nav-item.active {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--accent-gold-light);
+      font-weight: 600;
+    }
+
+    .admin-stat-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      border-radius: var(--radius-md);
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-glass);
+    }
+
+    .admin-stat-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .admin-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ADMIN AUTH OVERLAY -->
+  <div class="modal-overlay active" id="auth-overlay">
+    <div class="modal-card text-center" style="max-width: 420px;">
+      <div class="logo-icon" style="margin: 0 auto 16px; width: 56px; height: 56px; font-size: 1.8rem;">T</div>
+      <h2 style="font-size: 1.6rem; margin-bottom: 4px;">Control Portal</h2>
+      <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 24px;">Enter administrator access key to manage THANAFUS 2026</p>
+      
+      <form onsubmit="handleAdminLogin(event)">
+        <div style="position: relative; margin-bottom: 20px; text-align: left;">
+          <input type="password" id="admin-pass" class="form-control" placeholder="Enter access key..." style="padding-left:16px; padding-right:44px;" required>
+          <button type="button" onclick="togglePassVisibility()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem;">
+            <i class="fa-solid fa-eye" id="pass-eye-icon"></i>
+          </button>
+        </div>
+        <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center; height: 46px;">
+          <i class="fa-solid fa-right-to-bracket"></i> Authenticate
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <nav class="navbar">
+      <a href="../index.html" class="logo-container">
+        <div class="logo-icon">T</div>
+        <div class="logo">
+          <h2>THANAFUS<span>2026</span></h2>
+        </div>
+      </a>
+      
+      <div id="admin-header-controls" style="display: none; align-items: center; gap: 14px;">
+        <span class="text-gold" style="font-weight: 600; font-size: 0.85rem;"><i class="fa-solid fa-user-shield"></i> Admin Authenticated</span>
+        <button class="btn btn-outline btn-sm" onclick="handleAdminLogout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div class="container">
+      <div id="admin-panel-wrap" class="admin-layout" style="display: none;">
+        
+        <!-- Left Admin Navigation Sidebar -->
+        <aside class="admin-sidebar">
+          <div class="admin-nav-item active" onclick="switchAdminTab('dash')" id="tab-btn-dash">
+            <i class="fa-solid fa-gauge"></i> Dashboard
+          </div>
+          <div class="admin-nav-item" onclick="switchAdminTab('teams')" id="tab-btn-teams">
+            <i class="fa-solid fa-people-group"></i> Manage Teams
+          </div>
+          <div class="admin-nav-item" onclick="switchAdminTab('students')" id="tab-btn-students">
+            <i class="fa-solid fa-user-graduate"></i> Manage Students
+          </div>
+          <div class="admin-nav-item" onclick="switchAdminTab('progs')" id="tab-btn-progs">
+            <i class="fa-solid fa-trophy"></i> Programmes & Marks
+          </div>
+          <div class="admin-nav-item" onclick="switchAdminTab('penalties')" id="tab-btn-penalties">
+            <i class="fa-solid fa-square-minus"></i> Minus Points
+          </div>
+          <div class="admin-nav-item" onclick="switchAdminTab('notifs')" id="tab-btn-notifs">
+            <i class="fa-solid fa-bullhorn"></i> Announcements
+          </div>
+          <div class="admin-nav-item" onclick="switchAdminTab('appeals')" id="tab-btn-appeals">
+            <i class="fa-solid fa-gavel"></i> Appeals Board
+          </div>
+          <div class="admin-nav-item" onclick="switchAdminTab('messages')" id="tab-btn-messages">
+            <i class="fa-solid fa-envelope-open-text"></i> Visitor Messages
+          </div>
+          <div class="admin-nav-item" onclick="switchAdminTab('settings')" id="tab-btn-settings">
+            <i class="fa-solid fa-sliders"></i> Portal Settings
+          </div>
+        </aside>
+
+        <!-- Right Content Section -->
+        <section style="min-width: 0;">
+          
+          <!-- TAB 1: DASHBOARD OVERVIEW -->
+          <div id="tab-sec-dash" class="admin-tab-content">
+            <h2 style="font-size: 1.6rem; margin-bottom: 20px;"><i class="fa-solid fa-gauge text-gold"></i> Live Control Dashboard</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px;">
+              <div class="admin-stat-card">
+                <div>
+                  <span class="text-muted" style="font-size: 0.8rem;">Teams</span>
+                  <div id="stat-teams" class="admin-stat-val text-gold">0</div>
+                </div>
+                <i class="fa-solid fa-people-group fa-2x text-muted" style="opacity: 0.4;"></i>
+              </div>
+              <div class="admin-stat-card">
+                <div>
+                  <span class="text-muted" style="font-size: 0.8rem;">Students</span>
+                  <div id="stat-students" class="admin-stat-val text-emerald">0</div>
+                </div>
+                <i class="fa-solid fa-user-graduate fa-2x text-muted" style="opacity: 0.4;"></i>
+              </div>
+              <div class="admin-stat-card">
+                <div>
+                  <span class="text-muted" style="font-size: 0.8rem;">Programmes</span>
+                  <div id="stat-progs" class="admin-stat-val" style="color:#3b82f6;">0</div>
+                </div>
+                <i class="fa-solid fa-trophy fa-2x text-muted" style="opacity: 0.4;"></i>
+              </div>
+              <div class="admin-stat-card">
+                <div>
+                  <span class="text-muted" style="font-size: 0.8rem;">Pending Appeals</span>
+                  <div id="stat-appeals" class="admin-stat-val" style="color:#ef4444;">0</div>
+                </div>
+                <i class="fa-solid fa-circle-exclamation fa-2x text-muted" style="opacity: 0.4;"></i>
+              </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 24px;">
+              <h3 style="font-size: 1.2rem; margin-bottom: 14px;"><i class="fa-solid fa-bolt text-gold"></i> Quick Actions</h3>
+              <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+                <button onclick="confirmUnpublishAll()" class="btn btn-outline btn-sm"><i class="fa-solid fa-rotate-left"></i> Unpublish All Results</button>
+                <button onclick="confirmResetDB()" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i> Factory Reset DB</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: MANAGE TEAMS -->
+          <div id="tab-sec-teams" class="admin-tab-content" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-people-group text-gold"></i> Manage Teams</h2>
+              <button onclick="openTeamModal()" class="btn btn-gold btn-sm"><i class="fa-solid fa-plus"></i> Add Team</button>
+            </div>
+            <div id="teams-admin-table" class="table-responsive"></div>
+          </div>
+
+          <!-- TAB 3: MANAGE STUDENTS -->
+          <div id="tab-sec-students" class="admin-tab-content" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+              <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-user-graduate text-gold"></i> Manage Students</h2>
+              <button onclick="openStudentModal()" class="btn btn-gold btn-sm"><i class="fa-solid fa-plus"></i> Add Student</button>
+            </div>
+            <div id="students-admin-table" class="table-responsive"></div>
+          </div>
+
+          <!-- TAB 4: PROGRAMMES & MARKS -->
+          <div id="tab-sec-progs" class="admin-tab-content" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+              <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-trophy text-gold"></i> Programmes & Result Entry</h2>
+              <button onclick="openProgModal()" class="btn btn-gold btn-sm"><i class="fa-solid fa-plus"></i> Add Programme</button>
+            </div>
+            <div id="progs-admin-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
+          </div>
+
+          <!-- TAB 5: TEAM PENALTIES -->
+          <div id="tab-sec-penalties" class="admin-tab-content" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-square-minus text-gold"></i> Team Penalties (Minus Points)</h2>
+              <button onclick="openPenaltyModal()" class="btn btn-gold btn-sm"><i class="fa-solid fa-minus"></i> Add Penalty</button>
+            </div>
+            <div id="penalties-admin-table" class="table-responsive"></div>
+          </div>
+
+          <!-- TAB 6: ANNOUNCEMENTS -->
+          <div id="tab-sec-notifs" class="admin-tab-content" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-bullhorn text-gold"></i> Announcements</h2>
+              <button onclick="openNotifModal()" class="btn btn-gold btn-sm"><i class="fa-solid fa-plus"></i> Create Notice</button>
+            </div>
+            <div id="notifs-admin-table" class="table-responsive"></div>
+          </div>
+
+          <!-- TAB 7: APPEALS BOARD -->
+          <div id="tab-sec-appeals" class="admin-tab-content" style="display: none;">
+            <h2 style="font-size: 1.6rem; margin-bottom: 20px;"><i class="fa-solid fa-gavel text-gold"></i> Appeals Board</h2>
+            <div id="appeals-admin-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
+          </div>
+
+          <!-- TAB 8: MESSAGES INBOX -->
+          <div id="tab-sec-messages" class="admin-tab-content" style="display: none;">
+            <h2 style="font-size: 1.6rem; margin-bottom: 20px;"><i class="fa-solid fa-envelope-open-text text-gold"></i> Visitor Messages Inbox</h2>
+            <div id="messages-admin-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
+          </div>
+
+          <!-- TAB 9: SETTINGS -->
+          <div id="tab-sec-settings" class="admin-tab-content" style="display: none;">
+            <h2 style="font-size: 1.6rem; margin-bottom: 20px;"><i class="fa-solid fa-sliders text-gold"></i> Portal Settings</h2>
+            
+            <div class="card" style="margin-bottom: 20px;">
+              <h3 style="font-size: 1.1rem; margin-bottom: 14px;">Prospectus PDF Upload</h3>
+              <input type="file" id="pdf-file-input" accept="application/pdf" class="form-control" style="padding-left:14px;" onchange="handleProspectusUpload(event)">
+            </div>
+
+            <div class="card">
+              <h3 style="font-size: 1.1rem; margin-bottom: 14px;">Admin Access Password</h3>
+              <div style="display: flex; gap: 12px;">
+                <input type="text" id="new-admin-pass" class="form-control" style="padding-left:14px;" placeholder="Enter new access key...">
+                <button onclick="updateAdminPass()" class="btn btn-gold btn-sm">Update Password</button>
+              </div>
+            </div>
+          </div>
+
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODALS FOR ADMIN CREATION -->
+  
+  <!-- Team Modal -->
+  <div class="modal-overlay" id="team-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="team-modal-title">Add Team</h3>
+        <button class="modal-close" onclick="closeTeamModal()">&times;</button>
+      </div>
+      <form onsubmit="saveTeam(event)">
+        <input type="hidden" id="edit-team-id">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Team Name</label>
+            <input type="text" id="t-name" class="form-control" style="padding-left:14px;" required>
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Captain</label>
+            <input type="text" id="t-captain" class="form-control" style="padding-left:14px;">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Vice Captain</label>
+            <input type="text" id="t-vice" class="form-control" style="padding-left:14px;">
+          </div>
+        </div>
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-outline" onclick="closeTeamModal()">Cancel</button>
+          <button type="submit" class="btn btn-gold">Save Team</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Student Modal -->
+  <div class="modal-overlay" id="student-form-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="student-modal-title">Add Student</h3>
+        <button class="modal-close" onclick="closeStudentFormModal()">&times;</button>
+      </div>
+      <form onsubmit="saveStudent(event)">
+        <input type="hidden" id="edit-student-id">
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Student Name</label>
+            <input type="text" id="s-name" class="form-control" style="padding-left:14px;" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div>
+              <label style="font-size: 0.85rem; color: var(--text-muted);">Chest No.</label>
+              <input type="text" id="s-chest" class="form-control" style="padding-left:14px;">
+            </div>
+            <div>
+              <label style="font-size: 0.85rem; color: var(--text-muted);">Category</label>
+              <select id="s-cat" class="form-control" required>
+                <option value="Sub Junior">Sub Junior</option>
+                <option value="Junior">Junior</option>
+                <option value="Senior">Senior</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Team</label>
+            <select id="s-team" class="form-control" required></select>
+          </div>
+        </div>
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-outline" onclick="closeStudentFormModal()">Cancel</button>
+          <button type="submit" class="btn btn-gold">Save Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3 style="color: var(--accent-gold-light); font-size: 1.3rem;">THANAFUS 2026</h3>
+          <p style="font-size: 0.85rem; margin-top: 4px;">Control Panel</p>
+        </div>
+        <ul class="footer-links">
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="../pages/results.html">Results</a></li>
+          <li><a href="../pages/contact.html">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../js/db.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      await ThanafusDB.ready();
+      if (sessionStorage.getItem('thanafus_admin_auth') === 'true') {
+        showAdminPanel();
+      }
+    });
+
+    function togglePassVisibility() {
+      const input = document.getElementById("admin-pass");
+      const icon = document.getElementById("pass-eye-icon");
+      if (input.type === "password") {
+        input.type = "text";
+        icon.className = "fa-solid fa-eye-slash";
+      } else {
+        input.type = "password";
+        icon.className = "fa-solid fa-eye";
+      }
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const pass = document.getElementById("admin-pass").value;
+      if (ThanafusDB.verifyAdminPassword(pass)) {
+        sessionStorage.setItem('thanafus_admin_auth', 'true');
+        showAdminPanel();
+      } else {
+        showAlert("Invalid access key!", "danger");
+      }
+    }
+
+    function showAdminPanel() {
+      document.getElementById("auth-overlay").classList.remove("active");
+      document.getElementById("admin-panel-wrap").style.display = "grid";
+      document.getElementById("admin-header-controls").style.display = "flex";
+      renderAdminDash();
+    }
+
+    function handleAdminLogout() {
+      sessionStorage.removeItem('thanafus_admin_auth');
+      window.location.reload();
+    }
+
+    function switchAdminTab(tab) {
+      document.querySelectorAll(".admin-nav-item").forEach(el => el.classList.remove("active"));
+      document.querySelectorAll(".admin-tab-content").forEach(el => el.style.display = "none");
+
+      const btn = document.getElementById(`tab-btn-${tab}`);
+      const sec = document.getElementById(`tab-sec-${tab}`);
+      if (btn) btn.classList.add("active");
+      if (sec) sec.style.display = "block";
+
+      if (tab === 'dash') renderAdminDash();
+      if (tab === 'teams') renderTeamsAdmin();
+      if (tab === 'students') renderStudentsAdmin();
+      if (tab === 'progs') renderProgsAdmin();
+      if (tab === 'penalties') renderPenaltiesAdmin();
+      if (tab === 'notifs') renderNotifsAdmin();
+      if (tab === 'appeals') renderAppealsAdmin();
+      if (tab === 'messages') renderMessagesAdmin();
+    }
+
+    function renderAdminDash() {
+      document.getElementById("stat-teams").innerText = ThanafusDB.db.teams?.length || 0;
+      document.getElementById("stat-students").innerText = ThanafusDB.db.students?.length || 0;
+      document.getElementById("stat-progs").innerText = ThanafusDB.db.programmes?.length || 0;
+      const pendingAppeals = (ThanafusDB.db.appeals || []).filter(a => a.status === 'Pending').length;
+      document.getElementById("stat-appeals").innerText = pendingAppeals;
+    }
+
+    function renderTeamsAdmin() {
+      const container = document.getElementById("teams-admin-table");
+      const teams = ThanafusDB.db.teams || [];
+      container.innerHTML = `
+        <table class="table">
+          <thead>
+            <tr><th>Name</th><th>Captain</th><th>Vice Captain</th><th>Points</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            ${teams.map(t => `
+              <tr>
+                <td><strong>${t.name}</strong></td>
+                <td>${t.captain || '—'}</td>
+                <td>${t.viceCaptain || '—'}</td>
+                <td style="font-weight:700; color:var(--accent-gold-light);">${t.totalScore} PTS</td>
+                <td>
+                  <button onclick="deleteTeam('${t.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderStudentsAdmin() {
+      const container = document.getElementById("students-admin-table");
+      const students = ThanafusDB.db.students || [];
+      container.innerHTML = `
+        <table class="table">
+          <thead>
+            <tr><th>Chest</th><th>Name</th><th>Category</th><th>Team</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            ${students.map(s => {
+              const team = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+              return `
+                <tr>
+                  <td>#${s.chestNo || '—'}</td>
+                  <td><strong>${s.name}</strong></td>
+                  <td>${s.category}</td>
+                  <td>${team ? team.name : 'Unassigned'}</td>
+                  <td>
+                    <button onclick="deleteStudent('${s.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderProgsAdmin() {
+      const container = document.getElementById("progs-admin-list");
+      const progs = ThanafusDB.db.programmes || [];
+      container.innerHTML = progs.map(p => `
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <span class="kala-cat-tag" style="margin-bottom:4px;">${p.category}</span>
+              <h3>${p.name}</h3>
+              <p class="text-muted" style="font-size:0.8rem;">Type: ${p.type} | Published: ${p.resultsPublished ? 'YES' : 'NO'}</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              ${p.resultsPublished ? `<button onclick="unpublishProg('${p.id}')" class="btn btn-outline btn-sm">Unpublish</button>` : ''}
+              <button onclick="deleteProg('${p.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderPenaltiesAdmin() {
+      const container = document.getElementById("penalties-admin-table");
+      const pens = ThanafusDB.db.penalties || [];
+      container.innerHTML = `
+        <table class="table">
+          <thead>
+            <tr><th>Team</th><th>Points</th><th>Reason</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            ${pens.map(p => {
+              const team = ThanafusDB.db.teams.find(t => t.id === p.teamId);
+              return `
+                <tr>
+                  <td>${team ? team.name : 'Unknown'}</td>
+                  <td style="color:#ef4444; font-weight:700;">-${p.points} PTS</td>
+                  <td>${p.reason}</td>
+                  <td><button onclick="deletePenalty('${p.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>
+              `;
+            }).join('') || `<tr><td colspan="4" class="text-center text-muted">No penalty records</td></tr>`}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderNotifsAdmin() {
+      const container = document.getElementById("notifs-admin-table");
+      const notifs = ThanafusDB.db.notifications || [];
+      container.innerHTML = `
+        <table class="table">
+          <thead>
+            <tr><th>Title</th><th>Content</th><th>Type</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            ${notifs.map(n => `
+              <tr>
+                <td><strong>${n.title}</strong></td>
+                <td>${n.content}</td>
+                <td><span class="kala-cat-tag">${n.type}</span></td>
+                <td><button onclick="deleteNotif('${n.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderAppealsAdmin() {
+      const container = document.getElementById("appeals-admin-list");
+      const appeals = ThanafusDB.db.appeals || [];
+      container.innerHTML = appeals.map(a => `
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h4>${a.studentName} (${a.team}) - ${a.programme}</h4>
+            <span class="grade-chip ${a.status === 'Approved' ? 'a' : 'c'}">${a.status}</span>
+          </div>
+          <p class="text-muted" style="font-size:0.85rem; margin:8px 0;">${a.description}</p>
+        </div>
+      `).join('') || `<div class="card text-center"><p class="text-muted">No submitted appeals</p></div>`;
+    }
+
+    function renderMessagesAdmin() {
+      const container = document.getElementById("messages-admin-list");
+      const msgs = ThanafusDB.db.messages || [];
+      container.innerHTML = msgs.map(m => `
+        <div class="card">
+          <div style="display:flex; justify-content:space-between;">
+            <strong>${m.name} (${m.email} | ${m.phone})</strong>
+            <span class="text-muted" style="font-size:0.75rem;">${m.date ? new Date(m.date).toLocaleString() : ''}</span>
+          </div>
+          <p style="margin-top:8px; font-size:0.9rem;">${m.message}</p>
+        </div>
+      `).join('') || `<div class="card text-center"><p class="text-muted">No visitor messages</p></div>`;
+    }
+
+    // Modal Helpers & Operations
+    function openTeamModal() { document.getElementById("team-modal").classList.add("active"); }
+    function closeTeamModal() { document.getElementById("team-modal").classList.remove("active"); }
+    function saveTeam(e) {
+      e.preventDefault();
+      const name = document.getElementById("t-name").value;
+      const captain = document.getElementById("t-captain").value;
+      const vice = document.getElementById("t-vice").value;
+      ThanafusDB.addTeam(name, captain, vice);
+      closeTeamModal();
+      renderTeamsAdmin();
+      showAlert("Team created successfully!", "success");
+    }
+    function deleteTeam(id) { ThanafusDB.deleteTeam(id); renderTeamsAdmin(); }
+
+    function openStudentModal() {
+      const select = document.getElementById("s-team");
+      select.innerHTML = (ThanafusDB.db.teams || []).map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+      document.getElementById("student-form-modal").classList.add("active");
+    }
+    function closeStudentFormModal() { document.getElementById("student-form-modal").classList.remove("active"); }
+    function saveStudent(e) {
+      e.preventDefault();
+      const name = document.getElementById("s-name").value;
+      const chest = document.getElementById("s-chest").value;
+      const cat = document.getElementById("s-cat").value;
+      const teamId = document.getElementById("s-team").value;
+      ThanafusDB.addStudent(name, teamId, cat, "", chest);
+      closeStudentFormModal();
+      renderStudentsAdmin();
+      showAlert("Student added successfully!", "success");
+    }
+    function deleteStudent(id) { ThanafusDB.deleteStudent(id); renderStudentsAdmin(); }
+
+    function unpublishProg(id) { ThanafusDB.unpublishResults(id); renderProgsAdmin(); }
+    function deleteProg(id) { ThanafusDB.deleteProgramme(id); renderProgsAdmin(); }
+    function deletePenalty(id) { ThanafusDB.deletePenalty(id); renderPenaltiesAdmin(); }
+    function deleteNotif(id) { ThanafusDB.deleteNotification(id); renderNotifsAdmin(); }
+
+    function updateAdminPass() {
+      const newPass = document.getElementById("new-admin-pass").value.trim();
+      if (!newPass) return;
+      ThanafusDB.updateSettings({ adminPassword: newPass });
+      showAlert("Admin access password updated!", "success");
+      document.getElementById("new-admin-pass").value = "";
+    }
+
+    function confirmUnpublishAll() {
+      if (confirm("Are you sure you want to unpublish ALL program results?")) {
+        ThanafusDB.unpublishAllResults();
+        showAlert("All results unpublished", "warning");
+      }
+    }
+
+    function confirmResetDB() {
+      if (confirm("WARNING: This will reset all database scores to defaults! Proceed?")) {
+        ThanafusDB.reset();
+        showAlert("Database reset to factory default state", "warning");
+      }
+    }
+  </script>
+</body>
+</html>

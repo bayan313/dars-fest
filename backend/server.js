@@ -7,7 +7,7 @@ const { Team, Student, Programme, Notification, Appeal, Gallery, Contact, Messag
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const ADMIN_PASSWORD_FIXED = process.env.ADMIN_PASSWORD || "admin@9526";
+const ADMIN_PASSWORD_FIXED = process.env.ADMIN_PASSWORD || "bayanadmin";
 
 // siteKey scopes every document to a single deployed site/org so multiple
 // accounts can share one MongoDB without seeing each other's data.
