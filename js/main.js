@@ -22,19 +22,25 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Auto Highlight Active Navbar Link
-  const currentPath = window.location.pathname;
+  const currentPath = window.location.pathname.toLowerCase();
   const navAnchors = document.querySelectorAll(".nav-links a");
   
   navAnchors.forEach(anchor => {
-    const href = anchor.getAttribute("href");
+    const href = (anchor.getAttribute("href") || "").toLowerCase();
     if (!href) return;
     
-    // Extract file name
-    const pageName = href.substring(href.lastIndexOf('/') + 1) || 'index.html';
-    const isCurrentPage = currentPath.endsWith(pageName) || 
-                          (pageName === 'index.html' && (currentPath.endsWith('/') || currentPath.endsWith('/index.html') || currentPath.endsWith('officel%20web/')));
-    
-    if (isCurrentPage) {
+    const isHome = href.includes("index") || href === "/" || href === "";
+    const isResults = href.includes("results");
+    const isContact = href.includes("contact");
+    const isAdmin = href.includes("admin");
+
+    let isCurrent = false;
+    if (isResults && currentPath.includes("results")) isCurrent = true;
+    else if (isContact && currentPath.includes("contact")) isCurrent = true;
+    else if (isAdmin && currentPath.includes("admin")) isCurrent = true;
+    else if (isHome && (currentPath === "/" || currentPath.endsWith("/index.html") || (!currentPath.includes("results") && !currentPath.includes("contact") && !currentPath.includes("admin")))) isCurrent = true;
+
+    if (isCurrent) {
       anchor.classList.add("active");
     } else {
       anchor.classList.remove("active");

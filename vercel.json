@@ -1,23 +1,41 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "**/*.{html,css,js,png,jpg,jpeg,gif,svg,ico,woff,woff2,ttf,eot}",
-      "use": "@vercel/static"
-    }
-  ],
   "routes": [
     {
       "src": "/api/all",
       "dest": "/api/all.js"
+    },
+    {
+      "src": "/admin",
+      "dest": "/admin/admin.html"
+    },
+    {
+      "src": "/admin/",
+      "dest": "/admin/admin.html"
+    },
+    {
+      "src": "/results",
+      "dest": "/pages/results.html"
+    },
+    {
+      "src": "/results/",
+      "dest": "/pages/results.html"
+    },
+    {
+      "src": "/contact",
+      "dest": "/pages/contact.html"
+    },
+    {
+      "src": "/contact/",
+      "dest": "/pages/contact.html"
+    },
+    {
+      "src": "/slide",
+      "dest": "/slide.html"
+    },
+    {
+      "src": "/slide/",
+      "dest": "/slide.html"
     },
     {
       "src": "/(.*)",

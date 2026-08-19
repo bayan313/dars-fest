@@ -97,7 +97,19 @@ app.use(express.static(path.join(__dirname, '../')));
 // Favicon handler to avoid 404 logs
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
-// Projector slide page URL
+// Clean URL Page Routes
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '../admin/admin.html'));
+});
+
+app.get('/results', (req, res) => {
+  res.sendFile(path.join(__dirname, '../pages/results.html'));
+});
+
+app.get('/contact', (req, res) => {
+  res.sendFile(path.join(__dirname, '../pages/contact.html'));
+});
+
 app.get('/slide', (req, res) => {
   res.sendFile(path.join(__dirname, '../slide.html'));
 });
