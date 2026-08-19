@@ -53,6 +53,48 @@ const syncAdminPassword = async (siteKey) => {
   }
 };
 
+const fs = require('fs');
+
+let cachedDefaultDb = null;
+function getDefaultDb() {
+  if (cachedDefaultDb) return cachedDefaultDb;
+  try {
+    const dbPath = path.join(__dirname, '../js/db.js');
+    if (fs.existsSync(dbPath)) {
+      const code = fs.readFileSync(dbPath, 'utf8');
+      cachedDefaultDb = (new Function('window', 'document', 'localStorage', 'fetch', 'BroadcastChannel', 'CustomEvent', code + '; return DEFAULT_DB;'))(
+        {}, {}, { getItem: () => null, setItem: () => {} }, () => Promise.reject(), class {}, class {}
+      );
+      return cachedDefaultDb;
+    }
+  } catch (e) {}
+  return null;
+}
+
+async function ensureDefaultData(siteKey) {
+  try {
+    if (mongoose.connection.readyState !== 1) return;
+    const filter = siteFilter(siteKey);
+    const count = await Team.countDocuments(filter);
+    if (count === 0) {
+      const def = getDefaultDb();
+      if (def) {
+        const key = siteKey || 'default';
+        const tag = (arr) => (arr || []).map(x => ({ ...x, siteKey: key }));
+        if (def.teams && def.teams.length > 0) await Team.insertMany(tag(def.teams));
+        if (def.students && def.students.length > 0) await Student.insertMany(tag(def.students));
+        if (def.programmes && def.programmes.length > 0) await Programme.insertMany(tag(def.programmes));
+        if (def.notifications && def.notifications.length > 0) await Notification.insertMany(tag(def.notifications));
+        if (def.contact) await Contact.create({ ...def.contact, siteKey: key });
+        if (def.settings) await Settings.create({ ...def.settings, siteKey: key, adminPassword: ADMIN_PASSWORD_FIXED, revision: 0 });
+        console.log('Auto-seeded MongoDB Atlas with default data for site:', key);
+      }
+    }
+  } catch (err) {
+    console.warn('ensureDefaultData notice:', err.message);
+  }
+}
+
 const DEFAULT_MONGO_URI = 'mongodb+srv://festweb:Ub0cEhGvvRwoRyCA@cluster0.0sx6md0.mongodb.net/dars_fest?retryWrites=true&w=majority';
 
 const connectDB = async () => {
@@ -64,6 +106,7 @@ const connectDB = async () => {
     await mongoose.connect(uri, mongooseOptions);
     isConnecting = false;
     console.log('Connected to MongoDB');
+    await ensureDefaultData(siteKeyOf({ headers: {} }));
     await syncAdminPassword(siteKeyOf({ headers: {} }));
     return true;
   } catch (err) {
@@ -76,6 +119,7 @@ const connectDB = async () => {
 // Initial connection attempt in background
 connectDB();
 
+app.set('case sensitive routing', false);
 app.use(cors());
 app.use(express.json({ limit: '15mb' }));
 
@@ -97,21 +141,25 @@ app.use(express.static(path.join(__dirname, '../')));
 // Favicon handler to avoid 404 logs
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
-// Clean URL Page Routes
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, '../admin/admin.html'));
+// Clean URL Page Routes with all aliases and case insensitivity
+app.get(['/admin', '/admin/', '/login', '/login/', '/admin.html', '/login.html'], (req, res) => {
+  res.sendFile(path.join(__dirname, '../admin.html'));
 });
 
-app.get('/results', (req, res) => {
-  res.sendFile(path.join(__dirname, '../pages/results.html'));
+app.get(['/results', '/results/', '/results.html'], (req, res) => {
+  res.sendFile(path.join(__dirname, '../results.html'));
 });
 
-app.get('/contact', (req, res) => {
-  res.sendFile(path.join(__dirname, '../pages/contact.html'));
+app.get(['/contact', '/contact/', '/contact.html'], (req, res) => {
+  res.sendFile(path.join(__dirname, '../contact.html'));
 });
 
-app.get('/slide', (req, res) => {
+app.get(['/slide', '/slide/', '/slide.html'], (req, res) => {
   res.sendFile(path.join(__dirname, '../slide.html'));
+});
+
+app.get(['/', '/index.html', '/home', '/home/'], (req, res) => {
+  res.sendFile(path.join(__dirname, '../index.html'));
 });
 
 async function getAllData(siteKey) {
@@ -398,6 +446,14 @@ app.post('/api/settings', async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+});
+
+// SPA Fallback: Unknown frontend GET routes serve index.html
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'Endpoint not found' });
+  }
+  res.sendFile(path.join(__dirname, '../index.html'));
 });
 
 app.listen(PORT, () => {

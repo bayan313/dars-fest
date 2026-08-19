@@ -1,4 +1,4 @@
-const { connectDB, syncAdminPassword, getAllData, siteKeyOf, siteFilter, Team, Student, Programme, Notification, Appeal, Gallery, Contact, Message, Settings, Penalty } = require('./lib/db');
+const { connectDB, ensureDefaultData, syncAdminPassword, getAllData, siteKeyOf, siteFilter, Team, Student, Programme, Notification, Appeal, Gallery, Contact, Message, Settings, Penalty } = require('./lib/db');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -20,6 +20,7 @@ module.exports = async function handler(req, res) {
 
   if (isDbOnline) {
     try {
+      await ensureDefaultData(siteKey);
       await syncAdminPassword(siteKey);
     } catch (e) {}
   }

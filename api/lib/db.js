@@ -78,6 +78,50 @@ const Message    = mongoose.models.Message    || mongoose.model('Message', messa
 const Settings   = mongoose.models.Settings   || mongoose.model('Settings', settingsSchema);
 const Penalty    = mongoose.models.Penalty    || mongoose.model('Penalty', penaltySchema);
 
+const fs = require('fs');
+
+let cachedDefaultDb = null;
+function getDefaultDb() {
+  if (cachedDefaultDb) return cachedDefaultDb;
+  try {
+    const p1 = path.join(__dirname, '../../js/db.js');
+    const p2 = path.join(__dirname, '../js/db.js');
+    const dbPath = fs.existsSync(p1) ? p1 : (fs.existsSync(p2) ? p2 : null);
+    if (dbPath) {
+      const code = fs.readFileSync(dbPath, 'utf8');
+      cachedDefaultDb = (new Function('window', 'document', 'localStorage', 'fetch', 'BroadcastChannel', 'CustomEvent', code + '; return DEFAULT_DB;'))(
+        {}, {}, { getItem: () => null, setItem: () => {} }, () => Promise.reject(), class {}, class {}
+      );
+      return cachedDefaultDb;
+    }
+  } catch (e) {}
+  return null;
+}
+
+async function ensureDefaultData(siteKey) {
+  try {
+    if (mongoose.connection.readyState !== 1) return;
+    const filter = siteFilter(siteKey);
+    const count = await Team.countDocuments(filter);
+    if (count === 0) {
+      const def = getDefaultDb();
+      if (def) {
+        const key = siteKey || 'default';
+        const tag = (arr) => (arr || []).map(x => ({ ...x, siteKey: key }));
+        if (def.teams && def.teams.length > 0) await Team.insertMany(tag(def.teams));
+        if (def.students && def.students.length > 0) await Student.insertMany(tag(def.students));
+        if (def.programmes && def.programmes.length > 0) await Programme.insertMany(tag(def.programmes));
+        if (def.notifications && def.notifications.length > 0) await Notification.insertMany(tag(def.notifications));
+        if (def.contact) await Contact.create({ ...def.contact, siteKey: key });
+        if (def.settings) await Settings.create({ ...def.settings, siteKey: key, adminPassword: process.env.ADMIN_PASSWORD || 'bayanadmin', revision: 0 });
+        console.log('Auto-seeded MongoDB Atlas with default data for site:', key);
+      }
+    }
+  } catch (err) {
+    console.warn('ensureDefaultData notice:', err.message);
+  }
+}
+
 async function syncAdminPassword(siteKey) {
   try {
     if (mongoose.connection.readyState !== 1) return;
@@ -98,7 +142,8 @@ async function getAllData(siteKey) {
     Team.find(filter), Student.find(filter), Programme.find(filter), Notification.find(filter),
     Appeal.find(filter), Gallery.find(filter), Contact.findOne(filter), Message.find(filter), Settings.findOne(filter), Penalty.find(filter)
   ]);
-  return { teams, students, programmes, notifications, appeals, gallery, contact, messages: messages || [], settings, penalties: penalties || [] };
+  return { teams: teams || [], students: students || [], programmes: programmes || [], notifications: notifications || [], appeals: appeals || [], gallery: gallery || [], contact: contact || {}, messages: messages || [], settings: settings || { adminPassword: process.env.ADMIN_PASSWORD || 'bayanadmin', revision: 0 }, penalties: penalties || [] };
 }
 
-module.exports = { connectDB, syncAdminPassword, getAllData, siteKeyOf, siteFilter, Team, Student, Programme, Notification, Appeal, Gallery, Contact, Message, Settings, Penalty };
+module.exports = { connectDB, ensureDefaultData, syncAdminPassword, getAllData, siteKeyOf, siteFilter, Team, Student, Programme, Notification, Appeal, Gallery, Contact, Message, Settings, Penalty };
+
