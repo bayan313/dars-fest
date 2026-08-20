@@ -342,6 +342,13 @@
     // Connect DB auto refresh window hooks
     window.loadLeaderboard = renderLeaderboard;
     window.loadKalaprathibha = renderKalaprathibha;
+
+    // Real-time auto-refresh on home page when database updates
+    window.addEventListener('thanafus:db-updated', () => {
+      renderLeaderboard();
+      renderKalaprathibha();
+      renderNotifications();
+    });
   </script>
 </body>
 </html>

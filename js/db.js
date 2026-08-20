@@ -610,7 +610,7 @@ class Database {
     }
   }
 
-  startAutoSync(intervalMs = 6000) {
+  startAutoSync(intervalMs = 3000) {
     if (typeof window === 'undefined') return;
     if (this._syncTimer) clearInterval(this._syncTimer);
     

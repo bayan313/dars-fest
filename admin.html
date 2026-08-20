@@ -881,22 +881,19 @@
         
         if (isGeneral) {
           options += students.map(s => {
-            const team = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+            const team = (ThanafusDB.db.teams || []).find(t => t.id === s.teamId);
             return `<option value="${s.id}" data-chest="${s.chestNo || ''}" ${s.id === selectedId ? 'selected' : ''}>#${s.chestNo || '—'} - ${s.name} (${team ? team.name : 'No Team'} - ${s.category})</option>`;
           }).join('');
         } else {
-          const catStudents = students.filter(s => s.category === prog.category);
-          options += `<optgroup label="${prog.category} Students">` + catStudents.map(s => {
-            const team = ThanafusDB.db.teams.find(t => t.id === s.teamId);
-            return `<option value="${s.id}" data-chest="${s.chestNo || ''}" ${s.id === selectedId ? 'selected' : ''}>#${s.chestNo || '—'} - ${s.name} (${team ? team.name : 'No Team'})</option>`;
-          }).join('') + `</optgroup>`;
-
-          const otherStudents = students.filter(s => s.category !== prog.category);
-          if (otherStudents.length > 0) {
-            options += `<optgroup label="Other Categories">` + otherStudents.map(s => {
-              const team = ThanafusDB.db.teams.find(t => t.id === s.teamId);
-              return `<option value="${s.id}" data-chest="${s.chestNo || ''}" ${s.id === selectedId ? 'selected' : ''}>#${s.chestNo || '—'} - ${s.name} (${team ? team.name : 'No Team'} - ${s.category})</option>`;
-            }).join('') + `</optgroup>`;
+          // Strictly show ONLY students belonging to the programme's category
+          const catStudents = students.filter(s => String(s.category).trim().toLowerCase() === String(prog.category).trim().toLowerCase());
+          if (catStudents.length > 0) {
+            options += catStudents.map(s => {
+              const team = (ThanafusDB.db.teams || []).find(t => t.id === s.teamId);
+              return `<option value="${s.id}" data-chest="${s.chestNo || ''}" ${s.id === selectedId ? 'selected' : ''}>#${s.chestNo || '—'} - ${s.name} (${team ? team.name : 'No Team'})</option>`;
+            }).join('');
+          } else {
+            options += `<option value="" disabled>No registered students in ${prog.category}</option>`;
           }
         }
         return options;
@@ -1701,6 +1698,17 @@
         showAlert(`Failed to connect to Telegram API: ${err.message}`, "danger");
       }
     }
+
+    // Auto Refresh Admin Panel when DB updates in real time
+    window.addEventListener('thanafus:db-updated', () => {
+      const activeTab = document.querySelector('.admin-nav-item.active')?.dataset.tab;
+      if (activeTab === 'progs') renderProgsAdmin();
+      else if (activeTab === 'teams') renderTeamsAdmin();
+      else if (activeTab === 'students') renderStudentsAdmin();
+      else if (activeTab === 'penalties') renderPenaltiesAdmin();
+      else if (activeTab === 'notifs') renderNotifsAdmin();
+      else if (activeTab === 'messages') renderMessagesAdmin();
+    });
   </script>
 </body>
 </html>

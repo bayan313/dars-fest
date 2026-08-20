@@ -388,6 +388,11 @@
     }
 
     window.loadProgrammes = filterResults;
+
+    // Real-time auto-refresh when results/database updates
+    window.addEventListener('thanafus:db-updated', () => {
+      filterResults();
+    });
   </script>
 </body>
 </html>
