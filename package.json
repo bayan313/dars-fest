@@ -4,8 +4,9 @@
   "description": "THANAFUS Dars Fest 2026 website",
   "main": "backend/server.js",
   "scripts": {
-    "start": "node backend/bot.js",
-    "dev": "node backend/bot.js",
+    "start": "node backend/server.js",
+    "bot": "node backend/bot.js",
+    "dev": "node backend/server.js",
     "seed": "node backend/seed.js",
     "server": "node backend/server.js"
   },
@@ -13,6 +14,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "mongoose": "^9.9.1"
+    "mongoose": "^9.9.1",
+    "node-telegram-bot-api": "^0.66.0"
   }
 }

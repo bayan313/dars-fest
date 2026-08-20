@@ -72,17 +72,31 @@
       </div>
     </section>
 
-    <!-- Kalaprathibha Section -->
-    <section class="section" style="background: #ffffff; border-top: 1px solid var(--border-glass); border-bottom: 1px solid var(--border-glass); box-shadow: inset 0 2px 8px rgba(15, 23, 42, 0.02);">
+    <!-- Champions & Kalaprathibha Grand Showcase -->
+    <section class="section champions-section">
       <div class="container">
         <div class="section-header">
-          <h2 class="section-title">Category Champions</h2>
-          <p class="section-subtitle">Leading individual Kalaprathibha contenders across categories</p>
+          <div class="hero-badge" style="margin-bottom: 12px;">
+            <i class="fa-solid fa-crown text-gold"></i> Arts Champions &amp; Toppers
+          </div>
+          <h2 class="section-title">Fest Champions / വ്യക്തിഗത ചാമ്പ്യന്മാർ</h2>
+          <p class="section-subtitle">Leading Kalaprathibha contenders and top performers of THANAFUS 2026</p>
         </div>
 
-        <div class="kala-grid" id="kalaprathibha-container">
-          <div class="card text-center" style="grid-column: 1 / -1; padding: 40px;">
-            <p class="text-muted"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Loading Champions...</p>
+        <!-- Overall Fest Champion Spotlight -->
+        <div id="overall-champ-spotlight">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Category Champions (Sub Junior, Junior, Senior) -->
+        <div style="margin-top: 16px;">
+          <h3 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 20px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-medal text-gold"></i> Category Kalaprathibha Toppers
+          </h3>
+          <div class="champ-cat-grid" id="kalaprathibha-container">
+            <div class="card text-center" style="grid-column: 1 / -1; padding: 40px;">
+              <p class="text-muted"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Loading Champions...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -206,24 +220,69 @@
     }
 
     function renderKalaprathibha() {
-      const container = document.getElementById("kalaprathibha-container");
-      if (!container) return;
+      const overallContainer = document.getElementById("overall-champ-spotlight");
+      const catContainer = document.getElementById("kalaprathibha-container");
+      if (!catContainer) return;
 
-      const categories = ["Sub Junior", "Junior", "Senior"];
-      container.innerHTML = categories.map(cat => {
-        const champ = ThanafusDB.getKalaprathibha(cat);
-        const student = champ.student || { name: "Pending", photo: "" };
-        const avatarHtml = student.photo 
-          ? `<img src="${student.photo}" class="kala-avatar" alt="${student.name}">`
-          : `<div class="kala-avatar"><i class="fa-solid fa-user-graduate"></i></div>`;
+      // 1. Overall Fest Arts Champion (Highest Points in Fest)
+      if (overallContainer) {
+        const overall = (typeof ThanafusDB.getOverallIndividualChampion === 'function')
+          ? ThanafusDB.getOverallIndividualChampion()
+          : null;
+
+        if (overall && overall.student && overall.points > 0) {
+          const s = overall.student;
+          const photoHtml = s.photo 
+            ? `<img src="${s.photo}" class="champ-hero-photo" alt="${s.name}">`
+            : `<div class="champ-avatar-fallback"><i class="fa-solid fa-user-graduate"></i></div>`;
+
+          overallContainer.innerHTML = `
+            <div class="champ-hero-card">
+              <div class="champ-crown-badge">
+                <i class="fa-solid fa-crown"></i> Fest Overall Arts Champion
+              </div>
+              <div class="champ-photo-wrapper">
+                ${photoHtml}
+              </div>
+              <span class="champ-chest-badge"><i class="fa-solid fa-id-badge"></i> Chest #${s.chestNo || '—'}</span>
+              <h3 class="champ-name">${s.name}</h3>
+              <div class="champ-team-tag">
+                <i class="fa-solid fa-people-group text-gold"></i> ${overall.teamName} &bull; <span style="color:#059669; font-weight:700;">${overall.category}</span>
+              </div>
+              <div class="champ-points-pill">
+                ${overall.points} <span style="font-size: 0.95rem; font-weight: 600; opacity: 0.9;">PTS</span>
+              </div>
+            </div>
+          `;
+        } else {
+          overallContainer.innerHTML = ``;
+        }
+      }
+
+      // 2. Category Champions (Sub Junior, Junior, Senior)
+      const categories = [
+        { key: "Sub Junior", label: "Sub Junior Champion", badgeClass: "sub-junior" },
+        { key: "Junior", label: "Junior Champion", badgeClass: "junior" },
+        { key: "Senior", label: "Senior Champion", badgeClass: "senior" }
+      ];
+
+      catContainer.innerHTML = categories.map(c => {
+        const champ = ThanafusDB.getKalaprathibha(c.key);
+        const student = champ.student || { name: "Contenders Awaiting", photo: "" };
+        const photoHtml = student.photo 
+          ? `<img src="${student.photo}" class="champ-cat-photo" alt="${student.name}">`
+          : `<div class="champ-cat-avatar-fallback"><i class="fa-solid fa-user-graduate"></i></div>`;
 
         return `
-          <div class="card kala-card">
-            <span class="kala-cat-tag">${cat}</span>
-            ${avatarHtml}
-            <h3 class="kala-name">${student.name}</h3>
-            <p class="kala-meta">${champ.teamName} ${student.chestNo ? `| Chest: #${student.chestNo}` : ''}</p>
-            <div class="kala-points">${champ.points} <span style="font-size:0.9rem; font-weight:500;">Points</span></div>
+          <div class="champ-cat-card">
+            <span class="champ-cat-badge ${c.badgeClass}"><i class="fa-solid fa-award"></i> ${c.label}</span>
+            ${photoHtml}
+            <span class="champ-chest-badge" style="font-size:0.75rem; padding: 2px 10px; margin-bottom: 4px;">Chest #${student.chestNo || '—'}</span>
+            <h4 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 2px;">${student.name}</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">${champ.teamName}</p>
+            <div style="background: rgba(5,150,105,0.08); border: 1px solid rgba(5,150,105,0.2); color: #059669; font-weight: 800; font-size: 1.1rem; padding: 6px 18px; border-radius: 20px; font-family: 'Outfit', sans-serif;">
+              ${champ.points} <span style="font-size: 0.8rem; font-weight: 600;">PTS</span>
+            </div>
           </div>
         `;
       }).join('');

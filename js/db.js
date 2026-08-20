@@ -970,6 +970,61 @@ class Database {
     });
   }
 
+  // Overall Fest Arts Champion (Highest individual points in whole fest)
+  getOverallIndividualChampion() {
+    const studentPoints = {};
+
+    (this.db.students || []).forEach(s => {
+      studentPoints[s.id] = { student: s, points: 0, rank1Count: 0, gradeACount: 0 };
+    });
+
+    (this.db.programmes || []).forEach(prog => {
+      if (!prog.resultsPublished) return;
+      const isGroup = (prog.type || '').toLowerCase() === 'group';
+      if (isGroup) return;
+
+      (prog.results || []).forEach(res => {
+        if (res.studentId && studentPoints[res.studentId]) {
+          const pts = this.programmePoints(prog, res.rank, res.grade);
+          studentPoints[res.studentId].points += pts;
+          if (res.rank === 1) studentPoints[res.studentId].rank1Count++;
+          if (res.grade === 'A') studentPoints[res.studentId].gradeACount++;
+        }
+      });
+    });
+
+    const list = Object.values(studentPoints).filter(item => item.points > 0);
+    list.sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.rank1Count !== a.rank1Count) return b.rank1Count - a.rank1Count;
+      return b.gradeACount - a.gradeACount;
+    });
+
+    if (list.length > 0) {
+      const top = list[0];
+      const team = this.db.teams.find(t => t.id === top.student.teamId);
+      return {
+        student: top.student,
+        points: top.points,
+        rank1Count: top.rank1Count,
+        gradeACount: top.gradeACount,
+        teamName: team ? team.name : "Unknown Team",
+        category: top.student.category || "General"
+      };
+    }
+
+    const firstStudent = (this.db.students || [])[0];
+    const team = firstStudent ? this.db.teams.find(t => t.id === firstStudent.teamId) : null;
+    return {
+      student: firstStudent || { name: "Contenders Awaiting Results", photo: "" },
+      points: 0,
+      rank1Count: 0,
+      gradeACount: 0,
+      teamName: team ? team.name : "—",
+      category: firstStudent ? (firstStudent.category || "General") : "—"
+    };
+  }
+
   // Get student profile and program participations
   getStudentProfile(studentId) {
     const student = this.db.students.find(s => s.id === studentId);
@@ -1195,6 +1250,83 @@ class Database {
 
       // Trigger automatic announcement notification
       this.addNotification(`${prog.name} (${prog.category}) Results Published`, `The results for the program "${prog.name}" under category "${prog.category}" have been officially published. Check the results portal for details.`, "success");
+
+      // Dispatch Telegram Broadcast if configured
+      this.dispatchTelegramResult(prog);
+    }
+  }
+
+  dispatchTelegramResult(prog) {
+    if (!prog || !prog.resultsPublished) return;
+    const isGroup = (prog.type || '').toLowerCase() === 'group';
+    let msg = `🏆 <b>THANAFUS 2026 - RESULT PUBLISHED</b>\n\n`;
+    msg += `📌 <b>Programme:</b> ${prog.name}\n`;
+    msg += `📂 <b>Category:</b> ${prog.category} | <b>Type:</b> ${(prog.type || 'Individual').toUpperCase()}\n\n`;
+
+    const topRanks = (prog.results || []).filter(r => r.rank && r.rank <= 3).sort((a, b) => a.rank - b.rank);
+    if (topRanks.length > 0) {
+      msg += `<b>🏅 WINNERS:</b>\n`;
+      topRanks.forEach(r => {
+        const medal = r.rank === 1 ? '🥇 1st Place' : r.rank === 2 ? '🥈 2nd Place' : '🥉 3rd Place';
+        let name = "—";
+        let team = "";
+        if (isGroup) {
+          const t = this.db.teams.find(tm => tm.id === r.teamId);
+          name = t ? t.name : "Team";
+        } else {
+          const st = this.db.students.find(s => s.id === r.studentId);
+          if (st) {
+            name = `${st.name} ${st.chestNo ? `(#${st.chestNo})` : ''}`;
+            const t = this.db.teams.find(tm => tm.id === st.teamId);
+            if (t) team = ` (${t.name})`;
+          }
+        }
+        const gr = r.grade ? ` [Grade ${r.grade}]` : '';
+        msg += `${medal}: <b>${name}</b>${team}${gr}\n`;
+      });
+    }
+
+    const gradeOnly = (prog.results || []).filter(r => !r.rank && r.grade);
+    if (gradeOnly.length > 0) {
+      msg += `\n<b>🎖️ GRADE HOLDERS:</b>\n`;
+      gradeOnly.forEach(r => {
+        let name = "—";
+        if (isGroup) {
+          const t = this.db.teams.find(tm => tm.id === r.teamId);
+          name = t ? t.name : "Team";
+        } else {
+          const st = this.db.students.find(s => s.id === r.studentId);
+          if (st) name = `${st.name} ${st.chestNo ? `(#${st.chestNo})` : ''}`;
+        }
+        msg += `• <b>${name}</b> - Grade ${r.grade}\n`;
+      });
+    }
+
+    msg += `\n🔗 <a href="https://dars-fest.vercel.app/results">View Full Scoreboard & Standings</a>`;
+    this.sendTelegramNotification(msg);
+  }
+
+  async sendTelegramNotification(htmlMessage) {
+    try {
+      const token = (this.db.settings?.telegramBotToken || "").trim() || "8364515958:AAEIHGbuYNmpZ-oc_Q7zx-BJhkLuy1vN4ms";
+      const chatId = (this.db.settings?.telegramChatId || "").trim();
+      if (!token || !chatId) return false;
+
+      const url = `https://api.telegram.org/bot${token}/sendMessage`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: htmlMessage,
+          parse_mode: 'HTML'
+        })
+      });
+      const data = await res.json();
+      return data.ok;
+    } catch (e) {
+      console.warn('Telegram notification notice:', e.message);
+      return false;
     }
   }
 

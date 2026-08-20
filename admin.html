@@ -314,6 +314,30 @@
           <div id="tab-sec-settings" class="admin-tab-content" style="display: none;">
             <h2 style="font-size: 1.6rem; margin-bottom: 20px;"><i class="fa-solid fa-sliders text-gold"></i> Portal Settings</h2>
             
+            <!-- Telegram Live Channel Alerts -->
+            <div class="card" style="margin-bottom: 20px;">
+              <h3 style="font-size: 1.15rem; margin-bottom: 8px; color: #2563eb; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-brands fa-telegram"></i> Telegram Live Channel / Group Alerts
+              </h3>
+              <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 16px;">
+                Connect a Telegram Bot to automatically broadcast published results and announcements directly to your Telegram Channel or Group in real time.
+              </p>
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div>
+                  <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Telegram Bot Token</label>
+                  <input type="text" id="tg-bot-token" class="form-control" placeholder="e.g. 8364515958:AAEIHGbuYNmpZ-oc_Q7zx-BJhkLuy1vN4ms" style="padding-left:14px;">
+                </div>
+                <div>
+                  <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Telegram Chat / Channel ID (e.g. @your_channel or -100123456789)</label>
+                  <input type="text" id="tg-chat-id" class="form-control" placeholder="e.g. @thanafus_fest or -100192837465" style="padding-left:14px;">
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px;">
+                  <button onclick="saveTelegramSettings()" class="btn btn-gold btn-sm"><i class="fa-solid fa-floppy-disk"></i> Save Telegram Config</button>
+                  <button onclick="sendTestTelegramMessage()" class="btn btn-outline btn-sm" style="border-color: #2563eb; color: #2563eb;"><i class="fa-brands fa-telegram"></i> Send Test Message</button>
+                </div>
+              </div>
+            </div>
+
             <div class="card" style="margin-bottom: 20px;">
               <h3 style="font-size: 1.1rem; margin-bottom: 14px;">Prospectus PDF Upload</h3>
               <input type="file" id="pdf-file-input" accept="application/pdf" class="form-control" style="padding-left:14px;" onchange="handleProspectusUpload(event)">
@@ -682,6 +706,7 @@
       if (tab === 'penalties') renderPenaltiesAdmin();
       if (tab === 'notifs') renderNotifsAdmin();
       if (tab === 'messages') renderMessagesAdmin();
+      if (tab === 'settings') renderSettingsAdmin();
     }
 
     function renderAdminDash() {
@@ -1346,6 +1371,52 @@
       ThanafusDB.updateSettings({ adminPassword: newPass });
       showAlert("Admin access password updated!", "success");
       document.getElementById("new-admin-pass").value = "";
+    }
+
+    function renderSettingsAdmin() {
+      const s = ThanafusDB.db.settings || {};
+      const tokenInput = document.getElementById("tg-bot-token");
+      const chatInput = document.getElementById("tg-chat-id");
+      if (tokenInput && !tokenInput.value) tokenInput.value = s.telegramBotToken || "";
+      if (chatInput && !chatInput.value) chatInput.value = s.telegramChatId || "";
+    }
+
+    function saveTelegramSettings() {
+      const token = (document.getElementById("tg-bot-token").value || "").trim();
+      const chatId = (document.getElementById("tg-chat-id").value || "").trim();
+      ThanafusDB.updateSettings({ telegramBotToken: token, telegramChatId: chatId });
+      showAlert("Telegram bot configuration saved successfully!", "success");
+    }
+
+    async function sendTestTelegramMessage() {
+      const token = (document.getElementById("tg-bot-token").value || "").trim();
+      const chatId = (document.getElementById("tg-chat-id").value || "").trim();
+      if (!token || !chatId) {
+        showAlert("Please enter both Bot Token and Chat / Channel ID first.", "warning");
+        return;
+      }
+
+      showAlert("Dispatching test notification to Telegram...", "info");
+      try {
+        const url = `https://api.telegram.org/bot${token}/sendMessage`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: `✨ <b>THANAFUS 2026 DARS FEST</b>\n\n🎉 <b>Telegram Channel Connected!</b>\n\n📢 Live results, category standings, and fest announcements will be broadcasted here in real time.`,
+            parse_mode: 'HTML'
+          })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          showAlert("Test message delivered to Telegram successfully! ✅", "success");
+        } else {
+          showAlert(`Telegram error: ${data.description || 'Check Bot Token & Channel permissions'}`, "danger");
+        }
+      } catch (err) {
+        showAlert(`Failed to connect to Telegram API: ${err.message}`, "danger");
+      }
     }
   </script>
 </body>

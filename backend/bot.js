@@ -5,24 +5,27 @@ const TelegramBot = require('node-telegram-bot-api');
 const mongoose = require('mongoose');
 const { Team, Student, Programme, Notification, Appeal, Gallery, Contact, Message, Settings, Penalty } = require('./models');
 
-const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const DEFAULT_MONGO_URI = 'mongodb+srv://festweb:Ub0cEhGvvRwoRyCA@cluster0.0sx6md0.mongodb.net/dars_fest?retryWrites=true&w=majority';
+const TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8364515958:AAEIHGbuYNmpZ-oc_Q7zx-BJhkLuy1vN4ms';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'bayanadmin';
-const MONGO_URI = process.env.MONGO_URI;
+const MONGO_URI = process.env.MONGO_URI || DEFAULT_MONGO_URI;
 
-if (!TOKEN) { console.error('TELEGRAM_BOT_TOKEN missing'); process.exit(1); }
-if (!MONGO_URI) { console.error('MONGO_URI missing'); process.exit(1); }
+if (!TOKEN) {
+  console.warn('TELEGRAM_BOT_TOKEN missing - Telegram bot will not start');
+}
 
 const bot = new TelegramBot(TOKEN, { polling: true });
 const adminSessions = new Map();
 const pendingActions = new Map();
 
 async function connectDB() {
+  if (mongoose.connection.readyState === 1) return true;
   try {
     await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 });
-    console.log('MongoDB connected');
+    console.log('MongoDB connected for Telegram Bot');
     return true;
   } catch (err) {
-    console.error('MongoDB error:', err.message);
+    console.error('MongoDB error for Telegram Bot:', err.message);
     return false;
   }
 }

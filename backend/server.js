@@ -458,4 +458,10 @@ app.get('/*splat', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  try {
+    require('./bot.js');
+    console.log('Telegram Bot service active alongside Express server');
+  } catch (err) {
+    console.warn('Telegram Bot startup notice:', err.message);
+  }
 });
