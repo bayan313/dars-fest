@@ -6,18 +6,39 @@ document.addEventListener("DOMContentLoaded", () => {
   const navLinks = document.querySelector(".nav-links");
 
   if (hamburger && navLinks) {
-    hamburger.addEventListener("click", () => {
+    hamburger.addEventListener("click", (e) => {
+      e.stopPropagation();
       navLinks.classList.toggle("open");
-      const spans = hamburger.querySelectorAll("span");
-      if (navLinks.classList.contains("open")) {
-        spans[0].style.transform = "rotate(45deg) translate(6px, 6px)";
-        spans[1].style.opacity = "0";
-        spans[2].style.transform = "rotate(-45deg) translate(6px, -6px)";
-      } else {
-        spans[0].style.transform = "none";
-        spans[1].style.opacity = "1";
-        spans[2].style.transform = "none";
+      navLinks.classList.toggle("active");
+      
+      const icon = hamburger.querySelector("i");
+      if (icon) {
+        if (navLinks.classList.contains("open") || navLinks.classList.contains("active")) {
+          icon.className = "fa-solid fa-xmark";
+        } else {
+          icon.className = "fa-solid fa-bars";
+        }
       }
+    });
+
+    // Close mobile nav when clicking outside
+    document.addEventListener("click", (e) => {
+      if ((navLinks.classList.contains("open") || navLinks.classList.contains("active")) && !navLinks.contains(e.target) && !hamburger.contains(e.target)) {
+        navLinks.classList.remove("open");
+        navLinks.classList.remove("active");
+        const icon = hamburger.querySelector("i");
+        if (icon) icon.className = "fa-solid fa-bars";
+      }
+    });
+
+    // Close mobile nav when clicking any link
+    navLinks.querySelectorAll("a").forEach(a => {
+      a.addEventListener("click", () => {
+        navLinks.classList.remove("open");
+        navLinks.classList.remove("active");
+        const icon = hamburger.querySelector("i");
+        if (icon) icon.className = "fa-solid fa-bars";
+      });
     });
   }
 
