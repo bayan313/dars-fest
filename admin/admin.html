@@ -1494,11 +1494,15 @@
     function openPenaltyModal() {
       const teamSelect = document.getElementById("pen-team");
       const teams = ThanafusDB.db.teams || [];
+      if (!teams.length) {
+        showAlert("No teams available in database.", "warning");
+        return;
+      }
       teamSelect.innerHTML = teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
 
       const progSelect = document.getElementById("pen-prog");
       const progs = ThanafusDB.db.programmes || [];
-      progSelect.innerHTML = `<option value="">None / General Penalty</option>` + progs.map(p => `<option value="${p.id}">${p.name} (${p.category})</option>`).join('');
+      progSelect.innerHTML = `<option value="">None / General Fest Penalty</option>` + progs.map(p => `<option value="${p.id}">${p.name} (${p.category})</option>`).join('');
 
       document.getElementById("pen-pts").value = "5";
       document.getElementById("pen-reason").value = "";
@@ -1525,13 +1529,16 @@
       closePenaltyModal();
       renderPenaltiesAdmin();
       renderTeamsAdmin();
+      if (typeof renderAdminDash === 'function') renderAdminDash();
       showAlert(`Minus mark of -${pts} PTS applied successfully!`, "danger");
     }
 
     function deletePenalty(id) {
+      if (!confirm("Are you sure you want to delete this penalty record?")) return;
       ThanafusDB.deletePenalty(id);
       renderPenaltiesAdmin();
       renderTeamsAdmin();
+      if (typeof renderAdminDash === 'function') renderAdminDash();
       showAlert("Penalty record removed.", "info");
     }
 

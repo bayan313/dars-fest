@@ -781,11 +781,11 @@ class Database {
     });
 
     // Subtract penalties
-    if (this.db.penalties) {
+    if (this.db.penalties && Array.isArray(this.db.penalties)) {
       this.db.penalties.forEach(pen => {
-        const team = this.db.teams.find(t => t.id === pen.teamId);
+        const team = this.db.teams.find(t => String(t.id) === String(pen.teamId));
         if (team) {
-          team.totalScore -= (parseInt(pen.points) || 0);
+          team.totalScore -= (parseInt(pen.points, 10) || 0);
         }
       });
     }
@@ -861,26 +861,33 @@ class Database {
   // CRUD Penalties / Minus Marks
   addPenalty(programmeId, teamId, points, reason) {
     const id = "pen-" + Date.now();
-    this.db.penalties = this.db.penalties || [];
+    this.db.penalties = Array.isArray(this.db.penalties) ? this.db.penalties : [];
     this.db.penalties.push({
       id,
       programmeId: programmeId || "",
-      teamId,
-      points: Math.abs(parseInt(points)) || 0,
-      reason: reason || "Disciplinary deduction"
+      teamId: String(teamId),
+      points: Math.abs(parseInt(points, 10)) || 0,
+      reason: reason || "Disciplinary deduction",
+      date: new Date().toISOString()
     });
     this.calculateLeaderboard();
     this.save(false, 'penalties');
     this.save(false, 'teams');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('thanafus:db-updated', { detail: { source: 'addPenalty' } }));
+    }
     return id;
   }
 
   deletePenalty(id) {
-    if (this.db.penalties) {
-      this.db.penalties = this.db.penalties.filter(p => p.id !== id);
+    if (Array.isArray(this.db.penalties)) {
+      this.db.penalties = this.db.penalties.filter(p => String(p.id) !== String(id));
       this.calculateLeaderboard();
       this.save(false, 'penalties');
       this.save(false, 'teams');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('thanafus:db-updated', { detail: { source: 'deletePenalty' } }));
+      }
     }
   }
 
