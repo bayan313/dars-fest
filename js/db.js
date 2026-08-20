@@ -598,9 +598,13 @@ class Database {
 
   async _fetchFresh() {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     try {
-      const res = await fetch('/api/all', { cache: 'no-store', signal: controller.signal });
+      const res = await fetch('/api/all?_t=' + Date.now(), { 
+        cache: 'no-store', 
+        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+        signal: controller.signal 
+      });
       clearTimeout(timeoutId);
       if (!res.ok) return null;
       return await res.json();
@@ -610,7 +614,7 @@ class Database {
     }
   }
 
-  startAutoSync(intervalMs = 3000) {
+  startAutoSync(intervalMs = 1500) {
     if (typeof window === 'undefined') return;
     if (this._syncTimer) clearInterval(this._syncTimer);
     

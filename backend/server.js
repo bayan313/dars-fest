@@ -183,6 +183,9 @@ async function getAllData(siteKey) {
 
 // Get all data
 app.get('/api/all', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   try {
     const siteKey = siteKeyOf(req);
     if (mongoose.connection.readyState !== 1) {
