@@ -232,8 +232,9 @@
 
         if (overall && overall.student && overall.points > 0) {
           const s = overall.student;
-          const photoHtml = s.photo 
-            ? `<img src="${s.photo}" class="champ-hero-photo" alt="${s.name}">`
+          const photoUrl = s.photoUrl || s.photo || "";
+          const photoHtml = photoUrl 
+            ? `<img src="${photoUrl}" class="champ-hero-photo" alt="${s.name}">`
             : `<div class="champ-avatar-fallback"><i class="fa-solid fa-user-graduate"></i></div>`;
 
           overallContainer.innerHTML = `
@@ -241,7 +242,7 @@
               <div class="champ-crown-badge">
                 <i class="fa-solid fa-crown"></i> Fest Overall Arts Champion
               </div>
-              <div class="champ-photo-wrapper">
+              <div class="champ-photo-wrapper" style="margin-bottom: 10px;">
                 ${photoHtml}
               </div>
               <span class="champ-chest-badge"><i class="fa-solid fa-id-badge"></i> Chest #${s.chestNo || '—'}</span>
@@ -268,9 +269,10 @@
 
       catContainer.innerHTML = categories.map(c => {
         const champ = ThanafusDB.getKalaprathibha(c.key);
-        const student = champ.student || { name: "Contenders Awaiting", photo: "" };
-        const photoHtml = student.photo 
-          ? `<img src="${student.photo}" class="champ-cat-photo" alt="${student.name}">`
+        const student = champ.student || { name: "Contenders Awaiting", photoUrl: "", photo: "" };
+        const photoUrl = student.photoUrl || student.photo || "";
+        const photoHtml = photoUrl 
+          ? `<img src="${photoUrl}" class="champ-cat-photo" alt="${student.name}">`
           : `<div class="champ-cat-avatar-fallback"><i class="fa-solid fa-user-graduate"></i></div>`;
 
         return `

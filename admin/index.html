@@ -750,24 +750,46 @@
     function renderTeamsAdmin() {
       const container = document.getElementById("teams-admin-table");
       const teams = ThanafusDB.db.teams || [];
+      const students = ThanafusDB.db.students || [];
+
+      if (teams.length === 0) {
+        container.innerHTML = `<div class="card text-center"><p class="text-muted">No teams created yet.</p></div>`;
+        return;
+      }
+
       container.innerHTML = `
         <table class="table">
           <thead>
-            <tr><th>Name</th><th>Captain</th><th>Vice Captain</th><th>Points</th><th>Actions</th></tr>
+            <tr>
+              <th>Team Name</th>
+              <th>Students Count</th>
+              <th>Captain</th>
+              <th>Vice Captain</th>
+              <th>Total Points</th>
+              <th style="width:120px; text-align:center;">Actions</th>
+            </tr>
           </thead>
           <tbody>
-            ${teams.map(t => `
-              <tr>
-                <td><strong>${t.name}</strong></td>
-                <td>${t.captain || '—'}</td>
-                <td>${t.viceCaptain || '—'}</td>
-                <td style="font-weight:700; color:var(--accent-gold);">${t.totalScore} PTS</td>
-                <td>
-                  <button onclick="editTeamModal('${t.id}')" class="btn btn-gold btn-sm"><i class="fa-solid fa-pen"></i></button>
-                  <button onclick="deleteTeam('${t.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
-                </td>
-              </tr>
-            `).join('')}
+            ${teams.map(t => {
+              const studentCount = students.filter(s => String(s.teamId) === String(t.id)).length;
+              return `
+                <tr>
+                  <td><strong style="font-size:1.05rem; color:#0f172a;">${t.name}</strong></td>
+                  <td>
+                    <span class="kala-cat-tag" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-weight:700;">
+                      <i class="fa-solid fa-user-graduate"></i> ${studentCount} Students
+                    </span>
+                  </td>
+                  <td>${t.captain || '—'}</td>
+                  <td>${t.viceCaptain || '—'}</td>
+                  <td><strong style="font-weight:800; color:var(--accent-gold); font-size:1rem;">${t.totalScore || 0} PTS</strong></td>
+                  <td style="text-align:center;">
+                    <button onclick="editTeamModal('${t.id}')" class="btn btn-gold btn-sm" style="padding:4px 8px;"><i class="fa-solid fa-pen"></i></button>
+                    <button onclick="deleteTeam('${t.id}')" class="btn btn-danger btn-sm" style="padding:4px 8px;"><i class="fa-solid fa-trash"></i></button>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
           </tbody>
         </table>
       `;
