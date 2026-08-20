@@ -899,9 +899,9 @@ class Database {
 
   deletePenalty(id) {
     if (Array.isArray(this.db.penalties)) {
-      const target = this.db.penalties.find(p => p && (String(p.id) === String(id) || String(p._id) === String(id)));
-      this.db.penalties = this.db.penalties.filter(p => p && String(p.id) !== String(id) && String(p._id) !== String(id));
-      this._allowUnpublishAll = true;
+      const targetId = String(id).trim();
+      const target = this.db.penalties.find(p => p && (String(p.id).trim() === targetId || String(p._id).trim() === targetId));
+      this.db.penalties = this.db.penalties.filter(p => p && String(p.id).trim() !== targetId && String(p._id).trim() !== targetId);
       this.calculateLeaderboard();
       this.save(false, 'penalties');
       this.save(false, 'teams');
@@ -916,7 +916,7 @@ class Database {
         this.sendTelegramNotification(delMsg);
       }
 
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
         window.dispatchEvent(new CustomEvent('thanafus:db-updated', { detail: { source: 'deletePenalty' } }));
       }
     }
