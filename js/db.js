@@ -873,6 +873,20 @@ class Database {
     this.calculateLeaderboard();
     this.save(false, 'penalties');
     this.save(false, 'teams');
+
+    // Broadcast Penalty Alert to Telegram Channel
+    const team = (this.db.teams || []).find(t => String(t.id) === String(teamId));
+    const prog = programmeId ? (this.db.programmes || []).find(pr => String(pr.id) === String(programmeId)) : null;
+    const teamName = team ? team.name : "Team";
+    const pts = Math.abs(parseInt(points, 10)) || 0;
+    let penMsg = `⛔ <b>THANAFUS 2026 - TEAM PENALTY NOTICE</b>\n\n`;
+    penMsg += `🚩 <b>Team:</b> ${teamName}\n`;
+    penMsg += `🔻 <b>Deduction:</b> -${pts} PTS\n`;
+    if (prog) penMsg += `📌 <b>Programme:</b> ${prog.name} (${prog.category})\n`;
+    penMsg += `📝 <b>Reason:</b> ${reason || 'Disciplinary deduction'}\n\n`;
+    penMsg += `🔗 <a href="https://dars-fest.vercel.app">View Updated Team Standings</a>`;
+    this.sendTelegramNotification(penMsg);
+
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('thanafus:db-updated', { detail: { source: 'addPenalty' } }));
     }
@@ -1375,6 +1389,14 @@ class Database {
     // Limit to latest 30 notifications
     if (this.db.notifications.length > 30) this.db.notifications.pop();
     this.save(false, 'notifications');
+
+    // Broadcast Announcement to Telegram Channel
+    if (!title.toLowerCase().includes('results published')) {
+      const icon = type === 'danger' ? '⚠️' : type === 'warning' ? '⚡' : type === 'success' ? '🎉' : '📢';
+      const msg = `${icon} <b>THANAFUS 2026 - ANNOUNCEMENT</b>\n\n📌 <b>${title}</b>\n${content}\n\n🔗 <a href="https://dars-fest.vercel.app">Visit Official Fest Portal</a>`;
+      this.sendTelegramNotification(msg);
+    }
+
     return id;
   }
 
