@@ -1346,7 +1346,7 @@
                   <td><span class="grade-chip" style="background:rgba(239,68,68,0.15); color:#ef4444; font-size:0.85rem; font-weight:800;">-${p.points} PTS</span></td>
                   <td style="font-size:0.9rem; color:#334155;">${p.reason || '—'}</td>
                   <td style="text-align:center;">
-                    <button onclick="deletePenalty('${p.id}')" class="btn btn-danger btn-sm" style="padding:4px 10px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i> Delete</button>
+                    <button onclick="deletePenalty('${p.id || p._id}')" class="btn btn-danger btn-sm" style="padding:4px 10px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i> Delete</button>
                   </td>
                 </tr>
               `;

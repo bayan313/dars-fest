@@ -287,9 +287,11 @@ app.post('/api/all', async (req, res) => {
         await Model.bulkWrite(clean.map(d => ({
           replaceOne: { filter: writeFilter({ id: String(d.id) }), replacement: d, upsert: true }
         })));
-      }
-      if (ids.length > 0) {
-        await Model.deleteMany(writeFilter({ id: { $nin: ids } }));
+        if (ids.length > 0) {
+          await Model.deleteMany(writeFilter({ id: { $nin: ids } }));
+        }
+      } else {
+        await Model.deleteMany(writeFilter({}));
       }
     };
 

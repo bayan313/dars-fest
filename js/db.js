@@ -899,10 +899,23 @@ class Database {
 
   deletePenalty(id) {
     if (Array.isArray(this.db.penalties)) {
-      this.db.penalties = this.db.penalties.filter(p => String(p.id) !== String(id));
+      const target = this.db.penalties.find(p => p && (String(p.id) === String(id) || String(p._id) === String(id)));
+      this.db.penalties = this.db.penalties.filter(p => p && String(p.id) !== String(id) && String(p._id) !== String(id));
+      this._allowUnpublishAll = true;
       this.calculateLeaderboard();
       this.save(false, 'penalties');
       this.save(false, 'teams');
+
+      if (target) {
+        const team = (this.db.teams || []).find(t => String(t.id) === String(target.teamId));
+        const teamName = team ? team.name : "Team";
+        let delMsg = `ℹ️ <b>THANAFUS 2026 - PENALTY REMOVED</b>\n\n`;
+        delMsg += `🚩 <b>Team:</b> ${teamName}\n`;
+        delMsg += `✨ Penalty deduction of -${target.points} PTS has been removed/cleared.\n\n`;
+        delMsg += `🔗 <a href="https://dars-fest.vercel.app">View Restored Team Standings</a>`;
+        this.sendTelegramNotification(delMsg);
+      }
+
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('thanafus:db-updated', { detail: { source: 'deletePenalty' } }));
       }
