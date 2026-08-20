@@ -765,84 +765,132 @@ bot.on('message', async (msg) => {
       return;
     }
 
-    // ── Set Result ──
+    // ── Set Result Flow (Screenshot-style) ──
     if (action.step === 'setresult_select') {
       const idx = parseInt(text) - 1;
       if (idx < 0 || idx >= action.progs.length) return bot.sendMessage(chatId, 'Invalid number');
-      action.progId = action.progs[idx]._id;
-      action.progName = action.progs[idx].name;
-      action.progType = action.progs[idx].type;
+      const prog = action.progs[idx];
+      action.progId = prog._id;
+      action.progName = prog.name;
+      action.progCategory = prog.category || '';
+      action.progType = (prog.type || '').toLowerCase();
       action.rankCounter = 1;
-      action.step = 'setresult_type';
-      return bot.sendMessage(chatId,
-        `*${escapeMd(action.progName)}*\n\nResult type:\n1\\. General \\(individual\\)\n2\\. Group \\(team\\)\n\nSend 1 or 2:`,
-        { parse_mode: 'MarkdownV2' }
-      );
-    }
-    if (action.step === 'setresult_type') {
-      if (text === '1') {
-        action.resultType = 'individual';
-        const students = await Student.find(siteFilter('default'));
-        if (!students.length) return bot.sendMessage(chatId, 'No students found. Add students first.');
-        action.items = students;
-        let list = `*Select student for Rank ${action.rankCounter}:*\n\n`;
-        students.slice(0, 30).forEach((s, i) => {
-          list += `${i + 1}\\. ${escapeMd(s.name)} \\| Team: ${escapeMd(s.teamId || '—')}\n`;
-        });
-        list += '\nSend number:';
-        action.step = 'setresult_pick';
-        return bot.sendMessage(chatId, list, { parse_mode: 'MarkdownV2' });
-      } else if (text === '2') {
-        action.resultType = 'team';
-        const teams = await Team.find(siteFilter('default'));
-        if (!teams.length) return bot.sendMessage(chatId, 'No teams found.');
+      action.results = [];
+      action.resultType = (action.progType.includes('group') || action.progType.includes('team')) ? 'team' : 'individual';
+
+      const typeTag = action.resultType === 'team' ? '👥 GROUP' : '🧑 GENERAL';
+      const gradePoints = '1st=10, 2nd=8, 3rd=6 | Grade A=5, B=3, C=1';
+
+      let msg = `*📝 Publish Results & Marks Entry*\n\n`;
+      msg += `🏷️ Category: *${escapeMd(action.progCategory)}*\n`;
+      msg += `📌 *${escapeMd(action.progName)}*\n`;
+      msg += `${typeTag}\n`;
+      msg += `📊 Scoring: ${escapeMd(gradePoints)}\n\n`;
+      msg += `*🏆 Rank Winners (1st, 2nd, 3rd\\.\\.\\)*\n\n`;
+
+      if (action.resultType === 'team') {
+        const teams = await Team.find(siteFilter('default')).sort({ rank: 1 });
+        if (!teams.length) { pendingActions.delete(chatId); return bot.sendMessage(chatId, 'No teams found.'); }
         action.items = teams;
-        let list = `*Select team for Rank ${action.rankCounter}:*\n\n`;
+        msg += `Select team for *Rank ${action.rankCounter}*:\n\n`;
         teams.forEach((t, i) => {
-          list += `${i + 1}\\. ${escapeMd(t.name)} \\| Score: ${t.totalScore}\n`;
+          const memberCount = (t.members || []).length;
+          msg += `${i + 1}\\. ${escapeMd(t.name)} \\| 👥 ${memberCount} members \\| Score: ${t.totalScore}\n`;
         });
-        list += '\nSend number:';
-        action.step = 'setresult_pick';
-        return bot.sendMessage(chatId, list, { parse_mode: 'MarkdownV2' });
+      } else {
+        const filter = siteFilter('default');
+        if (action.progCategory) {
+          filter.category = action.progCategory;
+        }
+        const students = await Student.find(filter);
+        if (!students.length) {
+          const allStudents = await Student.find(siteFilter('default'));
+          action.items = allStudents;
+          msg += `No *${escapeMd(action.progCategory)}* students\\. Showing all:\n\n`;
+          allStudents.slice(0, 30).forEach((s, i) => {
+            msg += `${i + 1}\\. ${escapeMd(s.name)} \\| Chest: ${escapeMd(s.chestNo || '—')} \\| Team: ${escapeMd(s.teamId || '—')}\n`;
+          });
+        } else {
+          action.items = students;
+          msg += `Select student for *Rank ${action.rankCounter}*:\n\n`;
+          students.slice(0, 30).forEach((s, i) => {
+            msg += `${i + 1}\\. ${escapeMd(s.name)} \\| Chest: ${escapeMd(s.chestNo || '—')} \\| Team: ${escapeMd(s.teamId || '—')}\n`;
+          });
+        }
+        msg += `\nYou can also *type name or chest no* to search:`;
       }
-      return bot.sendMessage(chatId, 'Send 1 or 2:');
+      action.step = 'setresult_pick';
+      return bot.sendMessage(chatId, msg, { parse_mode: 'MarkdownV2' });
     }
+
+    // ── Pick student/team (by number OR by name/chest search) ──
     if (action.step === 'setresult_pick') {
-      const idx = parseInt(text) - 1;
-      if (idx < 0 || idx >= action.items.length) return bot.sendMessage(chatId, 'Invalid number');
-      action.selectedItem = action.items[idx];
+      let selected = null;
+      const numIdx = parseInt(text) - 1;
+      if (!isNaN(numIdx) && numIdx >= 0 && numIdx < (action.items || []).length) {
+        selected = action.items[numIdx];
+      } else if (action.items && action.items.length) {
+        const q = text.toLowerCase();
+        selected = action.items.find(s =>
+          (s.name && s.name.toLowerCase().includes(q)) ||
+          (s.chestNo && String(s.chestNo).toLowerCase().includes(q))
+        );
+      }
+      if (!selected) return bot.sendMessage(chatId, 'Invalid selection. Send number or type name/chest no:');
+
+      action.selectedItem = selected;
+      const gradePoints = { A: 5, B: 3, C: 1, D: 0 };
+
+      let msg = `*Rank ${action.rankCounter}: ${escapeMd(selected.name)}*\n`;
+      if (action.resultType === 'team') {
+        const memberCount = (selected.members || []).length;
+        msg += `👥 Members: *${memberCount}*\n`;
+        if (selected.members && selected.members.length) {
+          selected.members.forEach((m, i) => { msg += `  ${i + 1}\\. ${escapeMd(m)}\n`; });
+        }
+      } else {
+        msg += `🪪 Chest: ${escapeMd(selected.chestNo || '—')}\n`;
+      }
+      msg += `\nSelect grade:\n`;
+      msg += `1\\. 🅰️ A \\(Excellent\\) \\| 5 pts\n`;
+      msg += `2\\. 🅱️ B \\(Good\\) \\| 3 pts\n`;
+      msg += `3\\. ©️ C \\(Average\\) \\| 1 pt\n`;
+      msg += `4\\. 🅳 D \\(Below Avg\\) \\| 0 pts\n`;
+      msg += `5\\. ✏️ Custom\n\nSend 1\\-5:`;
       action.step = 'setresult_grade';
-      return bot.sendMessage(chatId,
-        `*Rank ${action.rankCounter}: ${escapeMd(action.selectedItem.name)}*\n\n` +
-        `Select grade:\n1\\. A \\(Excellent\\)\n2\\. B \\(Good\\)\n3\\. C \\(Average\\)\n4\\. D \\(Below Avg\\)\n5\\. Custom\n\nSend 1\\-5:`,
-        { parse_mode: 'MarkdownV2' }
-      );
+      return bot.sendMessage(chatId, msg, { parse_mode: 'MarkdownV2' });
     }
+
     if (action.step === 'setresult_grade') {
-      const grades = { '1': 'A', '2': 'B', '3': 'C', '4': 'D' };
-      if (grades[text]) {
-        action.selectedGrade = grades[text];
+      const gradeMap = { '1': 'A', '2': 'B', '3': 'C', '4': 'D' };
+      if (gradeMap[text]) {
+        action.selectedGrade = gradeMap[text];
+        action.selectedPoints = { A: 5, B: 3, C: 1, D: 0 }[action.selectedGrade];
       } else if (text === '5') {
         action.step = 'setresult_grade_custom';
-        return bot.sendMessage(chatId, 'Enter custom grade:');
+        return bot.sendMessage(chatId, 'Enter custom grade name:');
       } else {
         return bot.sendMessage(chatId, 'Send 1\\-5:', { parse_mode: 'MarkdownV2' });
       }
       action.step = 'setresult_marks';
-      return bot.sendMessage(chatId, 'Enter marks/score \\(or /skip to skip\\):', { parse_mode: 'MarkdownV2' });
+      return bot.sendMessage(chatId, `Grade: *${action.selectedGrade}* \\| Points: *${action.selectedPoints}*\n\nEnter marks/score \\(/skip to skip\\):`, { parse_mode: 'MarkdownV2' });
     }
+
     if (action.step === 'setresult_grade_custom') {
       action.selectedGrade = text;
+      action.selectedPoints = 0;
       action.step = 'setresult_marks';
-      return bot.sendMessage(chatId, 'Enter marks/score \\(or /skip to skip\\):', { parse_mode: 'MarkdownV2' });
+      return bot.sendMessage(chatId, `Custom Grade: *${escapeMd(text)}*\n\nEnter marks/score \\(/skip to skip\\):`, { parse_mode: 'MarkdownV2' });
     }
+
     if (action.step === 'setresult_marks') {
       const marks = text === '/skip' ? null : parseInt(text) || null;
       const result = {
         rank: action.rankCounter,
         grade: action.selectedGrade,
         marks,
-        type: action.resultType
+        type: action.resultType,
+        points: action.selectedPoints || 0
       };
       if (action.resultType === 'individual') {
         result.studentId = action.selectedItem.id;
@@ -853,13 +901,16 @@ bot.on('message', async (msg) => {
 
       let summary = `✅ *Rank ${action.rankCounter}:*\n`;
       summary += `${action.resultType === 'team' ? '👥' : '🧑'} ${escapeMd(action.selectedItem.name)}\n`;
-      summary += `Grade: ${escapeMd(action.selectedGrade)}`;
+      summary += `Grade: *${escapeMd(action.selectedGrade)}* \\| Points: *${action.selectedPoints || 0}*`;
       if (marks != null) summary += ` \\| Marks: ${marks}`;
-      summary += `\n\nAdd more? Send next rank number \\(${action.rankCounter + 1}\\) or /done to publish:`;
+      summary += `\n\n---\\n`;
+      summary += `Add more? Send next rank \\(${action.rankCounter + 1}\\) or /done to save\\:\\n`;
+      summary += `/done \\= Save & Publish`;
       action.rankCounter++;
       action.step = 'setresult_next';
       return bot.sendMessage(chatId, summary, { parse_mode: 'MarkdownV2' });
     }
+
     if (action.step === 'setresult_next') {
       if (text === '/done' || text === 'done') {
         await Programme.updateOne(
@@ -867,40 +918,47 @@ bot.on('message', async (msg) => {
           { $set: { results: action.results, resultsPublished: true, resultsPublishedAt: new Date().toISOString() } }
         );
         pendingActions.delete(chatId);
-        let msg = `✅ *Results Published\\!*\n\n*${escapeMd(action.progName)}*\n`;
+        let msg = `✅ *Results Published\\!*\n\n*${escapeMd(action.progName)}*\n\n`;
         action.results.forEach(r => {
-          const name = r.studentId || r.teamId;
-          msg += `${r.rank}\\. ${escapeMd(name)} \\(${escapeMd(r.grade)}\\)`;
-          if (r.marks != null) msg += ` \\| ${r.marks} marks`;
-          msg += '\n';
+          const icon = r.type === 'team' ? '👥' : '🧑';
+          msg += `${icon} Rank ${r.rank}: *${escapeMd(r.studentId || r.teamId)}*\n`;
+          msg += `  Grade: ${escapeMd(r.grade)} \\| Points: ${r.points || 0}`;
+          if (r.marks != null) msg += ` \\| Marks: ${r.marks}`;
+          msg += '\n\n';
         });
+        const totalPts = action.results.reduce((sum, r) => sum + (r.points || 0), 0);
+        msg += `📊 Total Points: *${totalPts}*`;
         return bot.sendMessage(chatId, msg, { parse_mode: 'MarkdownV2' });
       }
       const nextRank = parseInt(text);
-      if (nextRank !== action.rankCounter) {
-        return bot.sendMessage(chatId, `Expected rank ${action.rankCounter} or /done`);
+      if (!isNaN(nextRank) && nextRank === action.rankCounter) {
+        if (action.resultType === 'team') {
+          const teams = await Team.find(siteFilter('default')).sort({ rank: 1 });
+          action.items = teams;
+          let list = `*Select team for Rank ${action.rankCounter}:*\n\n`;
+          teams.forEach((t, i) => {
+            const mc = (t.members || []).length;
+            list += `${i + 1}\\. ${escapeMd(t.name)} \\| 👥 ${mc} members \\| Score: ${t.totalScore}\n`;
+          });
+          list += `\nType name to search:`;
+          action.step = 'setresult_pick';
+          return bot.sendMessage(chatId, list, { parse_mode: 'MarkdownV2' });
+        } else {
+          const filter = siteFilter('default');
+          if (action.progCategory) filter.category = action.progCategory;
+          let students = await Student.find(filter);
+          if (!students.length) students = await Student.find(siteFilter('default'));
+          action.items = students;
+          let list = `*Select student for Rank ${action.rankCounter}:*\n\n`;
+          students.slice(0, 30).forEach((s, i) => {
+            list += `${i + 1}\\. ${escapeMd(s.name)} \\| Chest: ${escapeMd(s.chestNo || '—')} \\| Team: ${escapeMd(s.teamId || '—')}\n`;
+          });
+          list += `\nType name or chest no to search:`;
+          action.step = 'setresult_pick';
+          return bot.sendMessage(chatId, list, { parse_mode: 'MarkdownV2' });
+        }
       }
-      if (action.resultType === 'individual') {
-        const students = await Student.find(siteFilter('default'));
-        action.items = students;
-        let list = `*Select student for Rank ${action.rankCounter}:*\n\n`;
-        students.slice(0, 30).forEach((s, i) => {
-          list += `${i + 1}\\. ${escapeMd(s.name)} \\| Team: ${escapeMd(s.teamId || '—')}\n`;
-        });
-        list += '\nSend number:';
-        action.step = 'setresult_pick';
-        return bot.sendMessage(chatId, list, { parse_mode: 'MarkdownV2' });
-      } else {
-        const teams = await Team.find(siteFilter('default'));
-        action.items = teams;
-        let list = `*Select team for Rank ${action.rankCounter}:*\n\n`;
-        teams.forEach((t, i) => {
-          list += `${i + 1}\\. ${escapeMd(t.name)} \\| Score: ${t.totalScore}\n`;
-        });
-        list += '\nSend number:';
-        action.step = 'setresult_pick';
-        return bot.sendMessage(chatId, list, { parse_mode: 'MarkdownV2' });
-      }
+      return bot.sendMessage(chatId, `Expected rank ${action.rankCounter} or /done`);
     }
 
     // ── Add Notification ──
