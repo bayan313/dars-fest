@@ -228,9 +228,15 @@
 
           <!-- TAB 2: MANAGE TEAMS -->
           <div id="tab-sec-teams" class="admin-tab-content" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
               <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-people-group text-gold"></i> Manage Teams</h2>
               <button onclick="openTeamModal()" class="btn btn-gold btn-sm"><i class="fa-solid fa-plus"></i> Add Team</button>
+            </div>
+            <div class="filter-row" style="margin-bottom: 16px;">
+              <div style="position: relative; flex: 1; max-width: 320px;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                <input type="text" id="teams-search-input" class="form-control" placeholder="Search team by name..." style="padding-left: 36px;" oninput="renderTeamsAdmin()">
+              </div>
             </div>
             <div id="teams-admin-table" class="table-responsive"></div>
           </div>
@@ -242,8 +248,12 @@
               <button onclick="openStudentModal()" class="btn btn-gold btn-sm"><i class="fa-solid fa-plus"></i> Add Student</button>
             </div>
 
-            <!-- Filters -->
-            <div class="filter-row">
+            <!-- Filters & Search -->
+            <div class="filter-row" style="margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+              <div style="position: relative; flex: 1; min-width: 220px;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                <input type="text" id="stud-search-input" class="form-control" placeholder="Search student name, chest #..." style="padding-left: 36px;" oninput="renderStudentsAdmin()">
+              </div>
               <select id="stud-cat-filter" class="form-control" style="width: 180px;" onchange="renderStudentsAdmin()">
                 <option value="ALL">All Categories</option>
                 <option value="Sub Junior">Sub Junior</option>
@@ -266,8 +276,12 @@
               <button onclick="openProgModal()" class="btn btn-gold btn-sm"><i class="fa-solid fa-plus"></i> Add Programme</button>
             </div>
 
-            <!-- Filters -->
-            <div class="filter-row">
+            <!-- Filters & Search -->
+            <div class="filter-row" style="margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+              <div style="position: relative; flex: 1; min-width: 220px;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                <input type="text" id="prog-search-input" class="form-control" placeholder="Search programme name..." style="padding-left: 36px;" oninput="renderProgsAdmin()">
+              </div>
               <select id="prog-cat-filter" class="form-control" style="width: 180px;" onchange="renderProgsAdmin()">
                 <option value="ALL">All Categories</option>
                 <option value="Sub Junior">Sub Junior</option>
@@ -288,25 +302,45 @@
 
           <!-- TAB 5: TEAM PENALTIES -->
           <div id="tab-sec-penalties" class="admin-tab-content" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
               <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-square-minus text-gold"></i> Team Penalties (Minus Points)</h2>
               <button onclick="openPenaltyModal()" class="btn btn-gold btn-sm"><i class="fa-solid fa-minus"></i> Add Penalty</button>
+            </div>
+            <div class="filter-row" style="margin-bottom: 16px;">
+              <div style="position: relative; flex: 1; max-width: 340px;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                <input type="text" id="penalties-search-input" class="form-control" placeholder="Search penalty by team, reason..." style="padding-left: 36px;" oninput="renderPenaltiesAdmin()">
+              </div>
             </div>
             <div id="penalties-admin-table" class="table-responsive"></div>
           </div>
 
           <!-- TAB 6: ANNOUNCEMENTS -->
           <div id="tab-sec-notifs" class="admin-tab-content" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
               <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-bullhorn text-gold"></i> Announcements</h2>
               <button onclick="openNotifModal()" class="btn btn-gold btn-sm"><i class="fa-solid fa-plus"></i> Create Notice</button>
+            </div>
+            <div class="filter-row" style="margin-bottom: 16px;">
+              <div style="position: relative; flex: 1; max-width: 340px;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                <input type="text" id="notifs-search-input" class="form-control" placeholder="Search announcement title, content..." style="padding-left: 36px;" oninput="renderNotifsAdmin()">
+              </div>
             </div>
             <div id="notifs-admin-table" class="table-responsive"></div>
           </div>
 
           <!-- TAB 7: MESSAGES INBOX -->
           <div id="tab-sec-messages" class="admin-tab-content" style="display: none;">
-            <h2 style="font-size: 1.6rem; margin-bottom: 20px;"><i class="fa-solid fa-envelope-open-text text-gold"></i> Visitor Messages Inbox</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+              <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-envelope-open-text text-gold"></i> Visitor Messages Inbox</h2>
+            </div>
+            <div class="filter-row" style="margin-bottom: 16px;">
+              <div style="position: relative; flex: 1; max-width: 340px;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                <input type="text" id="messages-search-input" class="form-control" placeholder="Search visitor name, email, message..." style="padding-left: 36px;" oninput="renderMessagesAdmin()">
+              </div>
+            </div>
             <div id="messages-admin-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
           </div>
 
@@ -749,11 +783,19 @@
 
     function renderTeamsAdmin() {
       const container = document.getElementById("teams-admin-table");
-      const teams = ThanafusDB.db.teams || [];
+      const query = (document.getElementById("teams-search-input")?.value || "").trim().toLowerCase();
+      const allTeams = ThanafusDB.db.teams || [];
       const students = ThanafusDB.db.students || [];
 
+      const teams = allTeams.filter(t => {
+        if (!query) return true;
+        return (t.name && t.name.toLowerCase().includes(query)) ||
+               (t.captain && t.captain.toLowerCase().includes(query)) ||
+               (t.viceCaptain && t.viceCaptain.toLowerCase().includes(query));
+      });
+
       if (teams.length === 0) {
-        container.innerHTML = `<div class="card text-center"><p class="text-muted">No teams created yet.</p></div>`;
+        container.innerHTML = `<div class="card text-center" style="padding:30px;"><p class="text-muted"><i class="fa-solid fa-circle-info text-gold" style="font-size:1.5rem; margin-bottom:8px;"></i><br>${query ? 'No teams matching search query.' : 'No teams created yet.'}</p></div>`;
         return;
       }
 
@@ -797,39 +839,54 @@
 
     function renderStudentsAdmin() {
       const container = document.getElementById("students-admin-table");
-      const catFilter = document.getElementById("stud-cat-filter").value;
-      const teamFilter = document.getElementById("stud-team-filter").value;
+      const query = (document.getElementById("stud-search-input")?.value || "").trim().toLowerCase();
+      const catFilter = document.getElementById("stud-cat-filter")?.value || 'ALL';
+      const teamFilter = document.getElementById("stud-team-filter")?.value || 'ALL';
 
       const students = (ThanafusDB.db.students || []).filter(s => {
         if (catFilter !== 'ALL' && s.category !== catFilter) return false;
         if (teamFilter !== 'ALL' && s.teamId !== teamFilter) return false;
+        if (query) {
+          const team = (ThanafusDB.db.teams || []).find(t => t.id === s.teamId);
+          const tName = team ? team.name.toLowerCase() : "";
+          const nameMatch = s.name && s.name.toLowerCase().includes(query);
+          const chestMatch = s.chestNo && s.chestNo.toLowerCase().includes(query);
+          const catMatch = s.category && s.category.toLowerCase().includes(query);
+          const teamMatch = tName.includes(query);
+          return nameMatch || chestMatch || catMatch || teamMatch;
+        }
         return true;
       });
+
+      if (students.length === 0) {
+        container.innerHTML = `<div class="card text-center" style="padding:30px;"><p class="text-muted"><i class="fa-solid fa-circle-info text-gold" style="font-size:1.5rem; margin-bottom:8px;"></i><br>${query || catFilter !== 'ALL' || teamFilter !== 'ALL' ? 'No students found matching current search/filter.' : 'No students registered yet.'}</p></div>`;
+        return;
+      }
 
       container.innerHTML = `
         <table class="table">
           <thead>
-            <tr><th>Chest</th><th>Student Profile</th><th>Category</th><th>Team</th><th>Actions</th></tr>
+            <tr><th>Chest</th><th>Student Profile</th><th>Category</th><th>Team</th><th style="width:120px; text-align:center;">Actions</th></tr>
           </thead>
           <tbody>
             ${students.map(s => {
-              const team = ThanafusDB.db.teams.find(t => t.id === s.teamId);
+              const team = (ThanafusDB.db.teams || []).find(t => t.id === s.teamId);
               return `
                 <tr>
-                  <td>#${s.chestNo || '—'}</td>
+                  <td><strong style="color:var(--accent-gold); font-weight:800;">#${s.chestNo || '—'}</strong></td>
                   <td>
                     <div style="display:flex; align-items:center; gap:10px;">
                       <div style="width:36px; height:36px; border-radius:50%; background:var(--gold-gradient); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; overflow:hidden; flex-shrink:0;">
-                        ${s.photo ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;">` : `<i class="fa-solid fa-user-graduate" style="font-size:0.8rem;"></i>`}
+                        ${(s.photoUrl || s.photo) ? `<img src="${s.photoUrl || s.photo}" style="width:100%;height:100%;object-fit:cover;">` : `<i class="fa-solid fa-user-graduate" style="font-size:0.8rem;"></i>`}
                       </div>
-                      <strong>${s.name}</strong>
+                      <strong style="color:#0f172a;">${s.name}</strong>
                     </div>
                   </td>
-                  <td>${s.category}</td>
+                  <td><span class="kala-cat-tag">${s.category}</span></td>
                   <td>${team ? team.name : 'Unassigned'}</td>
-                  <td>
-                    <button onclick="editStudentModal('${s.id}')" class="btn btn-gold btn-sm"><i class="fa-solid fa-pen"></i> Edit</button>
-                    <button onclick="deleteStudent('${s.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+                  <td style="text-align:center;">
+                    <button onclick="editStudentModal('${s.id}')" class="btn btn-gold btn-sm" style="padding:4px 8px;"><i class="fa-solid fa-pen"></i></button>
+                    <button onclick="deleteStudent('${s.id}')" class="btn btn-danger btn-sm" style="padding:4px 8px;"><i class="fa-solid fa-trash"></i></button>
                   </td>
                 </tr>
               `;
@@ -841,15 +898,28 @@
 
     function renderProgsAdmin() {
       const container = document.getElementById("progs-admin-list");
-      const catFilter = document.getElementById("prog-cat-filter").value;
-      const statusFilter = document.getElementById("prog-status-filter").value;
+      const query = (document.getElementById("prog-search-input")?.value || "").trim().toLowerCase();
+      const catFilter = document.getElementById("prog-cat-filter")?.value || 'ALL';
+      const statusFilter = document.getElementById("prog-status-filter")?.value || 'ALL';
 
       const progs = (ThanafusDB.db.programmes || []).filter(p => {
         if (catFilter !== 'ALL' && p.category !== catFilter) return false;
         if (statusFilter === 'PUBLISHED' && !p.resultsPublished) return false;
         if (statusFilter === 'PENDING' && p.resultsPublished) return false;
+        if (query) {
+          const nameMatch = p.name && p.name.toLowerCase().includes(query);
+          const catMatch = p.category && p.category.toLowerCase().includes(query);
+          const typeMatch = p.type && p.type.toLowerCase().includes(query);
+          const venueMatch = p.venue && p.venue.toLowerCase().includes(query);
+          return nameMatch || catMatch || typeMatch || venueMatch;
+        }
         return true;
       });
+
+      if (progs.length === 0) {
+        container.innerHTML = `<div class="card text-center" style="padding:30px;"><p class="text-muted"><i class="fa-solid fa-circle-info text-gold" style="font-size:1.5rem; margin-bottom:8px;"></i><br>${query || catFilter !== 'ALL' || statusFilter !== 'ALL' ? 'No programmes found matching search/filter.' : 'No programmes created yet.'}</p></div>`;
+        return;
+      }
 
       container.innerHTML = progs.map(p => `
         <div class="card">
@@ -866,7 +936,7 @@
             </div>
           </div>
         </div>
-      `).join('') || `<div class="card text-center"><p class="text-muted">No programmes matching filter</p></div>`;
+      `).join('');
     }
 
     function getParticipantOptionsHtml(prog, selectedId = "") {
@@ -1237,9 +1307,21 @@
 
     function renderPenaltiesAdmin() {
       const container = document.getElementById("penalties-admin-table");
-      const pens = ThanafusDB.db.penalties || [];
+      const query = (document.getElementById("penalties-search-input")?.value || "").trim().toLowerCase();
+      const allPens = ThanafusDB.db.penalties || [];
+
+      const pens = allPens.filter(p => {
+        if (!query) return true;
+        const team = (ThanafusDB.db.teams || []).find(t => String(t.id) === String(p.teamId));
+        const prog = p.programmeId ? (ThanafusDB.db.programmes || []).find(pr => String(pr.id) === String(p.programmeId)) : null;
+        const teamMatch = team && team.name.toLowerCase().includes(query);
+        const progMatch = prog && prog.name.toLowerCase().includes(query);
+        const reasonMatch = p.reason && p.reason.toLowerCase().includes(query);
+        return teamMatch || progMatch || reasonMatch;
+      });
+
       if (pens.length === 0) {
-        container.innerHTML = `<div class="card text-center"><p class="text-muted">No penalty / minus mark records recorded.</p></div>`;
+        container.innerHTML = `<div class="card text-center" style="padding:30px;"><p class="text-muted"><i class="fa-solid fa-circle-info text-gold" style="font-size:1.5rem; margin-bottom:8px;"></i><br>${query ? 'No penalty records matching search query.' : 'No penalty / minus mark records recorded.'}</p></div>`;
         return;
       }
       container.innerHTML = `
@@ -1255,12 +1337,12 @@
           </thead>
           <tbody>
             ${pens.map(p => {
-              const team = (ThanafusDB.db.teams || []).find(t => t.id === p.teamId);
-              const prog = (ThanafusDB.db.programmes || []).find(pr => pr.id === p.programmeId);
+              const team = (ThanafusDB.db.teams || []).find(t => String(t.id) === String(p.teamId));
+              const prog = p.programmeId ? (ThanafusDB.db.programmes || []).find(pr => String(pr.id) === String(p.programmeId)) : null;
               return `
                 <tr>
-                  <td><strong style="color:#0f172a;">${team ? team.name : 'Unknown Team'}</strong></td>
-                  <td>${prog ? `<span class="kala-cat-tag">${prog.category}</span> ${prog.name}` : '<span class="text-muted">General Fest Penalty</span>'}</td>
+                  <td><strong style="color:#0f172a; font-size:1rem;">${team ? team.name : 'Unknown Team'}</strong></td>
+                  <td>${prog ? `<span class="kala-cat-tag">${prog.category}</span> ${prog.name}` : '<span class="text-muted"><i class="fa-solid fa-flag"></i> General Fest Penalty</span>'}</td>
                   <td><span class="grade-chip" style="background:rgba(239,68,68,0.15); color:#ef4444; font-size:0.85rem; font-weight:800;">-${p.points} PTS</span></td>
                   <td style="font-size:0.9rem; color:#334155;">${p.reason || '—'}</td>
                   <td style="text-align:center;">
@@ -1276,19 +1358,34 @@
 
     function renderNotifsAdmin() {
       const container = document.getElementById("notifs-admin-table");
-      const notifs = ThanafusDB.db.notifications || [];
+      const query = (document.getElementById("notifs-search-input")?.value || "").trim().toLowerCase();
+      const allNotifs = ThanafusDB.db.notifications || [];
+
+      const notifs = allNotifs.filter(n => {
+        if (!query) return true;
+        const titleMatch = n.title && n.title.toLowerCase().includes(query);
+        const contentMatch = n.content && n.content.toLowerCase().includes(query);
+        const typeMatch = n.type && n.type.toLowerCase().includes(query);
+        return titleMatch || contentMatch || typeMatch;
+      });
+
+      if (notifs.length === 0) {
+        container.innerHTML = `<div class="card text-center" style="padding:30px;"><p class="text-muted"><i class="fa-solid fa-circle-info text-gold" style="font-size:1.5rem; margin-bottom:8px;"></i><br>${query ? 'No announcements matching search query.' : 'No announcements posted yet.'}</p></div>`;
+        return;
+      }
+
       container.innerHTML = `
         <table class="table">
           <thead>
-            <tr><th>Title</th><th>Content</th><th>Type</th><th>Action</th></tr>
+            <tr><th>Title</th><th>Content</th><th>Type</th><th style="width:100px; text-align:center;">Action</th></tr>
           </thead>
           <tbody>
             ${notifs.map(n => `
               <tr>
-                <td><strong>${n.title}</strong></td>
+                <td><strong style="color:#0f172a;">${n.title}</strong></td>
                 <td>${n.content}</td>
                 <td><span class="kala-cat-tag">${n.type}</span></td>
-                <td><button onclick="deleteNotif('${n.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i> Delete</button></td>
+                <td style="text-align:center;"><button onclick="deleteNotif('${n.id}')" class="btn btn-danger btn-sm" style="padding:4px 10px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i> Delete</button></td>
               </tr>
             `).join('')}
           </tbody>
@@ -1298,9 +1395,20 @@
 
     function renderMessagesAdmin() {
       const container = document.getElementById("messages-admin-list");
-      const msgs = ThanafusDB.db.messages || [];
+      const query = (document.getElementById("messages-search-input")?.value || "").trim().toLowerCase();
+      const allMsgs = ThanafusDB.db.messages || [];
+
+      const msgs = allMsgs.filter(m => {
+        if (!query) return true;
+        const nameMatch = m.name && m.name.toLowerCase().includes(query);
+        const emailMatch = m.email && m.email.toLowerCase().includes(query);
+        const phoneMatch = m.phone && m.phone.toLowerCase().includes(query);
+        const msgMatch = m.message && m.message.toLowerCase().includes(query);
+        return nameMatch || emailMatch || phoneMatch || msgMatch;
+      });
+
       if (msgs.length === 0) {
-        container.innerHTML = `<div class="card text-center"><p class="text-muted">No visitor messages received yet.</p></div>`;
+        container.innerHTML = `<div class="card text-center" style="padding:30px;"><p class="text-muted"><i class="fa-solid fa-circle-info text-gold" style="font-size:1.5rem; margin-bottom:8px;"></i><br>${query ? 'No visitor messages matching search query.' : 'No visitor messages received yet.'}</p></div>`;
         return;
       }
       container.innerHTML = msgs.map(m => `
