@@ -862,17 +862,25 @@ class Database {
   addPenalty(programmeId, teamId, points, reason) {
     const id = "pen-" + Date.now();
     this.db.penalties = this.db.penalties || [];
-    this.db.penalties.push({ id, programmeId, teamId, points: parseInt(points) || 0, reason });
-    this.save(false, 'penalties');
+    this.db.penalties.push({
+      id,
+      programmeId: programmeId || "",
+      teamId,
+      points: Math.abs(parseInt(points)) || 0,
+      reason: reason || "Disciplinary deduction"
+    });
     this.calculateLeaderboard();
+    this.save(false, 'penalties');
+    this.save(false, 'teams');
     return id;
   }
 
   deletePenalty(id) {
     if (this.db.penalties) {
       this.db.penalties = this.db.penalties.filter(p => p.id !== id);
-      this.save(false, 'penalties');
       this.calculateLeaderboard();
+      this.save(false, 'penalties');
+      this.save(false, 'teams');
     }
   }
 
