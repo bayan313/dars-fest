@@ -338,9 +338,30 @@
               </div>
             </div>
 
+            <!-- Prospectus PDF Management -->
             <div class="card" style="margin-bottom: 20px;">
-              <h3 style="font-size: 1.1rem; margin-bottom: 14px;">Prospectus PDF Upload</h3>
-              <input type="file" id="pdf-file-input" accept="application/pdf" class="form-control" style="padding-left:14px;" onchange="handleProspectusUpload(event)">
+              <h3 style="font-size: 1.15rem; margin-bottom: 8px; color: var(--accent-gold); display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-file-pdf"></i> Festival Prospectus PDF Management
+              </h3>
+              <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 16px;">
+                Upload your official Dars Fest prospectus PDF or paste a direct PDF / Google Drive link for visitors to view and download.
+              </p>
+
+              <div id="prospectus-status-wrap" style="margin-bottom: 16px;"></div>
+
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div>
+                  <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Option A: Upload PDF File (Max 10MB)</label>
+                  <input type="file" id="pdf-file-input" accept="application/pdf" class="form-control" style="padding: 8px 12px;" onchange="handleProspectusUpload(event)">
+                </div>
+                <div>
+                  <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Option B: Enter External PDF URL / Google Drive Link</label>
+                  <div style="display: flex; gap: 10px;">
+                    <input type="url" id="pdf-url-input" class="form-control" placeholder="https://example.com/prospectus.pdf" style="padding-left:14px;">
+                    <button onclick="saveProspectusUrlInput()" class="btn btn-gold btn-sm" style="white-space: nowrap;"><i class="fa-solid fa-link"></i> Save Link</button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="card">
@@ -1198,23 +1219,37 @@
     function renderPenaltiesAdmin() {
       const container = document.getElementById("penalties-admin-table");
       const pens = ThanafusDB.db.penalties || [];
+      if (pens.length === 0) {
+        container.innerHTML = `<div class="card text-center"><p class="text-muted">No penalty / minus mark records recorded.</p></div>`;
+        return;
+      }
       container.innerHTML = `
         <table class="table">
           <thead>
-            <tr><th>Team</th><th>Points</th><th>Reason</th><th>Action</th></tr>
+            <tr>
+              <th>Team Name</th>
+              <th>Programme</th>
+              <th>Minus Points</th>
+              <th>Reason / Details</th>
+              <th style="width:100px; text-align:center;">Action</th>
+            </tr>
           </thead>
           <tbody>
             ${pens.map(p => {
-              const team = ThanafusDB.db.teams.find(t => t.id === p.teamId);
+              const team = (ThanafusDB.db.teams || []).find(t => t.id === p.teamId);
+              const prog = (ThanafusDB.db.programmes || []).find(pr => pr.id === p.programmeId);
               return `
                 <tr>
-                  <td>${team ? team.name : 'Unknown'}</td>
-                  <td style="color:#ef4444; font-weight:700;">-${p.points} PTS</td>
-                  <td>${p.reason}</td>
-                  <td><button onclick="deletePenalty('${p.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i> Delete</button></td>
+                  <td><strong style="color:#0f172a;">${team ? team.name : 'Unknown Team'}</strong></td>
+                  <td>${prog ? `<span class="kala-cat-tag">${prog.category}</span> ${prog.name}` : '<span class="text-muted">General Fest Penalty</span>'}</td>
+                  <td><span class="grade-chip" style="background:rgba(239,68,68,0.15); color:#ef4444; font-size:0.85rem; font-weight:800;">-${p.points} PTS</span></td>
+                  <td style="font-size:0.9rem; color:#334155;">${p.reason || '—'}</td>
+                  <td style="text-align:center;">
+                    <button onclick="deletePenalty('${p.id}')" class="btn btn-danger btn-sm" style="padding:4px 10px; font-size:0.75rem;"><i class="fa-solid fa-trash"></i> Delete</button>
+                  </td>
                 </tr>
               `;
-            }).join('') || `<tr><td colspan="4" class="text-center text-muted">No penalty records</td></tr>`}
+            }).join('')}
           </tbody>
         </table>
       `;
@@ -1529,17 +1564,62 @@
         showAlert("Please select a valid PDF file.", "warning");
         return;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        showAlert("PDF file size exceeds 5MB limit.", "warning");
+      if (file.size > 10 * 1024 * 1024) {
+        showAlert("PDF file size exceeds 10MB limit.", "warning");
         return;
       }
       const reader = new FileReader();
       reader.onload = function(evt) {
         const base64 = evt.target.result;
         ThanafusDB.updateProspectus(base64);
-        showAlert("Prospectus PDF updated successfully!", "success");
+        renderProspectusStatus();
+        showAlert("Prospectus PDF uploaded and saved successfully!", "success");
       };
       reader.readAsDataURL(file);
+    }
+
+    function saveProspectusUrlInput() {
+      const urlInput = document.getElementById("pdf-url-input");
+      const url = (urlInput ? urlInput.value : "").trim();
+      if (!url) {
+        showAlert("Please enter a valid PDF URL or link.", "warning");
+        return;
+      }
+      ThanafusDB.updateProspectus(url);
+      if (urlInput) urlInput.value = "";
+      renderProspectusStatus();
+      showAlert("Prospectus PDF link saved successfully!", "success");
+    }
+
+    function renderProspectusStatus() {
+      const statusWrap = document.getElementById("prospectus-status-wrap");
+      if (!statusWrap) return;
+      const url = ThanafusDB.db.settings?.prospectusUrl || "";
+      if (url) {
+        statusWrap.innerHTML = `
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px 16px; border-radius:10px;">
+            <span style="color:#15803d; font-weight:700; font-size:0.9rem;">
+              <i class="fa-solid fa-circle-check"></i> Official Prospectus PDF is Active
+            </span>
+            <div style="display:flex; gap:8px;">
+              <a href="${url}" target="_blank" class="btn btn-outline btn-sm" style="border-color:#15803d; color:#15803d;"><i class="fa-solid fa-eye"></i> View PDF</a>
+              <button onclick="removeProspectusPDF()" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i> Remove</button>
+            </div>
+          </div>
+        `;
+      } else {
+        statusWrap.innerHTML = `
+          <div style="background:#fffbeb; border:1px solid #fef08a; padding:12px 16px; border-radius:10px; color:#b45309; font-size:0.85rem;">
+            <i class="fa-solid fa-triangle-exclamation"></i> No Prospectus PDF set yet. Upload a PDF file above or enter a direct link.
+          </div>
+        `;
+      }
+    }
+
+    function removeProspectusPDF() {
+      ThanafusDB.updateProspectus("");
+      renderProspectusStatus();
+      showAlert("Prospectus PDF removed.", "info");
     }
 
     function updateAdminPass() {
@@ -1554,8 +1634,12 @@
       const s = ThanafusDB.db.settings || {};
       const tokenInput = document.getElementById("tg-bot-token");
       const chatInput = document.getElementById("tg-chat-id");
-      if (tokenInput && !tokenInput.value) tokenInput.value = s.telegramBotToken || "";
-      if (chatInput && !chatInput.value) chatInput.value = s.telegramChatId || "";
+      const defaultToken = "8364515958:AAEIHGbuYNmpZ-oc_Q7zx-BJhkLuy1vN4ms";
+
+      if (tokenInput) tokenInput.value = s.telegramBotToken || defaultToken;
+      if (chatInput) chatInput.value = s.telegramChatId || "";
+
+      renderProspectusStatus();
     }
 
     function saveTelegramSettings() {
