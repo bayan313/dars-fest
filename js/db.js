@@ -888,7 +888,7 @@ class Database {
     penMsg += `🔻 <b>Deduction:</b> -${pts} PTS\n`;
     if (prog) penMsg += `📌 <b>Programme:</b> ${prog.name} (${prog.category})\n`;
     penMsg += `📝 <b>Reason:</b> ${reason || 'Disciplinary deduction'}\n\n`;
-    penMsg += `🔗 <a href="https://dars-fest.vercel.app">View Updated Team Standings</a>`;
+    penMsg += `🔗 <a href="https://thanafus-dars-fest.vercel.app">View Updated Team Standings</a>`;
     this.sendTelegramNotification(penMsg);
 
     if (typeof window !== 'undefined') {
@@ -912,7 +912,7 @@ class Database {
         let delMsg = `ℹ️ <b>THANAFUS 2026 - PENALTY REMOVED</b>\n\n`;
         delMsg += `🚩 <b>Team:</b> ${teamName}\n`;
         delMsg += `✨ Penalty deduction of -${target.points} PTS has been removed/cleared.\n\n`;
-        delMsg += `🔗 <a href="https://dars-fest.vercel.app">View Restored Team Standings</a>`;
+        delMsg += `🔗 <a href="https://thanafus-dars-fest.vercel.app">View Restored Team Standings</a>`;
         this.sendTelegramNotification(delMsg);
       }
 
@@ -1348,7 +1348,7 @@ class Database {
       });
     }
 
-    msg += `\n🔗 <a href="https://dars-fest.vercel.app/results">View Full Scoreboard & Standings</a>`;
+    msg += `\n🔗 <a href="https://thanafus-dars-fest.vercel.app/results">View Full Scoreboard & Standings</a>`;
     this.sendTelegramNotification(msg);
   }
 
@@ -1410,7 +1410,7 @@ class Database {
     // Broadcast Announcement to Telegram Channel
     if (!title.toLowerCase().includes('results published')) {
       const icon = type === 'danger' ? '⚠️' : type === 'warning' ? '⚡' : type === 'success' ? '🎉' : '📢';
-      const msg = `${icon} <b>THANAFUS 2026 - ANNOUNCEMENT</b>\n\n📌 <b>${title}</b>\n${content}\n\n🔗 <a href="https://dars-fest.vercel.app">Visit Official Fest Portal</a>`;
+      const msg = `${icon} <b>THANAFUS 2026 - ANNOUNCEMENT</b>\n\n📌 <b>${title}</b>\n${content}\n\n🔗 <a href="https://thanafus-dars-fest.vercel.app">Visit Official Fest Portal</a>`;
       this.sendTelegramNotification(msg);
     }
 
