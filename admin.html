@@ -91,7 +91,24 @@
     @media (max-width: 900px) {
       .admin-layout {
         grid-template-columns: 1fr;
+        gap: 16px;
       }
+      .admin-sidebar {
+        position: relative;
+        top: 0;
+        flex-direction: row;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 10px;
+        max-height: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      .admin-nav-item {
+        flex: 0 0 auto;
+        padding: 8px 14px;
+        font-size: 0.85rem;
+      }
+      /* Hide some text to save space if needed, or keep it */
     }
   </style>
 </head>
