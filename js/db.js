@@ -249,12 +249,12 @@ const DEFAULT_DB = {
     { id: "gal-4", type: "video", title: "Fest Highlights Day 1", url: "https://www.w3schools.com/html/mov_bbb.mp4", day: "Day 1", category: "General", event: "Overall Highlights" }
   ],
   contact: {
-    coordinatorName: "Usthad K.M. Shafi Hudawi",
-    coordinatorPhone: "+91 9988776655",
+    coordinatorName: "Usthad Musthafa Baqavi",
+    coordinatorPhone: "+91 9744597387",
     techSupportName: "Thanafus IT Support Team",
-    techSupportPhone: "+91 8877665544",
+    techSupportPhone: "+91 9526919218",
     email: "info@thanafusfest.com",
-    address: "THANAFUS Dars Fest Committee Office, Markaz Campus, Calicut, Kerala, 673573"
+    address: "THANAFUS Dars Fest Committee Office, Bayan Uloom Dars, Muttichira"
   },
   messages: [],
   settings: {
