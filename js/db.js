@@ -907,13 +907,7 @@ class Database {
       this.save(false, 'teams');
 
       if (target) {
-        const team = (this.db.teams || []).find(t => String(t.id) === String(target.teamId));
-        const teamName = team ? team.name : "Team";
-        let delMsg = `ℹ️ <b>THANAFUS 2026 - PENALTY REMOVED</b>\n\n`;
-        delMsg += `🚩 <b>Team:</b> ${teamName}\n`;
-        delMsg += `✨ Penalty deduction of -${target.points} PTS has been removed/cleared.\n\n`;
-        delMsg += `🔗 <a href="https://thanafus-dars-fest.vercel.app">View Restored Team Standings</a>`;
-        this.sendTelegramNotification(delMsg);
+        // Penalty is removed, no telegram notification is needed as per user request.
       }
 
       if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
