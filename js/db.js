@@ -1280,19 +1280,21 @@ class Database {
 
   // Publish Results
   publishResults(programmeId, resultsArray) {
-    const prog = this.db.programmes.find(p => p && String(p.id) === String(programmeId));
+      const prog = this.db.programmes.find(p => p && String(p.id) === String(programmeId));
     if (prog) {
       const isGroupEvent = (prog.type || '').trim().toLowerCase() === 'group';
       prog.results = (resultsArray || []).filter(r => r && (r.studentId || r.teamId)).map(r => ({
         rank: (r.rank !== undefined && r.rank !== null && r.rank !== '' && parseInt(r.rank) > 0) ? parseInt(r.rank) : null,
         studentId: isGroupEvent ? null : (r.studentId || null),
-        teamId: isGroupEvent ? (r.teamId || r.studentId || null) : (r.teamId || null),
+        teamId: isGroupEvent ? (r.teamId || r.studentId || null) : (r.teamId || (this.db.students.find(s => s.id === r.studentId)?.teamId) || null),
         grade: r.grade ? r.grade.toUpperCase().trim() : null
       }));
       prog.resultsPublished = true;
       prog.resultsPublishedAt = new Date().toISOString();
       this.calculateLeaderboard();
-      this.save(false, 'programmes');
+        this.save(false, 'programmes');
+        this.save(false, 'teams');
+        this.save(false, 'students');
 
       // Trigger automatic announcement notification
       this.addNotification(`${prog.name} (${prog.category}) Results Published`, `The results for the program "${prog.name}" under category "${prog.category}" have been officially published. Check the results portal for details.`, "success");
@@ -1384,7 +1386,9 @@ class Database {
       delete prog.resultsPublishedAt;
       this._allowUnpublishAll = true;
       this.calculateLeaderboard();
-      this.save(false, 'programmes');
+        this.save(false, 'programmes');
+        this.save(false, 'teams');
+        this.save(false, 'students');
     }
   }
 
@@ -1396,7 +1400,9 @@ class Database {
     });
     this._allowUnpublishAll = true;
     this.calculateLeaderboard();
-    this.save(false, 'programmes');
+        this.save(false, 'programmes');
+        this.save(false, 'teams');
+        this.save(false, 'students');
   }
 
   // Notifications
