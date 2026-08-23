@@ -498,7 +498,7 @@ class Database {
 
   async _sendSave(payload, changedCollections, attempt) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     try {
       const res = await fetch('/api/all', {
@@ -627,6 +627,12 @@ class Database {
           const freshRev = typeof fresh.revision === 'number' ? fresh.revision : 0;
           const currentRev = typeof this.db.revision === 'number' ? this.db.revision : 0;
           
+          if (freshRev === 0 && currentRev > 0) {
+            // Server DB was reset or migrated. Upload our full local state to initialize it.
+            this.save(true);
+            return;
+          }
+
           if (freshRev !== currentRev || !this.loadedFromServer) {
             const protectedCols = this._activeLocalCollections();
             const mergedData = { ...fresh };
