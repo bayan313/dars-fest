@@ -15,7 +15,7 @@ const path = require('path');
 app.use(express.static(path.join(__dirname, '../')));
 
 // Handle client-side routing fallback (for /admin, etc.)
-app.get('/*', (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, '../index.html'));
 });
 
