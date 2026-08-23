@@ -329,7 +329,7 @@ class Database {
   async load() {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
       const response = await fetch('/api/all', { 
         cache: 'no-store',
         signal: controller.signal 
@@ -498,7 +498,7 @@ class Database {
 
   async _sendSave(payload, changedCollections, attempt) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     try {
       const res = await fetch('/api/all', {
