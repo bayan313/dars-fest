@@ -188,15 +188,6 @@
       setInterval(renderContactDetails, 8000);
     });
 
-    function renderContactDetails() {
-      const c = ThanafusDB.db.contact || {};
-      document.getElementById("c-coord-name").innerText = c.coordinatorName || "Usthad Coordinator";
-      document.getElementById("c-coord-phone").innerText = c.coordinatorPhone || "+91 9988776655";
-      document.getElementById("c-tech-name").innerText = c.techSupportName || "IT Control Room";
-      document.getElementById("c-tech-phone").innerText = c.techSupportPhone || "+91 8877665544";
-      document.getElementById("c-address").innerText = c.address || "THANAFUS Fest Committee Headquarters";
-    }
-
     function handleContactMessage(e) {
       e.preventDefault();
       const name = document.getElementById("msg-name").value;
