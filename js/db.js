@@ -313,6 +313,18 @@ class Database {
 
   _ensureDbDefaults() {
     if (!this.db || typeof this.db !== 'object') this.db = JSON.parse(JSON.stringify(DEFAULT_DB));
+    
+    // Auto-cleanup huge photos/pdfs that cause payload crashes
+    if (this.db.students) {
+      this.db.students.forEach(s => {
+        if (s.photo && s.photo.length > 200000) {
+          s.photo = '';
+        }
+      });
+    }
+    if (this.db.settings && this.db.settings.prospectusUrl && this.db.settings.prospectusUrl.length > 500000) {
+       this.db.settings.prospectusUrl = '';
+    }
     this.db.teams = Array.isArray(this.db.teams) ? this.db.teams : [];
     this.db.students = Array.isArray(this.db.students) ? this.db.students : [];
     this.db.programmes = Array.isArray(this.db.programmes) ? this.db.programmes : [];
