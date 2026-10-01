@@ -8,41 +8,100 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
   <style>
-    body { background: #f8fafc; }
-    .admin-container { max-width: 1000px; margin: 40px auto; padding: 20px; }
+    body { background: #f8fafc; font-family: 'Segoe UI', system-ui, sans-serif; }
+    
+    /* Elegant Login Screen */
+    .login-wrapper {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      display: flex; justify-content: center; align-items: center; z-index: 1000;
+    }
+    .login-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 40px; border-radius: 24px; width: 100%; max-width: 420px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      text-align: center; color: white;
+      animation: floatUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes floatUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+    .login-icon {
+      width: 80px; height: 80px; margin: 0 auto 20px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; color: white; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+    }
+    .login-input {
+      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white; padding: 15px; border-radius: 12px; font-size: 1.2rem;
+      text-align: center; letter-spacing: 2px;
+    }
+    .login-input:focus { background: rgba(255, 255, 255, 0.15); border-color: #f59e0b; color: white; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2); }
+    .login-input::placeholder { color: rgba(255, 255, 255, 0.5); font-size: 1rem; letter-spacing: 1px; }
+    .btn-login {
+      background: linear-gradient(to right, #f59e0b, #d97706); border: none;
+      padding: 15px; border-radius: 12px; font-size: 1.1rem; font-weight: 700;
+      color: white; margin-top: 20px; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3); transition: 0.3s;
+    }
+    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(245, 158, 11, 0.4); }
+
+    /* Admin Dashboard */
+    .admin-container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+    .dashboard-header { background: #0f172a; padding: 30px; border-radius: 20px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1); margin-bottom: 30px; }
+    .dashboard-header h2 { margin: 0; font-weight: 700; display: flex; align-items: center; gap: 15px; }
+    .btn-create { background: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; transition: 0.2s; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+    .btn-create:hover { background: #d97706; transform: translateY(-2px); color: white; }
+    .table-card { background: white; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
+    .table th { background: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; padding: 15px; border-bottom: 2px solid #e2e8f0; }
+    .table td { padding: 15px; vertical-align: middle; color: #334155; border-bottom: 1px solid #f1f5f9; }
+    
+    /* Modals */
+    .custom-modal-content { border-radius: 24px; border: none; box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
+    .quiz-q-block { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; transition: 0.2s; }
+    .quiz-q-block:hover { border-color: #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+    .form-control, .form-select { border-radius: 10px; padding: 12px 15px; border: 1px solid #cbd5e1; }
+    .form-control:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1); }
   </style>
 </head>
 <body>
 
-  <!-- AUTH OVERLAY -->
-  <div class="modal-overlay active" id="auth-overlay">
-    <div class="modal-card text-center" style="max-width: 420px;">
-      <h2 style="font-size: 1.6rem; margin-bottom: 4px;">Quiz Master Login</h2>
-      <p class="text-muted mb-4">Enter access key to manage Spot Quizzes</p>
+  <!-- ELEGANT LOGIN SCREEN -->
+  <div class="login-wrapper" id="auth-overlay">
+    <div class="login-card">
+      <div class="login-icon"><i class="fa-solid fa-crown"></i></div>
+      <h2 style="font-weight: 800; margin-bottom: 5px;">Spot Quiz Master</h2>
+      <p style="color: rgba(255,255,255,0.6); margin-bottom: 30px; font-size: 0.95rem;">Secure Administration Portal</p>
       <form onsubmit="handleAdminLogin(event)">
-        <input type="password" id="admin-pass" class="form-control mb-3" placeholder="Access Key..." required style="text-align:center; letter-spacing:2px; font-size:1.1rem; padding:12px;">
-        <button type="submit" class="btn btn-gold w-100" style="padding:12px; font-size:1.1rem; font-weight:700;">Login to Quiz Control</button>
+        <input type="password" id="admin-pass" class="form-control login-input" placeholder="Enter Access Key" required>
+        <button type="submit" class="btn btn-login w-100">Authenticate <i class="fa-solid fa-arrow-right ms-2"></i></button>
       </form>
     </div>
   </div>
 
-  <!-- MAIN ADMIN -->
+  <!-- MAIN ADMIN DASHBOARD -->
   <div class="admin-container" id="admin-panel-wrap" style="display: none;">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 style="font-size: 1.8rem; margin-bottom: 0;"><i class="fa-solid fa-stopwatch text-gold"></i> Spot Quiz Admin Panel</h2>
-      <button class="btn btn-gold btn-lg" onclick="openQuizModal()"><i class="fa-solid fa-plus"></i> Create New Quiz</button>
+    <div class="dashboard-header">
+      <h2>
+        <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 14px; display:flex; align-items:center; justify-content:center; color: #f59e0b;">
+          <i class="fa-solid fa-stopwatch"></i>
+        </div>
+        Quiz Control Center
+      </h2>
+      <button class="btn btn-create" onclick="openQuizModal()"><i class="fa-solid fa-plus me-2"></i> Create New Quiz</button>
     </div>
 
-    <div class="card mb-4 shadow-sm border-0">
+    <div class="table-card">
       <div class="table-responsive">
-        <table class="table align-middle table-hover">
-          <thead class="table-light">
+        <table class="table align-middle table-hover mb-0">
+          <thead>
             <tr>
-              <th>Quiz Title</th>
+              <th>Quiz Info</th>
               <th>Model</th>
               <th>Duration</th>
               <th>Status / Winner</th>
-              <th>Actions</th>
+              <th class="text-end">Actions</th>
             </tr>
           </thead>
           <tbody id="quiz-table-body">
@@ -54,65 +113,76 @@
   </div>
 
   <!-- Quiz Form Modal -->
-  <div class="modal-overlay" id="quiz-form-modal">
-    <div class="modal-card" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
-      <div class="modal-header">
-        <h3>Create Spot Quiz</h3>
-        <button class="modal-close" onclick="closeQuizModal()">&times;</button>
-      </div>
-      <form onsubmit="saveQuizForm(event)">
-        <div class="mb-3">
-          <label>Quiz Title</label>
-          <input type="text" id="qz-title" class="form-control" required placeholder="e.g. Stage 1 Live Quiz">
+  <div class="modal fade" id="quizFormModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content custom-modal-content">
+        <div class="modal-header border-0 pb-0" style="padding: 30px 30px 10px;">
+          <h3 class="fw-bold mb-0 text-dark">Create Spot Quiz</h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="row mb-3">
-          <div class="col-6">
-            <label>Quiz Model</label>
-            <select id="qz-model" class="form-select">
-              <option value="model1">Model 1 (Single Q)</option>
-              <option value="model2">Model 2 (Multi Q)</option>
-            </select>
-          </div>
-          <div class="col-6">
-            <label>Duration (Minutes)</label>
-            <input type="number" id="qz-duration" class="form-control" value="10" required min="1">
-          </div>
-        </div>
-        <hr>
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="mb-0">Questions</h5>
-          <button type="button" class="btn btn-sm btn-outline-primary" onclick="addQuestionBlock()">+ Add Question</button>
-        </div>
-        <div id="qz-questions-wrap">
-          <div class="quiz-q-block card p-3 mb-3 border-gold" style="background:#fcfcfc;">
-            <h6>Question 1</h6>
-            <input type="text" class="form-control mb-2 qz-q-text" placeholder="Question Text" required>
-            <div class="row">
-               <div class="col-6"><input type="text" class="form-control mb-2 qz-opt-a" placeholder="Option A" required></div>
-               <div class="col-6"><input type="text" class="form-control mb-2 qz-opt-b" placeholder="Option B" required></div>
-               <div class="col-6"><input type="text" class="form-control mb-2 qz-opt-c" placeholder="Option C"></div>
-               <div class="col-6"><input type="text" class="form-control mb-2 qz-opt-d" placeholder="Option D"></div>
+        <div class="modal-body" style="padding: 20px 30px;">
+          <form id="quiz-setup-form" onsubmit="saveQuizForm(event)">
+            <div class="mb-4">
+              <label class="fw-semibold text-muted mb-2">Quiz Title / Event Name</label>
+              <input type="text" id="qz-title" class="form-control" required placeholder="e.g. Stage 1 Live Quiz">
             </div>
-            <input type="text" class="form-control mt-2 qz-ans border-success" placeholder="Exact Correct Answer Text" required>
-          </div>
+            <div class="row mb-4">
+              <div class="col-6">
+                <label class="fw-semibold text-muted mb-2">Quiz Model</label>
+                <select id="qz-model" class="form-select">
+                  <option value="model1">Model 1 (Single Question)</option>
+                  <option value="model2">Model 2 (Multi Question)</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="fw-semibold text-muted mb-2">Duration (Minutes)</label>
+                <input type="number" id="qz-duration" class="form-control" value="10" required min="1">
+              </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3 mt-5">
+              <h5 class="fw-bold mb-0 text-dark">Questions Setup</h5>
+              <button type="button" class="btn btn-sm btn-dark" style="border-radius:8px;" onclick="addQuestionBlock()">+ Add Question</button>
+            </div>
+            <div id="qz-questions-wrap">
+              <div class="quiz-q-block mb-3">
+                <h6 class="fw-bold text-muted mb-3">Question 1</h6>
+                <input type="text" class="form-control mb-3 qz-q-text" placeholder="Type the question here..." required style="font-weight:600;">
+                <div class="row g-2 mb-3">
+                   <div class="col-6"><input type="text" class="form-control qz-opt-a" placeholder="Option A" required></div>
+                   <div class="col-6"><input type="text" class="form-control qz-opt-b" placeholder="Option B" required></div>
+                   <div class="col-6"><input type="text" class="form-control qz-opt-c" placeholder="Option C"></div>
+                   <div class="col-6"><input type="text" class="form-control qz-opt-d" placeholder="Option D"></div>
+                </div>
+                <input type="text" class="form-control qz-ans" placeholder="Enter Exact Correct Answer Text (e.g. what you typed in Option A)" required style="border-color:#10b981; background:#f0fdf4;">
+              </div>
+            </div>
         </div>
-        <div class="text-end mt-4">
-          <button type="button" class="btn btn-outline" onclick="closeQuizModal()">Cancel</button>
-          <button type="submit" class="btn btn-gold">Create & Start Quiz</button>
+        <div class="modal-footer border-0" style="padding: 20px 30px 30px;">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius:10px; padding:10px 20px; font-weight:600;">Cancel</button>
+          <button type="submit" form="quiz-setup-form" class="btn btn-gold" style="border-radius:10px; padding:10px 20px; font-weight:600;">Deploy & Start Quiz <i class="fa-solid fa-rocket ms-1"></i></button>
         </div>
-      </form>
+        </form>
+      </div>
     </div>
   </div>
 
   <div id="alert-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/db.js"></script>
   <script>
     const ThanafusDB = new Database();
+    let quizModal;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      quizModal = new bootstrap.Modal(document.getElementById('quizFormModal'));
+    });
 
     function showAlert(msg, type = 'info') {
       const el = document.createElement('div');
-      el.className = \`alert alert-\${type} alert-dismissible fade show shadow-sm\`;
+      el.className = \`alert alert-\${type} alert-dismissible fade show shadow-lg border-0\`;
+      el.style.borderRadius = "12px";
+      el.style.fontWeight = "600";
       el.innerHTML = \`\${msg} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>\`;
       document.getElementById('alert-container').appendChild(el);
       setTimeout(() => el.remove(), 4000);
@@ -122,20 +192,13 @@
       e.preventDefault();
       const pass = document.getElementById("admin-pass").value;
       if (ThanafusDB.verifyAdminPassword(pass)) {
-        document.getElementById("auth-overlay").classList.remove("active");
+        document.getElementById("auth-overlay").style.display = "none";
         document.getElementById("admin-panel-wrap").style.display = "block";
         renderQuizAdmin();
       } else {
         showAlert("Invalid access key!", "danger");
       }
     }
-
-    // Auto-login if session valid
-    document.addEventListener("DOMContentLoaded", () => {
-      ThanafusDB._loadPromise.then(() => {
-        // Just require manual login for security
-      });
-    });
 
     window.addEventListener('thanafus:db-updated', () => {
       if (document.getElementById("admin-panel-wrap").style.display === "block") {
@@ -150,23 +213,23 @@
       
       const quizzes = ThanafusDB.db.quizzes || [];
       if (quizzes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No active quizzes found. Create one to start.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-5"><i class="fa-regular fa-folder-open mb-2" style="font-size:2rem; color:#cbd5e1;"></i><br>No active quizzes found. Create one to start.</td></tr>';
         return;
       }
 
       quizzes.forEach(q => {
         const publicUrl = window.location.origin + "/quiz.html?id=" + q.id;
-        const winnerText = q.winner ? \`<span class="badge bg-success">\${q.winner.name}</span>\` : (q.status === 'ended' ? '<span class="badge bg-secondary">No Winner</span>' : '<span class="badge bg-warning text-dark">Active</span>');
+        const winnerText = q.winner ? \`<span class="badge bg-success px-3 py-2" style="border-radius:20px;"><i class="fa-solid fa-trophy me-1"></i> \${q.winner.name}</span>\` : (q.status === 'ended' ? '<span class="badge bg-secondary px-3 py-2" style="border-radius:20px;">Ended</span>' : '<span class="badge bg-warning text-dark px-3 py-2" style="border-radius:20px;"><i class="fa-solid fa-circle-play me-1"></i> Active</span>');
         
         tbody.innerHTML += \`
           <tr>
-            <td><strong>\${q.title}</strong><br><small class="text-muted">\${q.questions.length} Questions</small></td>
-            <td><span class="badge bg-light text-dark">\${q.model === 'model1' ? 'Model 1' : 'Model 2'}</span></td>
-            <td>\${q.durationMins} Mins</td>
+            <td><strong class="text-dark">\${q.title}</strong><br><small class="text-muted"><i class="fa-solid fa-clipboard-question"></i> \${q.questions.length} Questions</small></td>
+            <td><span class="badge bg-light text-dark border">\${q.model === 'model1' ? 'Model 1 (Single Q)' : 'Model 2 (Multi Q)'}</span></td>
+            <td><span class="fw-bold text-dark">\${q.durationMins}</span> <small class="text-muted">Mins</small></td>
             <td>\${winnerText}</td>
-            <td>
-              <button class="btn btn-sm btn-outline-primary" onclick="copyQuizLink('\${publicUrl}')"><i class="fa-solid fa-link"></i> Copy Link</button>
-              <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteQuiz('\${q.id}')"><i class="fa-solid fa-trash"></i></button>
+            <td class="text-end">
+              <button class="btn btn-sm btn-light border fw-bold text-dark me-1" onclick="copyQuizLink('\${publicUrl}')"><i class="fa-solid fa-link text-primary"></i> Copy Link</button>
+              <button class="btn btn-sm btn-light border text-danger" onclick="deleteQuiz('\${q.id}')"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         \`;
@@ -174,23 +237,24 @@
     }
 
     function copyQuizLink(url) {
-      navigator.clipboard.writeText(url).then(() => showAlert("Quiz link copied! Paste it in QR Generator.", "success"));
+      navigator.clipboard.writeText(url).then(() => showAlert("<i class='fa-solid fa-check-circle me-1'></i> Quiz link copied! Paste it in your QR Generator.", "success"));
     }
 
     function deleteQuiz(id) {
-      if (confirm("Are you sure you want to delete this quiz? All responses will be lost.")) {
+      if (confirm("Are you sure you want to delete this quiz? All responses will be lost permanently.")) {
         ThanafusDB.deleteQuiz(id);
         renderQuizAdmin();
-        showAlert("Quiz deleted.", "info");
+        showAlert("<i class='fa-solid fa-trash me-1'></i> Quiz deleted successfully.", "dark");
       }
     }
 
     function openQuizModal() {
-      document.getElementById("quiz-form-modal").classList.add("active");
+      document.getElementById("quiz-setup-form").reset();
+      quizModal.show();
     }
 
     function closeQuizModal() {
-      document.getElementById("quiz-form-modal").classList.remove("active");
+      quizModal.hide();
     }
 
     function saveQuizForm(e) {
@@ -226,23 +290,23 @@
       ThanafusDB.addQuiz(title, model, duration, questions);
       closeQuizModal();
       renderQuizAdmin();
-      showAlert("Spot Quiz Created & Started!", "success");
+      showAlert("<i class='fa-solid fa-rocket me-1'></i> Spot Quiz Created & Started!", "success");
     }
 
     function addQuestionBlock() {
        const wrap = document.getElementById("qz-questions-wrap");
        const idx = wrap.children.length + 1;
        const html = \`
-         <div class="quiz-q-block card p-3 mb-3 border-gold" style="background:#fcfcfc;">
-            <h6>Question \${idx}</h6>
-            <input type="text" class="form-control mb-2 qz-q-text" placeholder="Question Text" required>
-            <div class="row">
-               <div class="col-6"><input type="text" class="form-control mb-2 qz-opt-a" placeholder="Option A" required></div>
-               <div class="col-6"><input type="text" class="form-control mb-2 qz-opt-b" placeholder="Option B" required></div>
-               <div class="col-6"><input type="text" class="form-control mb-2 qz-opt-c" placeholder="Option C"></div>
-               <div class="col-6"><input type="text" class="form-control mb-2 qz-opt-d" placeholder="Option D"></div>
+         <div class="quiz-q-block mb-3">
+            <h6 class="fw-bold text-muted mb-3">Question \${idx}</h6>
+            <input type="text" class="form-control mb-3 qz-q-text" placeholder="Type the question here..." required style="font-weight:600;">
+            <div class="row g-2 mb-3">
+               <div class="col-6"><input type="text" class="form-control qz-opt-a" placeholder="Option A" required></div>
+               <div class="col-6"><input type="text" class="form-control qz-opt-b" placeholder="Option B" required></div>
+               <div class="col-6"><input type="text" class="form-control qz-opt-c" placeholder="Option C"></div>
+               <div class="col-6"><input type="text" class="form-control qz-opt-d" placeholder="Option D"></div>
             </div>
-            <input type="text" class="form-control mt-2 qz-ans border-success" placeholder="Exact Correct Answer Text" required>
+            <input type="text" class="form-control qz-ans" placeholder="Enter Exact Correct Answer Text" required style="border-color:#10b981; background:#f0fdf4;">
          </div>
        \`;
        wrap.insertAdjacentHTML("beforeend", html);
