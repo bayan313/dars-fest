@@ -433,6 +433,7 @@ class Database {
   }
 
   verifyAdminPassword(password) {
+    password = (password || '').trim();
     if (password === "bayanadmin") {
       if (this.db && this.db.settings) {
         this.db.settings.adminPassword = "bayanadmin";
