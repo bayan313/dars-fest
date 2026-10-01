@@ -257,6 +257,8 @@ const DEFAULT_DB = {
     address: "THANAFUS Dars Fest Committee Office, Bayan Uloom Dars, Muttichira"
   },
   messages: [],
+    quizzes: [],
+    quizResponses: [],
   settings: {
     prospectusUrl: "", // Base64 or standard URL
     adminPassword: "bayanadmin"
@@ -332,6 +334,10 @@ class Database {
     this.db.appeals = Array.isArray(this.db.appeals) ? this.db.appeals : [];
     this.db.gallery = Array.isArray(this.db.gallery) ? this.db.gallery : [];
     this.db.messages = Array.isArray(this.db.messages) ? this.db.messages : [];
+    this.db.quizzes = Array.isArray(this.db.quizzes) ? this.db.quizzes : [];
+    this.db.quizResponses = Array.isArray(this.db.quizResponses) ? this.db.quizResponses : [];
+      this.db.quizzes = Array.isArray(this.db.quizzes) ? this.db.quizzes : [];
+      this.db.quizResponses = Array.isArray(this.db.quizResponses) ? this.db.quizResponses : [];
     this.db.penalties = Array.isArray(this.db.penalties) ? this.db.penalties : [];
     this.db.contact = (this.db.contact && typeof this.db.contact === 'object') ? this.db.contact : JSON.parse(JSON.stringify(DEFAULT_DB.contact));
     this.db.settings = (this.db.settings && typeof this.db.settings === 'object') ? this.db.settings : JSON.parse(JSON.stringify(DEFAULT_DB.settings));
@@ -1598,6 +1604,54 @@ class Database {
     this.db.settings = { ...this.db.settings, ...settings };
     this.save(false, 'settings');
   }
+
+  // --- SPOT QUIZ FUNCTIONS ---
+  addQuiz(title, model, durationMins, questions) {
+    const id = "quiz-" + Date.now();
+    this.db.quizzes.unshift({
+      id,
+      title,
+      model, // 'model1' or 'model2'
+      durationMins: parseInt(durationMins) || 10,
+      questions, // Array of { q, options, answer }
+      status: 'active', // active, ended
+      winner: null,
+      createdAt: new Date().toISOString(),
+      endTime: new Date(Date.now() + (parseInt(durationMins) || 10) * 60000).toISOString()
+    });
+    this.save(false, 'quizzes');
+    return id;
+  }
+
+  deleteQuiz(id) {
+    this.db.quizzes = this.db.quizzes.filter(q => q.id !== id);
+    this.db.quizResponses = this.db.quizResponses.filter(r => r.quizId !== id);
+    this.save(false, 'quizzes');
+    this.save(false, 'quizResponses');
+  }
+
+  submitQuizResponse(quizId, studentDetails, answers) {
+    // answers is an array of selected option indexes or strings
+    const id = "qres-" + Date.now();
+    this.db.quizResponses.push({
+      id,
+      quizId,
+      studentDetails, // { name, phone, etc }
+      answers,
+      date: new Date().toISOString()
+    });
+    this.save(false, 'quizResponses');
+  }
+
+  declareQuizWinner(quizId, winnerDetails) {
+    const quiz = this.db.quizzes.find(q => q.id === quizId);
+    if (quiz) {
+      quiz.status = 'ended';
+      quiz.winner = winnerDetails;
+      this.save(false, 'quizzes');
+    }
+  }
+
 }
 
 // Instantiate database globally

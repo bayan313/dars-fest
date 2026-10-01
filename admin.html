@@ -197,6 +197,9 @@
           <div class="admin-nav-item" onclick="switchAdminTab('messages')" id="tab-btn-messages">
             <i class="fa-solid fa-envelope-open-text"></i> Visitor Messages
           </div>
+          <div class="admin-nav-item" onclick="switchAdminTab('quiz')" id="tab-btn-quiz">
+            <i class="fa-solid fa-stopwatch"></i> Spot Quiz
+          </div>
           <div class="admin-nav-item" onclick="switchAdminTab('settings')" id="tab-btn-settings">
             <i class="fa-solid fa-sliders"></i> Portal Settings
           </div>
@@ -793,6 +796,7 @@
       if (tab === 'notifs') renderNotifsAdmin();
       if (tab === 'messages') renderMessagesAdmin();
       if (tab === 'settings') renderSettingsAdmin();
+      if (tab === 'quiz') renderQuizAdmin();
     }
 
     function renderAdminDash() {
@@ -1870,5 +1874,56 @@
   </script>
   <!-- Bootstrap 5 JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Quiz Form Modal -->
+    <div class="modal-overlay" id="quiz-form-modal">
+      <div class="modal-card" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header">
+          <h3>Create Spot Quiz</h3>
+          <button class="modal-close" onclick="closeQuizModal()">&times;</button>
+        </div>
+        <form onsubmit="saveQuizForm(event)">
+          <div class="mb-3">
+            <label>Quiz Title</label>
+            <input type="text" id="qz-title" class="form-control" required placeholder="e.g. Stage 1 Live Quiz">
+          </div>
+          <div class="row mb-3">
+            <div class="col-6">
+              <label>Quiz Model</label>
+              <select id="qz-model" class="form-select">
+                <option value="model1">Model 1 (Single Q)</option>
+                <option value="model2">Model 2 (Multi Q)</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label>Duration (Minutes)</label>
+              <input type="number" id="qz-duration" class="form-control" value="10" required min="1">
+            </div>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Questions</h5>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addQuestionBlock()">+ Add Question</button>
+          </div>
+          <div id="qz-questions-wrap">
+            <div class="quiz-q-block card p-3 mb-3 border-gold" style="background:#fcfcfc;">
+              <h6>Question 1</h6>
+              <input type="text" class="form-control mb-2 qz-q-text" placeholder="Question Text" required>
+              <div class="row">
+                 <div class="col-6"><input type="text" class="form-control mb-2 qz-opt-a" placeholder="Option A" required></div>
+                 <div class="col-6"><input type="text" class="form-control mb-2 qz-opt-b" placeholder="Option B" required></div>
+                 <div class="col-6"><input type="text" class="form-control mb-2 qz-opt-c" placeholder="Option C"></div>
+                 <div class="col-6"><input type="text" class="form-control mb-2 qz-opt-d" placeholder="Option D"></div>
+              </div>
+              <input type="text" class="form-control mt-2 qz-ans border-success" placeholder="Exact Correct Answer Text" required>
+            </div>
+          </div>
+          <div class="text-end mt-4">
+            <button type="button" class="btn btn-outline" onclick="closeQuizModal()">Cancel</button>
+            <button type="submit" class="btn btn-gold">Create & Start Timer</button>
+          </div>
+        </form>
+      </div>
+    </div>
 </body>
 </html>
