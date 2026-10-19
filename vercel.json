@@ -36,6 +36,18 @@
       "dest": "/slide.html"
     },
     {
+      "src": "/portal",
+      "dest": "/portal.html"
+    },
+    {
+      "src": "/quiz",
+      "dest": "/quiz.html"
+    },
+    {
+      "src": "/quiz-admin",
+      "dest": "/quiz-admin.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }

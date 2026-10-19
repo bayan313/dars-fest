@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THANAFUS Dars Fest 2026 | Student & Ustad Portal</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/mobile.css">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    .portal-hero {
+      padding: 120px 0 40px;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(5,150,105,0.06) 0%, rgba(255,255,255,0) 100%);
+    }
+    .portal-hero h1 { font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
+    .portal-hero h1 span { color: var(--accent-gold); }
+    .portal-hero p { color: var(--text-muted); max-width: 640px; margin: 0 auto; }
+
+    .portal-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .portal-grid { grid-template-columns: 1fr; }
+    }
+
+    .role-tabs { display: flex; gap: 8px; margin-bottom: 22px; background: #f1f5f9; padding: 6px; border-radius: 14px; }
+    .role-tab {
+      flex: 1; text-align: center; padding: 10px 12px; border-radius: 10px; cursor: pointer;
+      font-weight: 700; font-size: 0.9rem; color: var(--text-muted);
+      border: 1px solid transparent; background: transparent; transition: all 0.2s ease;
+    }
+    .role-tab.active { background: #ffffff; color: var(--accent-gold); border-color: var(--border-gold); box-shadow: 0 4px 12px rgba(15,23,42,0.06); }
+    .role-pane { display: none; }
+    .role-pane.active { display: block; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .portal-profile-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .portal-avatar {
+      width: 84px; height: 84px; border-radius: 50%; object-fit: cover;
+      border: 3px solid var(--accent-gold); box-shadow: 0 8px 20px rgba(217,119,6,0.2); flex-shrink: 0;
+    }
+    .portal-avatar-fallback {
+      width: 84px; height: 84px; border-radius: 50%; background: #e2e8f0; color: #94a3b8;
+      display: flex; align-items: center; justify-content: center; font-size: 2rem; flex-shrink: 0;
+    }
+    .stat-pill {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px;
+      font-size: 0.82rem; font-weight: 700; background: #f8fafc; border: 1px solid var(--border-glass); color: var(--text-main);
+    }
+    .stat-pill.gold { background: rgba(217,119,6,0.1); border-color: var(--border-gold); color: var(--accent-gold); }
+    .stat-pill.emerald { background: rgba(5,150,105,0.1); border-color: rgba(5,150,105,0.3); color: var(--primary-emerald); }
+
+    /* Birutha Tharikal showcase */
+    .alumni-section { margin-top: 20px; }
+    .alumni-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 22px; margin-top: 24px;
+    }
+    .alumni-card {
+      background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: var(--radius-lg);
+      padding: 22px; display: flex; flex-direction: column; gap: 14px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      position: relative; overflow: hidden;
+    }
+    .alumni-card::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: var(--gold-gradient);
+    }
+    .alumni-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(15,23,42,0.1); border-color: var(--border-gold); }
+    .alumni-card-top { display: flex; align-items: center; gap: 14px; }
+    .alumni-photo { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-gold); flex-shrink: 0; }
+    .alumni-photo-fallback {
+      width: 72px; height: 72px; border-radius: 50%; background: #e2e8f0; color: #94a3b8;
+      display: flex; align-items: center; justify-content: center; font-size: 1.7rem; flex-shrink: 0;
+    }
+    .alumni-name { font-size: 1.1rem; font-weight: 800; color: #0f172a; line-height: 1.25; }
+    .alumni-role { font-size: 0.82rem; color: var(--accent-gold); font-weight: 700; margin-top: 2px; }
+    .alumni-meta { font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px; }
+    .alumni-meta .row-line { display: flex; gap: 8px; align-items: flex-start; }
+    .alumni-meta i { color: var(--primary-emerald); width: 16px; margin-top: 3px; flex-shrink: 0; }
+    .alumni-about { font-size: 0.82rem; color: var(--text-muted); font-style: italic; border-top: 1px dashed var(--border-glass); padding-top: 10px; }
+    .portal-empty { text-align: center; padding: 50px 20px; }
+    .portal-empty i { font-size: 3rem; color: #cbd5e1; margin-bottom: 14px; display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header>
+    <nav class="navbar">
+      <a href="/" class="logo-container">
+        <div class="logo-icon">T</div>
+        <div class="logo">
+          <h2>THANAFUS<span>2026</span></h2>
+        </div>
+      </a>
+
+      <button class="hamburger" aria-label="Toggle Navigation">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <ul class="nav-links">
+        <li><a href="/"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="/results"><i class="fa-solid fa-trophy"></i> Results</a></li>
+        <li><a href="/contact"><i class="fa-solid fa-envelope"></i> Contact</a></li>
+        <li><a href="/portal" class="active"><i class="fa-solid fa-id-card-clip"></i> Portal</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="portal-hero">
+      <div class="container">
+        <div class="hero-badge" style="margin-bottom: 12px;">
+          <i class="fa-solid fa-id-card-clip text-gold"></i> Student &amp; Ustad Portal
+        </div>
+        <h1>Your Fest <span>Dashboard</span></h1>
+        <p>Students can sign in with their chest number to view personal results and points. Ustads (staff) can sign in with the access key for a supervision view. Below, meet our <strong>Birutha Tharikal</strong> — the graduates of our Dars.</p>
+      </div>
+    </section>
+
+    <section class="section" style="padding-top: 20px;">
+      <div class="container">
+        <div class="portal-grid">
+
+          <!-- LEFT: LOGIN / DASHBOARD -->
+          <div>
+            <div class="card" style="padding: 26px;">
+              <div id="portal-login-wrap">
+                <h2 style="font-size: 1.4rem; margin-bottom: 6px;"><i class="fa-solid fa-right-to-bracket text-gold"></i> Sign In</h2>
+                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 20px;">Choose your role to continue.</p>
+
+                <div class="role-tabs">
+                  <button type="button" class="role-tab active" data-role="student" onclick="switchRole('student')"><i class="fa-solid fa-user-graduate"></i> Student</button>
+                  <button type="button" class="role-tab" data-role="ustad" onclick="switchRole('ustad')"><i class="fa-solid fa-chalkboard-user"></i> Ustad</button>
+                </div>
+
+                <!-- Student login -->
+                <form id="pane-student" class="role-pane active" onsubmit="handleStudentLogin(event)">
+                  <div style="margin-bottom: 14px;">
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Chest Number</label>
+                    <input type="text" id="stu-chest" class="form-control" placeholder="e.g. 101" style="padding-left: 14px;">
+                  </div>
+                  <div style="margin-bottom: 18px;">
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Full Name (as registered)</label>
+                    <input type="text" id="stu-name" class="form-control" placeholder="Your registered name" style="padding-left: 14px;">
+                  </div>
+                  <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center;"><i class="fa-solid fa-arrow-right-to-bracket"></i> Enter Student View</button>
+                  <p class="text-muted" style="font-size: 0.78rem; margin-top: 12px;">Enter your chest number <em>or</em> your registered name (one is enough).</p>
+                </form>
+
+                <!-- Ustad login -->
+                <form id="pane-ustad" class="role-pane" onsubmit="handleUstadLogin(event)">
+                  <div style="margin-bottom: 18px;">
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Access Key</label>
+                    <input type="password" id="ustad-key" class="form-control" placeholder="Enter staff access key" style="padding-left: 14px;">
+                  </div>
+                  <button type="submit" class="btn btn-gold" style="width: 100%; justify-content: center;"><i class="fa-solid fa-shield-halved"></i> Enter Ustad View</button>
+                  <p class="text-muted" style="font-size: 0.78rem; margin-top: 12px;">Staff access key is managed by the fest committee.</p>
+                </form>
+              </div>
+
+              <div id="portal-dash-wrap" style="display: none;"></div>
+            </div>
+          </div>
+
+          <!-- RIGHT: QUICK INFO -->
+          <div>
+            <div class="card" style="padding: 26px;">
+              <h3 style="font-size: 1.1rem; margin-bottom: 14px;"><i class="fa-solid fa-circle-info text-gold"></i> Portal Guide</h3>
+              <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.88rem; color: var(--text-muted);">
+                <div class="row-line"><i class="fa-solid fa-user-graduate" style="color: var(--primary-emerald); margin-top: 3px;"></i><span><strong style="color:#0f172a;">Students:</strong> Sign in with your chest number or registered name to see your published results, grades, points and category position.</span></div>
+                <div class="row-line"><i class="fa-solid fa-chalkboard-user" style="color: var(--accent-gold); margin-top: 3px;"></i><span><strong style="color:#0f172a;">Ustads:</strong> Sign in with the staff access key to view team standings, programme status and recent announcements.</span></div>
+                <div class="row-line"><i class="fa-solid fa-graduation-cap" style="color: var(--primary-emerald); margin-top: 3px;"></i><span><strong style="color:#0f172a;">Birutha Tharikal:</strong> Our graduates are showcased below with their profile and full place details.</span></div>
+              </div>
+              <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="/results" class="btn btn-outline btn-sm"><i class="fa-solid fa-trophy"></i> Live Results</a>
+                <a href="/contact" class="btn btn-outline btn-sm"><i class="fa-solid fa-envelope"></i> Contact Us</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- BIRUTHA THARIKAL (GRADUATES) -->
+    <section class="section alumni-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="hero-badge" style="margin-bottom: 12px;">
+            <i class="fa-solid fa-graduation-cap text-gold"></i> Alumni Spotlight
+          </div>
+          <h2 class="section-title">Birutha Tharikal / ബിരുദധാരികൾ</h2>
+          <p class="section-subtitle">Proud graduates of our Dars — their name, profile photo and full place details.</p>
+        </div>
+
+        <div style="max-width: 420px; margin: 0 auto 6px; position: relative;">
+          <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+          <input type="text" id="alumni-search" class="form-control" placeholder="Search graduate by name, place, course..." style="padding-left: 40px;" oninput="renderAlumni()">
+        </div>
+
+        <div class="alumni-grid" id="alumni-container">
+          <div class="card text-center" style="grid-column: 1 / -1; padding: 40px;">
+            <p class="text-muted"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Loading graduates...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <h3 style="color: var(--accent-gold); font-size: 1.3rem;">THANAFUS 2026</h3>
+          <p style="font-size: 0.85rem; margin-top: 4px;">Student &amp; Ustad Portal</p>
+        </div>
+        <ul class="footer-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/results">Results</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/portal">Portal</a></li>
+          <li><a href="/admin" style="opacity: 0.4;"><i class="fa-solid fa-lock"></i></a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/js/db.js"></script>
+  <script src="/js/main.js"></script>
+  <script>
+    let portalRole = sessionStorage.getItem('thanafus_portal_role') || '';
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await ThanafusDB.ready();
+      renderPortal();
+      renderAlumni();
+
+      const refresh = () => { renderPortal(); renderAlumni(); };
+      window.addEventListener("thanafus:db-updated", refresh);
+      window.addEventListener("storage", refresh);
+      setInterval(refresh, 8000);
+    });
+
+    function switchRole(role) {
+      document.querySelectorAll('.role-tab').forEach(t => t.classList.toggle('active', t.dataset.role === role));
+      document.getElementById('pane-student').classList.toggle('active', role === 'student');
+      document.getElementById('pane-ustad').classList.toggle('active', role === 'ustad');
+    }
+
+    function handleStudentLogin(e) {
+      e.preventDefault();
+      const chest = (document.getElementById('stu-chest').value || '').trim().toLowerCase();
+      const name = (document.getElementById('stu-name').value || '').trim().toLowerCase();
+      if (!chest && !name) { showAlert("Enter your chest number or registered name.", "warning"); return; }
+
+      const students = ThanafusDB.db.students || [];
+      const match = students.find(s =>
+        (chest && String(s.chestNo || '').trim().toLowerCase() === chest) ||
+        (name && (s.name || '').trim().toLowerCase() === name)
+      );
+      if (!match) { showAlert("No matching student found. Please check your chest number or name.", "danger"); return; }
+
+      sessionStorage.setItem('thanafus_portal_role', 'student');
+      sessionStorage.setItem('thanafus_portal_student', match.id);
+      portalRole = 'student';
+      renderPortal();
+    }
+
+    function handleUstadLogin(e) {
+      e.preventDefault();
+      const key = document.getElementById('ustad-key').value;
+      if (ThanafusDB.verifyAdminPassword(key)) {
+        sessionStorage.setItem('thanafus_portal_role', 'ustad');
+        portalRole = 'ustad';
+        renderPortal();
+      } else {
+        showAlert("Invalid access key!", "danger");
+      }
+    }
+
+    function portalLogout() {
+      sessionStorage.removeItem('thanafus_portal_role');
+      sessionStorage.removeItem('thanafus_portal_student');
+      portalRole = '';
+      renderPortal();
+    }
+
+    function renderPortal() {
+      const loginWrap = document.getElementById('portal-login-wrap');
+      const dashWrap = document.getElementById('portal-dash-wrap');
+      if (!loginWrap || !dashWrap) return;
+
+      if (!portalRole) {
+        loginWrap.style.display = 'block';
+        dashWrap.style.display = 'none';
+        return;
+      }
+      loginWrap.style.display = 'none';
+      dashWrap.style.display = 'block';
+
+      if (portalRole === 'student') {
+        dashWrap.innerHTML = renderStudentDashboard();
+      } else {
+        dashWrap.innerHTML = renderUstadDashboard();
+      }
+    }
+
+    function renderStudentDashboard() {
+      const studentId = sessionStorage.getItem('thanafus_portal_student');
+      const profile = studentId ? ThanafusDB.getStudentProfile(studentId) : null;
+      if (!profile) {
+        return `<div class="portal-empty"><i class="fa-solid fa-user-slash"></i><h3>Student not found</h3>
+          <p class="text-muted">Your record may have been updated. Please sign in again.</p>
+          <button class="btn btn-gold btn-sm" onclick="portalLogout()">Sign out</button></div>`;
+      }
+
+      const photo = profile.photo
+        ? `<img src="${profile.photo}" class="portal-avatar" alt="${profile.name}">`
+        : `<div class="portal-avatar-fallback"><i class="fa-solid fa-user-graduate"></i></div>`;
+
+      const parts = (profile.participations || []).map(p => {
+        const rank = p.rank === 1 ? '🥇 1st' : p.rank === 2 ? '🥈 2nd' : p.rank === 3 ? '🥉 3rd' : '—';
+        const grade = p.grade ? `<span class="grade-chip ${String(p.grade).toLowerCase()}">${p.grade}</span>` : '—';
+        return `<tr>
+          <td><strong style="color:#0f172a;">${p.programmeName}</strong><br><span class="text-muted" style="font-size:0.78rem;">${p.venue || ''}</span></td>
+          <td>${rank}</td>
+          <td>${grade}</td>
+          <td style="font-weight:700; color:var(--primary-emerald);">${p.points} PTS</td>
+        </tr>`;
+      }).join('');
+
+      return `
+        <div class="portal-profile-head" style="margin-bottom: 18px;">
+          ${photo}
+          <div>
+            <div class="alumni-name" style="font-size:1.4rem;">${profile.name}</div>
+            <div class="text-muted" style="font-size:0.85rem; margin-top:4px;">
+              ${profile.teamName || 'Unassigned'} • ${profile.category || 'No category'}${profile.chestNo ? ` • Chest #${profile.chestNo}` : ''}
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+              <span class="stat-pill gold"><i class="fa-solid fa-star"></i> ${profile.totalScore} Points</span>
+              <span class="stat-pill emerald"><i class="fa-solid fa-ranking-star"></i> Position #${profile.position}</span>
+              <span class="stat-pill"><i class="fa-solid fa-medal"></i> ${(profile.rankCount && profile.rankCount[1]) || 0} Gold</span>
+            </div>
+          </div>
+        </div>
+
+        <h4 style="font-size:1.05rem; margin: 18px 0 10px;"><i class="fa-solid fa-list-check text-gold"></i> My Participations</h4>
+        <div class="table-responsive">
+          <table class="table">
+            <thead><tr><th>Programme</th><th>Rank</th><th>Grade</th><th>Points</th></tr></thead>
+            <tbody>${parts || `<tr><td colspan="4" class="text-center text-muted">No published results yet.</td></tr>`}</tbody>
+          </table>
+        </div>
+        <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+          <button class="btn btn-outline btn-sm" onclick="portalLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
+        </div>`;
+    }
+
+    function renderUstadDashboard() {
+      const teams = ThanafusDB.db.teams || [];
+      const progs = ThanafusDB.db.programmes || [];
+      const published = progs.filter(p => p.resultsPublished).length;
+      const alumni = (ThanafusDB.db.alumni || []).length;
+
+      const rows = [...teams].sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0)).map((t, i) => `
+        <tr>
+          <td style="font-weight:800; color:var(--accent-gold);">#${i + 1}</td>
+          <td><strong style="color:#0f172a;">${t.name}</strong></td>
+          <td>${(ThanafusDB.db.students || []).filter(s => String(s.teamId) === String(t.id)).length}</td>
+          <td style="font-weight:700; color:var(--primary-emerald);">${t.totalScore || 0} PTS</td>
+        </tr>`).join('');
+
+      return `
+        <div class="portal-profile-head" style="margin-bottom: 18px;">
+          <div class="portal-avatar-fallback" style="background:rgba(217,119,6,0.12); color:var(--accent-gold);"><i class="fa-solid fa-chalkboard-user"></i></div>
+          <div>
+            <div class="alumni-name" style="font-size:1.4rem;">Ustad Supervision View</div>
+            <div class="text-muted" style="font-size:0.85rem; margin-top:4px;">Read-only overview of the fest.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;">
+          <span class="stat-pill"><i class="fa-solid fa-people-group"></i> ${teams.length} Teams</span>
+          <span class="stat-pill"><i class="fa-solid fa-user-graduate"></i> ${(ThanafusDB.db.students || []).length} Students</span>
+          <span class="stat-pill emerald"><i class="fa-solid fa-trophy"></i> ${published}/${progs.length} Published</span>
+          <span class="stat-pill gold"><i class="fa-solid fa-graduation-cap"></i> ${alumni} Graduates</span>
+        </div>
+
+        <h4 style="font-size:1.05rem; margin: 6px 0 10px;"><i class="fa-solid fa-ranking-star text-gold"></i> Team Standings</h4>
+        <div class="table-responsive">
+          <table class="table">
+            <thead><tr><th>Rank</th><th>Team</th><th>Students</th><th>Points</th></tr></thead>
+            <tbody>${rows || `<tr><td colspan="4" class="text-center text-muted">No teams yet.</td></tr>`}</tbody>
+          </table>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-top:14px; gap:10px; flex-wrap:wrap;">
+          <a href="/admin" class="btn btn-gold btn-sm"><i class="fa-solid fa-sliders"></i> Open Control Panel</a>
+          <button class="btn btn-outline btn-sm" onclick="portalLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
+        </div>`;
+    }
+
+    function renderAlumni() {
+      const container = document.getElementById('alumni-container');
+      if (!container) return;
+      const query = (document.getElementById('alumni-search')?.value || '').trim();
+      const list = (typeof ThanafusDB.searchAlumni === 'function') ? ThanafusDB.searchAlumni(query) : (ThanafusDB.db.alumni || []);
+
+      if (!list.length) {
+        container.innerHTML = `<div class="card portal-empty" style="grid-column: 1 / -1;">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <h3 style="font-size:1.2rem; margin-bottom:6px;">${query ? 'No graduates found' : 'No Birutha Tharikal yet'}</h3>
+          <p class="text-muted" style="font-size:0.88rem;">${query ? 'Try a different name or place.' : 'Graduate profiles added by the fest committee will appear here.'}</p>
+        </div>`;
+        return;
+      }
+
+      container.innerHTML = list.map(a => {
+        const photo = a.photo
+          ? `<img src="${a.photo}" alt="${a.name || 'Graduate'}" class="alumni-photo">`
+          : `<div class="alumni-photo-fallback"><i class="fa-solid fa-user-graduate"></i></div>`;
+
+        const placeBits = [a.place, a.postOffice, a.district, a.state, a.country].filter(Boolean);
+        const batchCourse = [a.batch ? `Batch ${a.batch}` : '', a.course].filter(Boolean).join(' • ');
+
+        return `
+          <div class="alumni-card">
+            <div class="alumni-card-top">
+              ${photo}
+              <div>
+                <div class="alumni-name">${a.name || 'Unnamed Graduate'}</div>
+                ${a.position ? `<div class="alumni-role">${a.position}</div>` : ''}
+              </div>
+            </div>
+            <div class="alumni-meta">
+              ${batchCourse ? `<div class="row-line"><i class="fa-solid fa-scroll"></i><span>${batchCourse}</span></div>` : ''}
+              ${placeBits.length ? `<div class="row-line"><i class="fa-solid fa-location-dot"></i><span>${placeBits.join(', ')}</span></div>` : ''}
+              ${a.ustad ? `<div class="row-line"><i class="fa-solid fa-user-tie"></i><span>Ustad ${a.ustad}</span></div>` : ''}
+              ${a.phone ? `<div class="row-line"><i class="fa-solid fa-phone"></i><span>${a.phone}</span></div>` : ''}
+              ${a.email ? `<div class="row-line"><i class="fa-solid fa-envelope"></i><span>${a.email}</span></div>` : ''}
+            </div>
+            ${a.about ? `<div class="alumni-about">“${a.about}”</div>` : ''}
+          </div>`;
+      }).join('');
+    }
+  </script>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

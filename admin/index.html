@@ -176,31 +176,40 @@
         
         <!-- Left Admin Navigation Sidebar -->
         <aside class="admin-sidebar">
-          <div class="admin-nav-item active" onclick="switchAdminTab('dash')" id="tab-btn-dash">
+          <div class="admin-nav-item active" data-tab="dash" onclick="switchAdminTab('dash')" id="tab-btn-dash">
             <i class="fa-solid fa-gauge"></i> Dashboard
           </div>
-          <div class="admin-nav-item" onclick="switchAdminTab('teams')" id="tab-btn-teams">
+          <div class="admin-nav-item" data-tab="teams" onclick="switchAdminTab('teams')" id="tab-btn-teams">
             <i class="fa-solid fa-people-group"></i> Teams
           </div>
-          <div class="admin-nav-item" onclick="switchAdminTab('students')" id="tab-btn-students">
+          <div class="admin-nav-item" data-tab="students" onclick="switchAdminTab('students')" id="tab-btn-students">
             <i class="fa-solid fa-user-graduate"></i> Students
           </div>
-          <div class="admin-nav-item" onclick="switchAdminTab('progs')" id="tab-btn-progs">
+          <div class="admin-nav-item" data-tab="progs" onclick="switchAdminTab('progs')" id="tab-btn-progs">
             <i class="fa-solid fa-trophy"></i> Programmes & Marks
           </div>
-          <div class="admin-nav-item" onclick="switchAdminTab('penalties')" id="tab-btn-penalties">
+          <div class="admin-nav-item" data-tab="penalties" onclick="switchAdminTab('penalties')" id="tab-btn-penalties">
             <i class="fa-solid fa-square-minus"></i> Minus Points
           </div>
-          <div class="admin-nav-item" onclick="switchAdminTab('notifs')" id="tab-btn-notifs">
+          <div class="admin-nav-item" data-tab="notifs" onclick="switchAdminTab('notifs')" id="tab-btn-notifs">
             <i class="fa-solid fa-bullhorn"></i> Announcements
           </div>
-          <div class="admin-nav-item" onclick="switchAdminTab('messages')" id="tab-btn-messages">
+          <div class="admin-nav-item" data-tab="messages" onclick="switchAdminTab('messages')" id="tab-btn-messages">
             <i class="fa-solid fa-envelope-open-text"></i> Visitor Messages
           </div>
-          <div class="admin-nav-item" onclick="switchAdminTab('settings')" id="tab-btn-settings">
+          <div class="admin-nav-item" data-tab="alumni" onclick="switchAdminTab('alumni')" id="tab-btn-alumni">
+            <i class="fa-solid fa-graduation-cap"></i> Birutha Tharikal
+          </div>
+          <div class="admin-nav-item" data-tab="quiz" onclick="switchAdminTab('quiz')" id="tab-btn-quiz">
+            <i class="fa-solid fa-stopwatch"></i> Spot Quiz
+          </div>
+          <div class="admin-nav-item" data-tab="settings" onclick="switchAdminTab('settings')" id="tab-btn-settings">
             <i class="fa-solid fa-sliders"></i> Portal Settings
           </div>
-          <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
+          <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 8px;">
+            <a href="/portal" target="_blank" class="btn btn-outline btn-sm" style="width: 100%; justify-content: center; font-size: 0.8rem; border-color: rgba(5,150,105,0.5); color: var(--primary-emerald);">
+              <i class="fa-solid fa-id-card-clip"></i> Student / Ustad Portal
+            </a>
             <a href="/slide" target="_blank" class="btn btn-outline btn-sm" style="width: 100%; justify-content: center; font-size: 0.8rem; border-color: rgba(245,158,11,0.5); color: var(--accent-gold);">
               <i class="fa-solid fa-desktop"></i> Open Projector Slide
             </a>
@@ -364,6 +373,36 @@
             <div id="messages-admin-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
           </div>
 
+          <!-- TAB: BIRUTHA THARIKAL (GRADUATES / ALUMNI) -->
+          <div id="tab-sec-alumni" class="admin-tab-content" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 12px;">
+              <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-graduation-cap text-gold"></i> Birutha Tharikal (Graduates)</h2>
+              <button onclick="openAlumniModal()" class="btn btn-gold btn-sm"><i class="fa-solid fa-plus"></i> Add Graduate</button>
+            </div>
+            <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 16px;">
+              These profiles appear publicly on the Student / Ustad Portal login page.
+            </p>
+            <div class="filter-row" style="margin-bottom: 16px;">
+              <div style="position: relative; flex: 1; max-width: 340px;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                <input type="text" id="alumni-search-input" class="form-control" placeholder="Search by name, place, course..." style="padding-left: 36px;" oninput="renderAlumniAdmin()">
+              </div>
+            </div>
+            <div id="alumni-admin-table" class="table-responsive"></div>
+          </div>
+
+          <!-- TAB: SPOT QUIZ -->
+          <div id="tab-sec-quiz" class="admin-tab-content" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 12px;">
+              <h2 style="font-size: 1.6rem;"><i class="fa-solid fa-stopwatch text-gold"></i> Spot Quiz</h2>
+              <button onclick="openQuizModal()" class="btn btn-gold btn-sm"><i class="fa-solid fa-plus"></i> Create Spot Quiz</button>
+            </div>
+            <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 16px;">
+              Create a timed quiz and share the <a href="/quiz" target="_blank" class="text-gold">Quiz Portal</a> with participants.
+            </p>
+            <div id="quiz-admin-list" style="display: flex; flex-direction: column; gap: 16px;"></div>
+          </div>
+
           <!-- TAB 8: SETTINGS -->
           <div id="tab-sec-settings" class="admin-tab-content" style="display: none;">
             <h2 style="font-size: 1.6rem; margin-bottom: 20px;"><i class="fa-solid fa-sliders text-gold"></i> Portal Settings</h2>
@@ -492,7 +531,6 @@
         </div>
       </form>
     </div>
-  </div>
   </div>
 
   <!-- Team Modal -->
@@ -688,6 +726,125 @@
     </div>
   </div>
 
+  <!-- Birutha Tharikal (Graduate) Form Modal -->
+  <div class="modal-overlay" id="alumni-modal">
+    <div class="modal-card" style="max-width: 720px; width: 100%; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h3 id="alumni-modal-title"><i class="fa-solid fa-graduation-cap text-gold"></i> Add Graduate</h3>
+        <button class="modal-close" onclick="closeAlumniModal()">&times;</button>
+      </div>
+      <form onsubmit="saveAlumniForm(event)">
+        <input type="hidden" id="edit-alumni-id">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Full Name *</label>
+            <input type="text" id="al-name" class="form-control" style="padding-left:14px;" required placeholder="e.g. Muhammad Ashiq">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Batch / Graduation Year</label>
+            <input type="text" id="al-batch" class="form-control" style="padding-left:14px;" placeholder="e.g. 2024">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Course / Dars Class</label>
+            <input type="text" id="al-course" class="form-control" style="padding-left:14px;" placeholder="e.g. Dars Sanad">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Current Position / Designation</label>
+            <input type="text" id="al-position" class="form-control" style="padding-left:14px;" placeholder="e.g. Imam, Teacher">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Place / Village</label>
+            <input type="text" id="al-place" class="form-control" style="padding-left:14px;" placeholder="e.g. Muttichira">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Post Office</label>
+            <input type="text" id="al-post" class="form-control" style="padding-left:14px;" placeholder="e.g. Muttichira PO">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">District</label>
+            <input type="text" id="al-district" class="form-control" style="padding-left:14px;" placeholder="e.g. Malappuram">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">State</label>
+            <input type="text" id="al-state" class="form-control" style="padding-left:14px;" placeholder="e.g. Kerala">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Country</label>
+            <input type="text" id="al-country" class="form-control" style="padding-left:14px;" placeholder="e.g. India">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Ustad / Mentor</label>
+            <input type="text" id="al-ustad" class="form-control" style="padding-left:14px;" placeholder="e.g. Usthad Abdul Kader Baqavi">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Phone</label>
+            <input type="text" id="al-phone" class="form-control" style="padding-left:14px;" placeholder="+91 ...">
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Email</label>
+            <input type="text" id="al-email" class="form-control" style="padding-left:14px;" placeholder="name@example.com">
+          </div>
+        </div>
+        <div style="margin-top: 14px;">
+          <label style="font-size: 0.85rem; color: var(--text-muted);">Short Profile / Note</label>
+          <textarea id="al-about" class="form-control" rows="2" placeholder="A short note about the graduate..." style="padding: 10px 14px;"></textarea>
+        </div>
+        <div style="margin-top: 14px;">
+          <label style="font-size: 0.85rem; color: var(--text-muted);">Profile Photo (Optional)</label>
+          <input type="file" id="al-photo-file" accept="image/*" class="form-control" style="padding: 8px 12px;" onchange="handleAlumniPhotoSelect(event)">
+          <input type="hidden" id="al-photo-base64">
+          <div id="al-photo-preview-wrap" style="display: none; margin-top: 10px; align-items: center; gap: 12px;">
+            <img id="al-photo-img" style="width: 54px; height: 54px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-gold);">
+            <button type="button" class="btn btn-outline btn-sm" onclick="clearAlumniPhoto()"><i class="fa-solid fa-trash"></i> Remove Photo</button>
+          </div>
+        </div>
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-outline" onclick="closeAlumniModal()">Cancel</button>
+          <button type="submit" class="btn btn-gold"><i class="fa-solid fa-floppy-disk"></i> Save Graduate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Spot Quiz Form Modal -->
+  <div class="modal-overlay" id="quiz-form-modal">
+    <div class="modal-card" style="max-width: 640px; width: 100%; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-stopwatch text-gold"></i> Create Spot Quiz</h3>
+        <button class="modal-close" onclick="closeQuizModal()">&times;</button>
+      </div>
+      <form onsubmit="saveQuizForm(event)">
+        <div style="margin-bottom: 14px;">
+          <label style="font-size: 0.85rem; color: var(--text-muted);">Quiz Title</label>
+          <input type="text" id="qz-title" class="form-control" required placeholder="e.g. Stage 1 Live Quiz" style="padding-left:14px;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Quiz Model</label>
+            <select id="qz-model" class="form-control">
+              <option value="model1">Model 1 (Single Question Round)</option>
+              <option value="model2">Model 2 (Multi Question Round)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 0.85rem; color: var(--text-muted);">Duration (Minutes)</label>
+            <input type="number" id="qz-duration" class="form-control" value="10" required min="1">
+          </div>
+        </div>
+        <hr>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h4 style="margin: 0; font-size: 1rem;">Questions</h4>
+          <button type="button" class="btn btn-outline btn-sm" onclick="addQuestionBlock()"><i class="fa-solid fa-plus"></i> Add Question</button>
+        </div>
+        <div id="qz-questions-wrap"></div>
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-outline" onclick="closeQuizModal()">Cancel</button>
+          <button type="submit" class="btn btn-gold"><i class="fa-solid fa-bolt"></i> Create &amp; Start Timer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer>
     <div class="container">
@@ -700,6 +857,7 @@
           <li><a href="/">Home</a></li>
           <li><a href="/results">Results</a></li>
           <li><a href="/contact">Contact</a></li>
+          <li><a href="/portal">Portal</a></li>
           <li><a href="/admin">Admin</a></li>
         </ul>
       </div>
@@ -717,14 +875,9 @@
       }
       
       const refreshAdminTables = () => {
-        if (sessionStorage.getItem('thanafus_admin_auth') === 'true' && !document.querySelector('.modal-overlay.active')) {
-          renderAdminDash();
-          renderTeamsAdmin();
-          renderStudentsAdmin();
-          renderProgsAdmin();
-          renderPenaltiesAdmin();
-          renderNotifsAdmin();
-        }
+        if (sessionStorage.getItem('thanafus_admin_auth') !== 'true') return;
+        if (document.querySelector('.modal-overlay.active')) return;
+        if (typeof window.__refreshCurrentAdminTab === 'function') window.__refreshCurrentAdminTab();
       };
 
       window.addEventListener("thanafus:db-updated", refreshAdminTables);
@@ -776,7 +929,10 @@
       window.location.reload();
     }
 
+    let currentAdminTab = 'dash';
+
     function switchAdminTab(tab) {
+      currentAdminTab = tab;
       document.querySelectorAll(".admin-nav-item").forEach(el => el.classList.remove("active"));
       document.querySelectorAll(".admin-tab-content").forEach(el => el.style.display = "none");
 
@@ -792,6 +948,8 @@
       if (tab === 'penalties') renderPenaltiesAdmin();
       if (tab === 'notifs') renderNotifsAdmin();
       if (tab === 'messages') renderMessagesAdmin();
+      if (tab === 'alumni') renderAlumniAdmin();
+      if (tab === 'quiz') renderQuizAdmin();
       if (tab === 'settings') renderSettingsAdmin();
     }
 
@@ -1473,21 +1631,45 @@
     }
 
     // Student Photo Handlers
-    function handleStudentPhotoSelect(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 2 * 1024 * 1024) {
-        showAlert("Image size exceeds 2MB limit. Please choose a smaller photo.", "warning");
-        return;
-      }
+    // Shared: reads an image file, downsizes it to maxDim and returns a JPEG
+    // data URL. Keeps payloads small so database saves never exceed limits.
+    function compressImageFile(file, maxDim, quality, cb) {
       const reader = new FileReader();
-      reader.onload = function(evt) {
-        const base64 = evt.target.result;
+      reader.onload = function (evt) {
+        const img = new Image();
+        img.onload = function () {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          if (width > height) {
+            if (width > maxDim) { height *= maxDim / width; width = maxDim; }
+          } else {
+            if (height > maxDim) { width *= maxDim / height; height = maxDim; }
+          }
+          canvas.width = Math.round(width);
+          canvas.height = Math.round(height);
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          try {
+            cb(canvas.toDataURL('image/jpeg', quality));
+          } catch (e) {
+            cb(evt.target.result);
+          }
+        };
+        img.onerror = function () { cb(evt.target.result); };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleStudentPhotoSelect(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      compressImageFile(file, 300, 0.8, function (base64) {
         document.getElementById("s-photo-base64").value = base64;
         document.getElementById("s-photo-img").src = base64;
         document.getElementById("s-photo-preview-wrap").style.display = "flex";
-      };
-      reader.readAsDataURL(file);
+      });
     }
 
     function clearStudentPhoto() {
@@ -1495,6 +1677,294 @@
       document.getElementById("s-photo-base64").value = "";
       document.getElementById("s-photo-img").src = "";
       document.getElementById("s-photo-preview-wrap").style.display = "none";
+    }
+
+    // ================= BIRUTHA THARIKAL (GRADUATES) ADMIN =================
+    function renderAlumniAdmin() {
+      const container = document.getElementById("alumni-admin-table");
+      if (!container) return;
+      const query = (document.getElementById("alumni-search-input")?.value || "").trim();
+      const list = ThanafusDB.searchAlumni(query);
+
+      if (list.length === 0) {
+        container.innerHTML = `<div class="card text-center" style="padding:30px;"><p class="text-muted"><i class="fa-solid fa-graduation-cap text-gold" style="font-size:1.5rem; margin-bottom:8px;"></i><br>${query ? 'No graduates match your search.' : 'No Birutha Tharikal added yet. Click “Add Graduate” to begin.'}</p></div>`;
+        return;
+      }
+
+      container.innerHTML = `
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width:64px;">Photo</th>
+              <th>Name</th>
+              <th>Batch / Course</th>
+              <th>Place Details</th>
+              <th>Contact</th>
+              <th style="width:120px; text-align:center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${list.map(a => {
+              const placeBits = [a.place, a.postOffice, a.district, a.state, a.country].filter(Boolean);
+              const photo = a.photo
+                ? `<img src="${a.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--accent-gold);">`
+                : `<div style="width:44px;height:44px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;color:#94a3b8;"><i class="fa-solid fa-user-graduate"></i></div>`;
+              return `
+                <tr>
+                  <td>${photo}</td>
+                  <td><strong style="color:#0f172a;">${a.name || '—'}</strong>${a.position ? `<br><span class="text-muted" style="font-size:0.78rem;">${a.position}</span>` : ''}</td>
+                  <td style="font-size:0.85rem;">${a.batch ? `Batch ${a.batch}` : '—'}${a.course ? `<br><span class="text-muted" style="font-size:0.78rem;">${a.course}</span>` : ''}</td>
+                  <td style="font-size:0.85rem;">${placeBits.length ? placeBits.join(', ') : '—'}${a.ustad ? `<br><span class="text-muted" style="font-size:0.78rem;">Ustad: ${a.ustad}</span>` : ''}</td>
+                  <td style="font-size:0.82rem;">${[a.phone, a.email].filter(Boolean).join('<br>') || '—'}</td>
+                  <td style="text-align:center;">
+                    <button onclick="editAlumniModal('${a.id}')" class="btn btn-gold btn-sm" style="padding:4px 8px;" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                    <button onclick="deleteAlumniEntry('${a.id}')" class="btn btn-danger btn-sm" style="padding:4px 8px;" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                  </td>
+                </tr>`;
+            }).join('')}
+          </tbody>
+        </table>`;
+    }
+
+    function openAlumniModal() {
+      document.getElementById("alumni-modal-title").innerHTML = '<i class="fa-solid fa-graduation-cap text-gold"></i> Add Graduate';
+      document.getElementById("edit-alumni-id").value = "";
+      ["al-name", "al-batch", "al-course", "al-position", "al-place", "al-post", "al-district", "al-state", "al-country", "al-ustad", "al-phone", "al-email", "al-about"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+      });
+      clearAlumniPhoto();
+      document.getElementById("alumni-modal").classList.add("active");
+    }
+
+    function editAlumniModal(id) {
+      const a = (ThanafusDB.db.alumni || []).find(x => String(x.id) === String(id));
+      if (!a) return;
+      document.getElementById("alumni-modal-title").innerHTML = '<i class="fa-solid fa-graduation-cap text-gold"></i> Edit Graduate';
+      document.getElementById("edit-alumni-id").value = a.id;
+      document.getElementById("al-name").value = a.name || "";
+      document.getElementById("al-batch").value = a.batch || "";
+      document.getElementById("al-course").value = a.course || "";
+      document.getElementById("al-position").value = a.position || "";
+      document.getElementById("al-place").value = a.place || "";
+      document.getElementById("al-post").value = a.postOffice || "";
+      document.getElementById("al-district").value = a.district || "";
+      document.getElementById("al-state").value = a.state || "";
+      document.getElementById("al-country").value = a.country || "";
+      document.getElementById("al-ustad").value = a.ustad || "";
+      document.getElementById("al-phone").value = a.phone || "";
+      document.getElementById("al-email").value = a.email || "";
+      document.getElementById("al-about").value = a.about || "";
+      if (a.photo) {
+        document.getElementById("al-photo-base64").value = a.photo;
+        document.getElementById("al-photo-img").src = a.photo;
+        document.getElementById("al-photo-preview-wrap").style.display = "flex";
+      } else {
+        clearAlumniPhoto();
+      }
+      document.getElementById("alumni-modal").classList.add("active");
+    }
+
+    function closeAlumniModal() { document.getElementById("alumni-modal").classList.remove("active"); }
+
+    function saveAlumniForm(e) {
+      e.preventDefault();
+      const id = document.getElementById("edit-alumni-id").value;
+      const data = {
+        name: document.getElementById("al-name").value,
+        batch: document.getElementById("al-batch").value,
+        course: document.getElementById("al-course").value,
+        position: document.getElementById("al-position").value,
+        place: document.getElementById("al-place").value,
+        postOffice: document.getElementById("al-post").value,
+        district: document.getElementById("al-district").value,
+        state: document.getElementById("al-state").value,
+        country: document.getElementById("al-country").value,
+        ustad: document.getElementById("al-ustad").value,
+        phone: document.getElementById("al-phone").value,
+        email: document.getElementById("al-email").value,
+        about: document.getElementById("al-about").value,
+        photo: document.getElementById("al-photo-base64").value
+      };
+      if (!data.name.trim()) {
+        showAlert("Please enter the graduate's full name.", "warning");
+        return;
+      }
+      if (id) {
+        ThanafusDB.editAlumni(id, data);
+      } else {
+        ThanafusDB.addAlumni(data);
+      }
+      closeAlumniModal();
+      renderAlumniAdmin();
+      showAlert("Graduate profile saved successfully!", "success");
+    }
+
+    function deleteAlumniEntry(id) {
+      if (!confirm("Delete this graduate profile? This cannot be undone.")) return;
+      ThanafusDB.deleteAlumni(id);
+      renderAlumniAdmin();
+      showAlert("Graduate profile deleted.", "info");
+    }
+
+    function handleAlumniPhotoSelect(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      compressImageFile(file, 320, 0.8, function (base64) {
+        document.getElementById("al-photo-base64").value = base64;
+        document.getElementById("al-photo-img").src = base64;
+        document.getElementById("al-photo-preview-wrap").style.display = "flex";
+      });
+    }
+
+    function clearAlumniPhoto() {
+      const f = document.getElementById("al-photo-file");
+      if (f) f.value = "";
+      document.getElementById("al-photo-base64").value = "";
+      document.getElementById("al-photo-img").src = "";
+      document.getElementById("al-photo-preview-wrap").style.display = "none";
+    }
+
+    // ================= SPOT QUIZ ADMIN =================
+    function renderQuizAdmin() {
+      const container = document.getElementById("quiz-admin-list");
+      if (!container) return;
+      const quizzes = ThanafusDB.db.quizzes || [];
+      const responses = ThanafusDB.db.quizResponses || [];
+
+      if (quizzes.length === 0) {
+        container.innerHTML = `<div class="card text-center" style="padding:30px;"><p class="text-muted"><i class="fa-solid fa-stopwatch text-gold" style="font-size:1.5rem; margin-bottom:8px;"></i><br>No spot quizzes created yet. Click “Create Spot Quiz” to start one.</p></div>`;
+        return;
+      }
+
+      container.innerHTML = quizzes.map(q => {
+        const respCount = responses.filter(r => r.quizId === q.id).length;
+        const ended = q.status === 'ended' || (q.endTime && new Date().getTime() > new Date(q.endTime).getTime());
+        const publicUrl = window.location.origin + "/quiz?id=" + q.id;
+        return `
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+              <div style="min-width:220px;">
+                <h3 style="font-size:1.15rem; margin-bottom:4px;">${q.title}</h3>
+                <p class="text-muted" style="font-size:0.82rem; margin:0;">
+                  ${q.model === 'model1' ? 'Model 1' : 'Model 2'} • ${(q.questions || []).length} question(s) • ${q.durationMins || 0} min • ${respCount} response(s)
+                </p>
+                <p style="font-size:0.8rem; margin-top:8px;">
+                  <span class="grade-chip" style="background:${ended ? '#f1f5f9' : '#dcfce7'}; color:${ended ? '#475569' : '#166534'}; border-color:${ended ? '#e2e8f0' : '#86efac'};">${ended ? 'ENDED' : 'ACTIVE'}</span>
+                  ${q.winner ? ` <strong class="text-gold">🏆 ${q.winner.name || 'Winner'}</strong>` : ''}
+                </p>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button onclick="copyQuizPublicLink('${publicUrl}')" class="btn btn-outline btn-sm"><i class="fa-solid fa-link"></i> Copy Link</button>
+                <a href="/quiz?id=${q.id}" target="_blank" class="btn btn-outline btn-sm"><i class="fa-solid fa-up-right-from-square"></i> Open</a>
+                ${!ended ? `<button onclick="declareQuizWinnerAdmin('${q.id}')" class="btn btn-gold btn-sm"><i class="fa-solid fa-crown"></i> Declare Winner</button>` : ''}
+                <button onclick="deleteQuizAdmin('${q.id}')" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function copyQuizPublicLink(url) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => showAlert("Quiz link copied to clipboard!", "success"));
+      } else {
+        showAlert(url, "info");
+      }
+    }
+
+    function declareQuizWinnerAdmin(quizId) {
+      const responses = (ThanafusDB.db.quizResponses || []).filter(r => r.quizId === quizId);
+      let name = "";
+      if (responses.length) {
+        const names = responses.map((r, i) => `${i + 1}. ${(r.studentDetails && r.studentDetails.name) || 'Participant'}`).join('\n');
+        const pick = prompt(`Choose the winner by number:\n${names}`, "1");
+        if (pick === null) return;
+        const chosen = responses[(parseInt(pick, 10) || 1) - 1] || responses[0];
+        name = (chosen.studentDetails && chosen.studentDetails.name) || 'Participant';
+      } else {
+        name = prompt("No responses recorded. Enter the winner name:") || "";
+        if (!name) return;
+      }
+      ThanafusDB.declareQuizWinner(quizId, { name });
+      renderQuizAdmin();
+      showAlert(`Winner declared: ${name}`, "success");
+    }
+
+    function deleteQuizAdmin(id) {
+      if (!confirm("Delete this quiz? All its responses will be removed permanently.")) return;
+      ThanafusDB.deleteQuiz(id);
+      renderQuizAdmin();
+      showAlert("Quiz deleted.", "info");
+    }
+
+    function openQuizModal() {
+      document.getElementById("qz-title").value = "";
+      document.getElementById("qz-model").value = "model1";
+      document.getElementById("qz-duration").value = "10";
+      document.getElementById("qz-questions-wrap").innerHTML = "";
+      addQuestionBlock();
+      document.getElementById("quiz-form-modal").classList.add("active");
+    }
+
+    function closeQuizModal() { document.getElementById("quiz-form-modal").classList.remove("active"); }
+
+    function renumberQuizBlocks() {
+      document.querySelectorAll("#qz-questions-wrap .quiz-q-block").forEach((b, i) => {
+        const t = b.querySelector(".qz-q-number");
+        if (t) t.innerText = i + 1;
+      });
+    }
+
+    function addQuestionBlock() {
+      const wrap = document.getElementById("qz-questions-wrap");
+      if (!wrap) return;
+      const block = document.createElement("div");
+      block.className = "quiz-q-block";
+      block.style.cssText = "padding:14px; border:1px solid #e2e8f0; border-radius:12px; margin-bottom:12px; background:#fcfcfc;";
+      block.innerHTML = `
+        <h4 style="font-size:0.95rem; margin-bottom:10px;">Question <span class="qz-q-number"></span></h4>
+        <input type="text" class="form-control qz-q-text" placeholder="Type the question here..." required style="padding-left:14px; margin-bottom:8px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <input type="text" class="form-control qz-opt-a" placeholder="Option A" required style="padding-left:14px;">
+          <input type="text" class="form-control qz-opt-b" placeholder="Option B" required style="padding-left:14px;">
+          <input type="text" class="form-control qz-opt-c" placeholder="Option C" style="padding-left:14px;">
+          <input type="text" class="form-control qz-opt-d" placeholder="Option D" style="padding-left:14px;">
+        </div>
+        <input type="text" class="form-control qz-ans" placeholder="Exact correct answer text" required style="padding-left:14px; margin-top:8px; border-color:#86efac; background:#f0fdf4;">
+        <button type="button" class="btn btn-outline btn-sm" style="margin-top:8px; color:#ef4444; border-color:#fca5a5;"
+          onclick="this.closest('.quiz-q-block').remove(); renumberQuizBlocks();">
+          <i class="fa-solid fa-trash"></i> Remove
+        </button>`;
+      wrap.appendChild(block);
+      renumberQuizBlocks();
+    }
+
+    function saveQuizForm(e) {
+      e.preventDefault();
+      const title = document.getElementById("qz-title").value.trim();
+      const model = document.getElementById("qz-model").value;
+      const duration = document.getElementById("qz-duration").value;
+      const questions = [];
+      document.querySelectorAll("#qz-questions-wrap .quiz-q-block").forEach(block => {
+        const qText = (block.querySelector(".qz-q-text").value || "").trim();
+        const optA = (block.querySelector(".qz-opt-a").value || "").trim();
+        const optB = (block.querySelector(".qz-opt-b").value || "").trim();
+        const optC = (block.querySelector(".qz-opt-c").value || "").trim();
+        const optD = (block.querySelector(".qz-opt-d").value || "").trim();
+        const ans = (block.querySelector(".qz-ans").value || "").trim();
+        if (qText && optA && ans) {
+          questions.push({ text: qText, options: [optA, optB, optC, optD].filter(Boolean), answer: ans });
+        }
+      });
+      if (!title || questions.length === 0) {
+        showAlert("Please enter a title and at least one complete question.", "warning");
+        return;
+      }
+      ThanafusDB.addQuiz(title, model, duration, questions);
+      closeQuizModal();
+      renderQuizAdmin();
+      showAlert("Spot Quiz created and started!", "success");
     }
 
     // Modal Helpers & Operations
@@ -1835,14 +2305,23 @@
     }
 
     // Auto Refresh Admin Panel when DB updates in real time
+    function refreshCurrentAdminTab() {
+      const tab = currentAdminTab || 'dash';
+      if (tab === 'dash') renderAdminDash();
+      else if (tab === 'progs') renderProgsAdmin();
+      else if (tab === 'teams') renderTeamsAdmin();
+      else if (tab === 'students') renderStudentsAdmin();
+      else if (tab === 'penalties') renderPenaltiesAdmin();
+      else if (tab === 'notifs') renderNotifsAdmin();
+      else if (tab === 'messages') renderMessagesAdmin();
+      else if (tab === 'alumni') renderAlumniAdmin();
+      else if (tab === 'quiz') renderQuizAdmin();
+    }
+    window.__refreshCurrentAdminTab = refreshCurrentAdminTab;
+
     window.addEventListener('thanafus:db-updated', () => {
-      const activeTab = document.querySelector('.admin-nav-item.active')?.dataset.tab;
-      if (activeTab === 'progs') renderProgsAdmin();
-      else if (activeTab === 'teams') renderTeamsAdmin();
-      else if (activeTab === 'students') renderStudentsAdmin();
-      else if (activeTab === 'penalties') renderPenaltiesAdmin();
-      else if (activeTab === 'notifs') renderNotifsAdmin();
-      else if (activeTab === 'messages') renderMessagesAdmin();
+      if (document.querySelector('.modal-overlay.active')) return;
+      refreshCurrentAdminTab();
     });
   </script>
   <!-- Bootstrap 5 JS Bundle -->

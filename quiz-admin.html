@@ -6,7 +6,7 @@
   <title>Quiz Admin | THANAFUS 2026</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/style.css">
   <style>
     body { background: #f8fafc; font-family: 'Segoe UI', system-ui, sans-serif; }
     
@@ -171,7 +171,8 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/db.js"></script>
   <script>
-    const ThanafusDB = new Database();
+    // Shared instance from js/db.js (redeclaring it crashed with a duplicate
+    // declaration error and started a second database sync loop).
     let quizModal;
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -180,10 +181,10 @@
 
     function showAlert(msg, type = 'info') {
       const el = document.createElement('div');
-      el.className = \`alert alert-\${type} alert-dismissible fade show shadow-lg border-0\`;
+      el.className = `alert alert-${type} alert-dismissible fade show shadow-lg border-0`;
       el.style.borderRadius = "12px";
       el.style.fontWeight = "600";
-      el.innerHTML = \`\${msg} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>\`;
+      el.innerHTML = `${msg} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
       document.getElementById('alert-container').appendChild(el);
       setTimeout(() => el.remove(), 4000);
     }
@@ -218,21 +219,21 @@
       }
 
       quizzes.forEach(q => {
-        const publicUrl = window.location.origin + "/quiz.html?id=" + q.id;
-        const winnerText = q.winner ? \`<span class="badge bg-success px-3 py-2" style="border-radius:20px;"><i class="fa-solid fa-trophy me-1"></i> \${q.winner.name}</span>\` : (q.status === 'ended' ? '<span class="badge bg-secondary px-3 py-2" style="border-radius:20px;">Ended</span>' : '<span class="badge bg-warning text-dark px-3 py-2" style="border-radius:20px;"><i class="fa-solid fa-circle-play me-1"></i> Active</span>');
+        const publicUrl = window.location.origin + "/quiz?id=" + q.id;
+        const winnerText = q.winner ? `<span class="badge bg-success px-3 py-2" style="border-radius:20px;"><i class="fa-solid fa-trophy me-1"></i> ${q.winner.name}</span>` : (q.status === 'ended' ? '<span class="badge bg-secondary px-3 py-2" style="border-radius:20px;">Ended</span>' : '<span class="badge bg-warning text-dark px-3 py-2" style="border-radius:20px;"><i class="fa-solid fa-circle-play me-1"></i> Active</span>');
         
-        tbody.innerHTML += \`
+        tbody.innerHTML += `
           <tr>
-            <td><strong class="text-dark">\${q.title}</strong><br><small class="text-muted"><i class="fa-solid fa-clipboard-question"></i> \${q.questions.length} Questions</small></td>
-            <td><span class="badge bg-light text-dark border">\${q.model === 'model1' ? 'Model 1 (Single Q)' : 'Model 2 (Multi Q)'}</span></td>
-            <td><span class="fw-bold text-dark">\${q.durationMins}</span> <small class="text-muted">Mins</small></td>
-            <td>\${winnerText}</td>
+            <td><strong class="text-dark">${q.title}</strong><br><small class="text-muted"><i class="fa-solid fa-clipboard-question"></i> ${q.questions.length} Questions</small></td>
+            <td><span class="badge bg-light text-dark border">${q.model === 'model1' ? 'Model 1 (Single Q)' : 'Model 2 (Multi Q)'}</span></td>
+            <td><span class="fw-bold text-dark">${q.durationMins}</span> <small class="text-muted">Mins</small></td>
+            <td>${winnerText}</td>
             <td class="text-end">
-              <button class="btn btn-sm btn-light border fw-bold text-dark me-1" onclick="copyQuizLink('\${publicUrl}')"><i class="fa-solid fa-link text-primary"></i> Copy Link</button>
-              <button class="btn btn-sm btn-light border text-danger" onclick="deleteQuiz('\${q.id}')"><i class="fa-solid fa-trash"></i></button>
+              <button class="btn btn-sm btn-light border fw-bold text-dark me-1" onclick="copyQuizLink('${publicUrl}')"><i class="fa-solid fa-link text-primary"></i> Copy Link</button>
+              <button class="btn btn-sm btn-light border text-danger" onclick="deleteQuiz('${q.id}')"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
-        \`;
+        `;
       });
     }
 
@@ -296,9 +297,9 @@
     function addQuestionBlock() {
        const wrap = document.getElementById("qz-questions-wrap");
        const idx = wrap.children.length + 1;
-       const html = \`
+       const html = `
          <div class="quiz-q-block mb-3">
-            <h6 class="fw-bold text-muted mb-3">Question \${idx}</h6>
+            <h6 class="fw-bold text-muted mb-3">Question ${idx}</h6>
             <input type="text" class="form-control mb-3 qz-q-text" placeholder="Type the question here..." required style="font-weight:600;">
             <div class="row g-2 mb-3">
                <div class="col-6"><input type="text" class="form-control qz-opt-a" placeholder="Option A" required></div>
@@ -308,7 +309,7 @@
             </div>
             <input type="text" class="form-control qz-ans" placeholder="Enter Exact Correct Answer Text" required style="border-color:#10b981; background:#f0fdf4;">
          </div>
-       \`;
+       `;
        wrap.insertAdjacentHTML("beforeend", html);
     }
   </script>

@@ -122,6 +122,49 @@ const penaltySchema = new mongoose.Schema({
   reason: String
 });
 
+// Birutha Tharikal (graduates / alumni)
+const alumniSchema = new mongoose.Schema({
+  siteKey: String,
+  id: String,
+  name: String,
+  photo: String,
+  batch: String,
+  course: String,
+  place: String,
+  postOffice: String,
+  district: String,
+  state: String,
+  country: String,
+  ustad: String,
+  position: String,
+  phone: String,
+  email: String,
+  about: String,
+  date: String
+});
+
+const quizSchema = new mongoose.Schema({
+  siteKey: String,
+  id: String,
+  title: String,
+  model: String,
+  durationMins: Number,
+  questions: [mongoose.Schema.Types.Mixed],
+  status: String,
+  winner: mongoose.Schema.Types.Mixed,
+  createdAt: String,
+  endTime: String
+});
+
+const quizResponseSchema = new mongoose.Schema({
+  siteKey: String,
+  id: String,
+  quizId: String,
+  studentDetails: mongoose.Schema.Types.Mixed,
+  answers: [mongoose.Schema.Types.Mixed],
+  date: String
+});
+
 const Team = mongoose.models.Team || mongoose.model('Team', teamSchema);
 const Student = mongoose.models.Student || mongoose.model('Student', studentSchema);
 const Programme = mongoose.models.Programme || mongoose.model('Programme', programmeSchema);
@@ -132,6 +175,9 @@ const Contact = mongoose.models.Contact || mongoose.model('Contact', contactSche
 const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
 const Settings = mongoose.models.Settings || mongoose.model('Settings', settingsSchema);
 const Penalty = mongoose.models.Penalty || mongoose.model('Penalty', penaltySchema);
+const Alumni = mongoose.models.Alumni || mongoose.model('Alumni', alumniSchema);
+const Quiz = mongoose.models.Quiz || mongoose.model('Quiz', quizSchema);
+const QuizResponse = mongoose.models.QuizResponse || mongoose.model('QuizResponse', quizResponseSchema);
 
 module.exports = {
   Team,
@@ -143,5 +189,8 @@ module.exports = {
   Contact,
   Message,
   Settings,
-  Penalty
+  Penalty,
+  Alumni,
+  Quiz,
+  QuizResponse
 };

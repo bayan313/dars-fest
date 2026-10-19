@@ -259,6 +259,7 @@ const DEFAULT_DB = {
   messages: [],
     quizzes: [],
     quizResponses: [],
+  alumni: [],
   settings: {
     prospectusUrl: "", // Base64 or standard URL
     adminPassword: "bayanadmin"
@@ -270,13 +271,30 @@ class Database {
     this.loadedFromServer = false;
     this._saving = false;
     this._dirty = false;
+    // These sets MUST exist before load() runs; otherwise the first sync read
+    // throws and the page silently falls back to the demo DEFAULT_DB.
+    this._dirtyCollections = new Set();
+    this._pendingCollections = new Set();
+    this._retries = 0;
+    this._mergeAttempts = 0;
+    // hasRealData is false until we have seen genuine data (server snapshot or a
+    // cached copy that actually contains records). Writes are blocked while it is
+    // false so the bundled sample data can never overwrite the live database.
+    this.hasRealData = false;
     
     // Fast local cache hydration for zero-lag instant rendering
     try {
       if (typeof localStorage !== 'undefined') {
         const cached = localStorage.getItem('thanafus_fest_db_cache');
         if (cached) {
-          this.db = JSON.parse(cached);
+          const parsed = JSON.parse(cached);
+          if (parsed && typeof parsed === 'object') {
+            this.db = parsed;
+            // Only trust the cache if it looks like a real snapshot.
+            if (Array.isArray(parsed.teams) && parsed.teams.length > 0) {
+              this.hasRealData = true;
+            }
+          }
         }
       }
     } catch (e) { /* silent */ }
@@ -336,9 +354,10 @@ class Database {
     this.db.messages = Array.isArray(this.db.messages) ? this.db.messages : [];
     this.db.quizzes = Array.isArray(this.db.quizzes) ? this.db.quizzes : [];
     this.db.quizResponses = Array.isArray(this.db.quizResponses) ? this.db.quizResponses : [];
-      this.db.quizzes = Array.isArray(this.db.quizzes) ? this.db.quizzes : [];
-      this.db.quizResponses = Array.isArray(this.db.quizResponses) ? this.db.quizResponses : [];
     this.db.penalties = Array.isArray(this.db.penalties) ? this.db.penalties : [];
+    // Birutha Tharikal (graduates / alumni). New collection — additive only, so
+    // no existing data is ever removed by its introduction.
+    this.db.alumni = Array.isArray(this.db.alumni) ? this.db.alumni : [];
     this.db.contact = (this.db.contact && typeof this.db.contact === 'object') ? this.db.contact : JSON.parse(JSON.stringify(DEFAULT_DB.contact));
     this.db.settings = (this.db.settings && typeof this.db.settings === 'object') ? this.db.settings : JSON.parse(JSON.stringify(DEFAULT_DB.settings));
     if (!this.db.settings.adminPassword) this.db.settings.adminPassword = "bayanadmin";
@@ -377,6 +396,7 @@ class Database {
           this._ensureDbDefaults();
           if (typeof this.db.revision !== 'number') this.db.revision = 0;
           this.loadedFromServer = true;
+          this.hasRealData = true;
           this.calculateLeaderboard();
           this._persistLocal();
           return;
@@ -398,6 +418,9 @@ class Database {
           const parsed = JSON.parse(cached);
           if (parsed && typeof parsed === 'object') {
             this.db = parsed;
+            if (Array.isArray(parsed.teams) && parsed.teams.length > 0) {
+              this.hasRealData = true;
+            }
           }
         }
       }
@@ -454,6 +477,16 @@ class Database {
   }
 
   save(isReset, collectionName) {
+    // Data-loss guard: never allow a page that has not loaded genuine data to
+    // write its bundled sample state over the live database. Explicit resets
+    // are the only exception.
+    if (!this.hasRealData && !isReset) {
+      console.warn('Save blocked: no real data loaded yet (server unreachable and no local cache).');
+      if (typeof window !== 'undefined' && typeof window.__onDbSaveBlocked === 'function') {
+        window.__onDbSaveBlocked();
+      }
+      return;
+    }
     if (collectionName) {
       this._dirtyCollections = this._dirtyCollections || new Set();
       this._dirtyCollections.add(collectionName);
@@ -477,20 +510,29 @@ class Database {
       ...Array.from(this._dirtyCollections || []),
       ...Array.from(this._pendingCollections || [])
     ]);
+
+    const isReset = !!this._pendingReset;
+    if (isReset || collections.size === 0) {
+      this._allCollections().forEach(c => collections.add(c));
+    }
+
     const changedCollections = [...collections];
     this._dirty = false;
     this._saving = true;
 
+    // Only transmit the collections that actually changed. This keeps a stale
+    // tab from ever overwriting a collection it never touched (the original
+    // cause of the lost-marks incident).
     const payload = {
-      ...this.db,
       collections: changedCollections,
       revision: this.db.revision || 0,
-      clientVerified: true,
-      allowUnpublishAll: true,
-      allowUnpublish: true
+      clientVerified: true
     };
+    changedCollections.forEach(col => {
+      payload[col] = this.db[col];
+    });
 
-    if (this._pendingReset) {
+    if (isReset) {
       payload.reset = true;
       this._pendingReset = false;
     }
@@ -500,6 +542,15 @@ class Database {
     this._pendingCollections = collections;
 
     this._sendSave(payload, changedCollections, 0);
+  }
+
+  // Every collection the client is allowed to write to the server.
+  _allCollections() {
+    return [
+      'teams', 'students', 'programmes', 'notifications', 'appeals', 'gallery',
+      'messages', 'quizzes', 'quizResponses', 'penalties', 'alumni',
+      'contact', 'settings'
+    ];
   }
 
   // Collections that are still being saved/retried and must not be silently
@@ -654,8 +705,26 @@ class Database {
           const currentRev = typeof this.db.revision === 'number' ? this.db.revision : 0;
           
           if (freshRev === 0 && currentRev > 0) {
-            // Server DB was reset or migrated. Upload our full local state to initialize it.
-            this.save(true);
+            // A zero server revision used to trigger a blind full upload, which
+            // could overwrite a freshly restored database with stale local data.
+            // Only re-seed when the server is genuinely empty AND we hold real data.
+            const serverEmpty = (!Array.isArray(fresh.teams) || fresh.teams.length === 0)
+              && (!Array.isArray(fresh.students) || fresh.students.length === 0)
+              && (!Array.isArray(fresh.programmes) || fresh.programmes.length === 0);
+            if (serverEmpty && this.hasRealData) {
+              this.save(true);
+            } else {
+              // Server already holds data; adopt it rather than clobbering it.
+              this.db = { ...fresh };
+              this._ensureDbDefaults();
+              this.loadedFromServer = true;
+              this.hasRealData = true;
+              this.calculateLeaderboard();
+              this._persistLocal();
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('thanafus:db-updated', { detail: { source: 'auto-sync-recovery' } }));
+              }
+            }
             return;
           }
 
@@ -771,7 +840,7 @@ class Database {
     this.db.programmes.forEach(prog => {
       if (!prog.resultsPublished) return;
 
-      prog.results.forEach(res => {
+      (prog.results || []).forEach(res => {
         let team = null;
         let studentName = "";
 
@@ -852,7 +921,7 @@ class Database {
     this.db.programmes.forEach(prog => {
       if (!prog.resultsPublished || !cats.includes(prog.category)) return;
 
-      prog.results.forEach(res => {
+      (prog.results || []).forEach(res => {
         let team = null;
         if ((prog.type || '').trim().toLowerCase() === 'group' || (prog.category || '').trim().toLowerCase() === 'general') {
           team = this.db.teams.find(t => t.id === (res.teamId || prog.teamId));
@@ -962,7 +1031,7 @@ class Database {
     this.db.programmes.forEach(prog => {
       if (!prog.resultsPublished || prog.category !== category) return;
 
-      prog.results.forEach(res => {
+      (prog.results || []).forEach(res => {
         if (studentPoints[res.studentId]) {
           const pts = this.programmePoints(prog, res.rank, res.grade);
           studentPoints[res.studentId].points += pts;
@@ -1014,7 +1083,7 @@ class Database {
     this.db.programmes.forEach(prog => {
       if (!prog.resultsPublished || prog.category !== category) return;
 
-      prog.results.forEach(res => {
+      (prog.results || []).forEach(res => {
         if (studentPoints[res.studentId]) {
           const pts = this.programmePoints(prog, res.rank, res.grade);
           studentPoints[res.studentId].points += pts;
@@ -1111,7 +1180,7 @@ class Database {
     this.db.programmes.forEach(prog => {
       if (prog.category !== student.category) return;
 
-      const result = prog.results.find(r => r.studentId === studentId);
+      const result = (prog.results || []).find(r => r.studentId === studentId);
       if (result) {
         const pts = this.programmePoints(prog, result.rank, result.grade);
         totalScore += pts;
@@ -1148,7 +1217,7 @@ class Database {
       let r1 = 0, r2 = 0, r3 = 0, gA = 0, gB = 0;
       this.db.programmes.forEach(prog => {
         if (prog.category === s.category && prog.resultsPublished) {
-          const res = prog.results.find(r => r.studentId === s.id);
+          const res = (prog.results || []).find(r => r.studentId === s.id);
           if (res) {
             score += this.programmePoints(prog, res.rank, res.grade);
             if (res.rank === 1) r1++;
@@ -1186,7 +1255,7 @@ class Database {
   searchStudents(query) {
     if (!query) return [];
     const q = query.toLowerCase().trim();
-    return this.db.students.filter(s => s.name.toLowerCase().includes(q)).map(s => {
+    return this.db.students.filter(s => (s.name || "").toLowerCase().includes(q)).map(s => {
       const team = this.db.teams.find(t => t.id === s.teamId);
       return {
         ...s,
@@ -1271,7 +1340,7 @@ class Database {
     this.db.students = this.db.students.filter(s => s.id !== id);
     // Also remove from any programme results
     this.db.programmes.forEach(prog => {
-      prog.results = prog.results.filter(res => res.studentId !== id);
+      prog.results = (prog.results || []).filter(res => res.studentId !== id);
     });
     this.save(false, 'students');
     this.save(false, 'programmes');
@@ -1410,7 +1479,6 @@ class Database {
       prog.results = [];
       prog.resultsPublished = false;
       delete prog.resultsPublishedAt;
-      this._allowUnpublishAll = true;
       this.calculateLeaderboard();
         this.save(false, 'programmes');
         this.save(false, 'teams');
@@ -1424,7 +1492,6 @@ class Database {
       prog.resultsPublished = false;
       delete prog.resultsPublishedAt;
     });
-    this._allowUnpublishAll = true;
     this.calculateLeaderboard();
         this.save(false, 'programmes');
         this.save(false, 'teams');
@@ -1485,6 +1552,57 @@ class Database {
       const type = status === 'Approved' ? 'success' : 'danger';
       this.addNotification(`Appeal Update: ${appeal.programme}`, `Appeal submitted by ${appeal.studentName} (${appeal.team}) for "${appeal.programme}" has been ${status.toLowerCase()}. Response: ${responseText}`, type);
     }
+  }
+
+  // --- BIRUTHA THARIKAL (Graduates / Alumni) ---
+  // Additive collection. Introducing it never removes existing records.
+  addAlumni(data = {}) {
+    if (!Array.isArray(this.db.alumni)) this.db.alumni = [];
+    const id = "alum-" + Date.now();
+    this.db.alumni.unshift({
+      id,
+      name: (data.name || "").trim(),
+      photo: data.photo || "",
+      batch: (data.batch || "").trim(),
+      course: (data.course || "").trim(),
+      place: (data.place || "").trim(),
+      postOffice: (data.postOffice || "").trim(),
+      district: (data.district || "").trim(),
+      state: (data.state || "").trim(),
+      country: (data.country || "").trim(),
+      ustad: (data.ustad || "").trim(),
+      position: (data.position || "").trim(),
+      phone: (data.phone || "").trim(),
+      email: (data.email || "").trim(),
+      about: (data.about || "").trim(),
+      date: new Date().toISOString()
+    });
+    this.save(false, 'alumni');
+    return id;
+  }
+
+  editAlumni(id, data = {}) {
+    if (!Array.isArray(this.db.alumni)) this.db.alumni = [];
+    const a = this.db.alumni.find(x => String(x.id) === String(id));
+    if (!a) return;
+    ['name', 'batch', 'course', 'place', 'postOffice', 'district', 'state', 'country', 'ustad', 'position', 'phone', 'email', 'about']
+      .forEach(k => { if (data[k] !== undefined) a[k] = String(data[k] || "").trim(); });
+    if (data.photo !== undefined) a.photo = data.photo;
+    this.save(false, 'alumni');
+  }
+
+  deleteAlumni(id) {
+    if (!Array.isArray(this.db.alumni)) this.db.alumni = [];
+    this.db.alumni = this.db.alumni.filter(x => String(x.id) !== String(id));
+    this.save(false, 'alumni');
+  }
+
+  searchAlumni(query) {
+    const list = Array.isArray(this.db.alumni) ? this.db.alumni : [];
+    if (!query) return list.slice();
+    const q = query.toLowerCase().trim();
+    return list.filter(a => [a.name, a.place, a.district, a.course, a.batch, a.position, a.postOffice]
+      .some(v => (v || "").toLowerCase().includes(q)));
   }
 
   // Media & Social Embeds (YouTube, Instagram, Video, Image)

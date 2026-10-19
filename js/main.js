@@ -110,6 +110,19 @@ function showAlert(message, type = "success") {
   }, 4000);
 }
 
+// Shown when the database refuses a write because no real data could be loaded
+// (server unreachable). Prevents visitors from believing a form was submitted
+// when it was actually held back to protect the live data.
+let __dbBlockNoticeAt = 0;
+window.__onDbSaveBlocked = function () {
+  const now = Date.now();
+  if (now - __dbBlockNoticeAt < 8000) return;
+  __dbBlockNoticeAt = now;
+  try {
+    showAlert("Could not reach the festival server. Please check your connection and try again — your entry was not saved.", "danger");
+  } catch (e) { /* alert container unavailable */ }
+};
+
 function createAlertContainer() {
   const container = document.createElement("div");
   container.id = "alert-container";
